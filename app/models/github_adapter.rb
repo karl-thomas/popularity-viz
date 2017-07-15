@@ -6,6 +6,7 @@ class GithubAdapter
     # @options waiting for me to decide on token
   end
 
-  def request
+  def request_all_info
+    
   end 
 end
