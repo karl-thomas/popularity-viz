@@ -1,13 +1,18 @@
 class RemoteApiController < ApplicationController
-  
+  before_action :set_github_obj, only: [:github_profile, :github_repos]
+
   def github_profile
-    github_obj = GithubAdapter.new(ENV['GITHUB_USERNAME'], ENV['GITHUB_TOKEN'])
-    render json: github_obj.request_all_info.to_json
+    render json: @github_obj.request_all_info.to_json
   end
 
   def github_repos
-    github_obj = GithubAdapter.new(ENV['GITHUB_USERNAME'], ENV['GITHUB_TOKEN'])
-    render json: github_obj.repos.to_json
+    render json: @github_obj.repos.to_json
   end
 
+ 
+  private
+
+    def set_github_obj
+      @github_obj = GithubAdapter.new(ENV['GITHUB_USERNAME'], ENV['GITHUB_TOKEN'])
+    end
 end
