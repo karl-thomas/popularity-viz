@@ -18,6 +18,10 @@ class GithubAdapter
     self.class.get("/users/#{self.user}/repos", query: @options).parsed_response
   end
 
+  def recent_repos
+    self.repos.map {|repo| repo if repo['pushed_at'] > 2.weeks.ago}
+  end
+
   def all_repo_names
     self.repos.map {|repo| repo["name"]}
   end

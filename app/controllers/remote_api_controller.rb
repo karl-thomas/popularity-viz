@@ -2,12 +2,11 @@ class RemoteApiController < ApplicationController
   before_action :set_github_obj, only: [:github_profile, :github_repos]
 
   def github_profile
-    p thing = @github_obj.request_all_info
     render json: @github_obj.request_all_info.to_json
   end
 
   def github_repos
-    render json: @github_obj.all_commits.to_json
+    render json: @github_obj.recent_repos.to_json
   end
 
   private
