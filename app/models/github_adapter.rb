@@ -38,7 +38,10 @@ class GithubAdapter
   end
 
   def all_recent_commits
-    self.all_commits(self.recent_repos).flatten.count
+    date = 2.weeks.ago.strftime("%Y-%m-%d")
+    query_string = "q=author-date:>=#{date}+author:#{self.user}"
+    response = self.class.get("/search/commits?#{query_string}", query: @options)
+    # response["items"]
   end
 
 end
