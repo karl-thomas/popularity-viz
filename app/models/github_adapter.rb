@@ -14,15 +14,15 @@ class GithubAdapter
     self.class.get("/users/#{self.user}", query: @options).parsed_response
   end 
 
-  def repos
+  def all_repos
     self.class.get("/users/#{self.user}/repos", query: @options).parsed_response
   end
 
   def recent_repos
-    results = self.class.get("/search/repositories?q=pushed:>=#{date}+user:#{self.user}", query: @options)
-    repos = results["items"]
-    # filtered_set = self.repos.map {|repo| repo if repo['pushed_at'] > 2.weeks.ago}
-    # filtered_set.delete_if {|item| item == nil}
+    date = 2.weeks.ago.strftime("%Y-%m-%d")
+    query_string = "q=pushed:>=#{date}+user:#{self.user}"
+    response = self.class.get("/search/repositories?#{query_string}", query: @options)
+    response["items"]
   end
 
   def all_repo_names(arg_repos)
