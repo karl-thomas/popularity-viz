@@ -21,11 +21,12 @@ class GithubAdapter
     self.repos.map {|repo| repo["name"]}
   end
 
-  def all_commits
-    self.all_repo_names
+  def commits_for_repo(repo)
+    self.class.get("/repos/#{self.user}/#{repo}/commits", @options).parsed_response
   end
 
-  def commits_for_repo(repo)
-    self.class.get("/repos/#{self.user}/#{repo}", @options).parsed_response
+  def all_commits
+    self.all_repo_names.map{|repo| commits_for_repo(repo).count}.reduce(:+)
   end
+
 end

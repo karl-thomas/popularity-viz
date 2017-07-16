@@ -6,7 +6,7 @@ class RemoteApiController < ApplicationController
   end
 
   def github_repos
-    render json: @github_obj.repos.to_json
+    render json: @github_obj.all_commits.to_json
   end
 
   private
