@@ -18,4 +18,14 @@ class GithubAdapter
     options = {Authorization: "token #{self.token}"}
     self.class.get("/users/#{self.user}/repos", options).parsed_response
   end
+
+  def all_commits
+    options = {Authorization: "token #{self.token}"}
+    self.class.get("/users/#{self.user}/repos", options).parsed_response
+  end
+
+  def commits_for_repo(repo)
+    options = {Authorization: "token #{self.token}"}
+    self.class.get("/repos/#{self.user}/#{repo}", options).parsed_response
+  end
 end

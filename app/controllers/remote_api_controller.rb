@@ -9,7 +9,6 @@ class RemoteApiController < ApplicationController
     render json: @github_obj.repos.to_json
   end
 
- 
   private
 
     def set_github_obj
