@@ -12,7 +12,7 @@ class RemoteApiController < ApplicationController
   end
 
   def recent_commits
-    render json: @github_adapter.recent_commits.to_json
+    render json: @github_adapter.all_recent_commits.to_json
   end
 
   private
