@@ -10,7 +10,7 @@ class GithubAdapter
                 client_secret: ENV['GITHUB_CLIENT_SECRET']}
   end
 
-  def request_all_info
+  def profile
     self.class.get("/users/#{self.user}", query: @options).parsed_response
   end 
 
@@ -19,19 +19,24 @@ class GithubAdapter
   end
 
   def recent_repos
-    self.repos.map {|repo| repo if repo['pushed_at'] > 2.weeks.ago}
+    filtered_set = self.repos.map {|repo| repo if repo['pushed_at'] > 2.weeks.ago}
+    filtered_set.delete_if {|item| item == nil}
   end
 
-  def all_repo_names
-    self.repos.map {|repo| repo["name"]}
+  def all_repo_names(arg_repos)
+    arg_repos.map {|repo| repo["name"]}
   end
 
   def commits_for_repo(repo)
     self.class.get("/repos/#{self.user}/#{repo}/commits", query: @options).parsed_response
   end
 
-  def all_commits
-    self.all_repo_names.map{|repo| commits_for_repo(repo).count}.reduce(:+)
+  def all_commits(arg_repos)
+    self.all_repo_names(arg_repos).map{ |repo_name| commits_for_repo(repo_name)}
+  end
+
+  def all_recent_commits
+    self.all_commits(self.recent_repos).flatten.count
   end
 
 end
