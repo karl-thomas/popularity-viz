@@ -5,4 +5,9 @@ class RemoteApiController < ApplicationController
     render json: github_obj.request_all_info.to_json
   end
 
+  def github_repos
+    github_obj = GithubAdapter.new(ENV['GITHUB_USERNAME'], ENV['GITHUB_TOKEN'])
+    render json: github_obj.repos.to_json
+  end
+
 end
