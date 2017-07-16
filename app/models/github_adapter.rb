@@ -4,17 +4,18 @@ class GithubAdapter
 
   attr_reader :user
 
-  def initialize(user, oauth_token)
+  def initialize(user)
     @user = user 
-    @options = {Authorization: "token #{oauth_token}"}
+    @options = {client_id: ENV['GITHUB_CLIENT_ID'], 
+                client_secret: ENV['GITHUB_CLIENT_SECRET']}
   end
 
   def request_all_info
-    self.class.get("/users/#{self.user}", @options).parsed_response
+    self.class.get("/users/#{self.user}", query: @options).parsed_response
   end 
 
   def repos
-    self.class.get("/users/#{self.user}/repos", @options).parsed_response
+    self.class.get("/users/#{self.user}/repos", query: @options).parsed_response
   end
 
   def all_repo_names
@@ -22,7 +23,7 @@ class GithubAdapter
   end
 
   def commits_for_repo(repo)
-    self.class.get("/repos/#{self.user}/#{repo}/commits", @options).parsed_response
+    self.class.get("/repos/#{self.user}/#{repo}/commits", query: @options).parsed_response
   end
 
   def all_commits
