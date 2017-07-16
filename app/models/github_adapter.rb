@@ -16,6 +16,6 @@ class GithubAdapter
 
   def repos
     options = {Authorization: "token #{self.token}"}
-    self.class.get("/users/#{self.user}", options).parsed_response
+    self.class.get("/users/#{self.user}/repos", options).parsed_response
   end
 end
