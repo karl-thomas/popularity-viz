@@ -19,8 +19,10 @@ class GithubAdapter
   end
 
   def recent_repos
-    filtered_set = self.repos.map {|repo| repo if repo['pushed_at'] > 2.weeks.ago}
-    filtered_set.delete_if {|item| item == nil}
+    results = self.class.get("/search/repositories?q=pushed:>=#{date}+user:#{self.user}", query: @options)
+    repos = results["items"]
+    # filtered_set = self.repos.map {|repo| repo if repo['pushed_at'] > 2.weeks.ago}
+    # filtered_set.delete_if {|item| item == nil}
   end
 
   def all_repo_names(arg_repos)
