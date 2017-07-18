@@ -3,6 +3,7 @@ class RemoteApiController < ApplicationController
                                             :recent_repos,
                                             :recent_commits]
 
+  # ============ GITHUB ACTIONS =================
   def github_profile
     render json: @github_adapter.profile.to_json
   end
@@ -13,6 +14,11 @@ class RemoteApiController < ApplicationController
 
   def recent_commits
     render json: @github_adapter.all_recent_commits.to_json
+  end
+
+  # ============ LINKEDIN ACTIONS ===============
+  def linkedin_profile
+    render body: "ew a string"
   end
 
   private
