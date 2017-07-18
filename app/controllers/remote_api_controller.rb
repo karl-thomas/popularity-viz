@@ -3,6 +3,8 @@ class RemoteApiController < ApplicationController
                                             :recent_repos,
                                             :recent_commits]
 
+  before_action :set_linkedin_adapter, only: [:linkedin_profile]
+
   # ============ GITHUB ACTIONS =================
   def github_profile
     render json: @github_adapter.profile.to_json
@@ -25,5 +27,9 @@ class RemoteApiController < ApplicationController
 
     def set_github_adapter
       @github_adapter = GithubAdapter.new(ENV['GITHUB_USERNAME'])
+    end
+
+    def set_linkedin_adapter
+      @linkedin_adapter = LinkedinAdapter.new
     end
 end
