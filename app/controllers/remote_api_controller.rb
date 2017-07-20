@@ -20,7 +20,7 @@ class RemoteApiController < ApplicationController
 
   # ============ LINKEDIN ACTIONS ===============
   def linkedin_profile
-    render body: "ew a string"
+    render json: @linkedin_adapter.profile
   end
 
   private

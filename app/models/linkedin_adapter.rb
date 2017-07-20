@@ -4,9 +4,11 @@ class LinkedinAdapter
 
   def initialize
     @auth {"Authorization: Bearer #{ENV['LINKEDIN_ACCESS_TOKEN']}"}
+    @options = {format: 'json'}
+    @user = ENV['LINKEDIN_USER']
   end
 
-  def example_quest
-    
+  def profile
+    self.class.get("/v1/profiles/")
   end
 end
