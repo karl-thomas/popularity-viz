@@ -3,12 +3,12 @@ class LinkedinAdapter
   base_uri 'https://api.linkedin.com'
 
   def initialize
-    @auth {"Authorization: Bearer #{ENV['LINKEDIN_ACCESS_TOKEN']}"}
+    @auth = {"Authorization: Bearer #{ENV['LINKEDIN_ACCESS_TOKEN']}"}
     @options = {format: 'json'}
     @user = ENV['LINKEDIN_USER']
   end
 
   def profile
-    self.class.get("/v1/profiles/")
+    p self.class.get("/v1/profiles/#{self.user}", headers: @auth, query: @options)
   end
 end
