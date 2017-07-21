@@ -16,7 +16,7 @@ class GithubAdapter
   end 
 
   def all_repos
-    self.class.get("/users/#{self.user}/repos", query: @options).parsed_response
+    self.class.get("/users/#{self.user}/repos", query: @options
   end
 
   def recent_repos
@@ -32,7 +32,7 @@ class GithubAdapter
   end
 
   def commits_for_repo(repo)
-    self.class.get("/repos/#{self.user}/#{repo}/commits", query: @options).parsed_response
+    self.class.get("/repos/#{self.user}/#{repo}/commits", query: @options)
   end
 
   def all_commits(arg_repos)

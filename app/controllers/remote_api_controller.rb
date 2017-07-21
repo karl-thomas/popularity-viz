@@ -12,12 +12,14 @@ class RemoteApiController < ApplicationController
   end
 
   def recent_repos
-    render json: @github_adapter.recent_repos.to_json
+    @api_response = @github_adapter.recent_repos
+    render json: @api_response.parsed_response.to_json
   end
 
   # ******* under construction *******
   def recent_commits
-    render json: @github_adapter.all_recent_commits.to_json
+    @api_response = @github_adapter.recent_commits
+    render json: @api_response.parsed_response.to_json
   end
   # ******* end of construction ******
 
