@@ -60,7 +60,7 @@ class GithubAdapter
     #query string for search api
     query_string = "q=author-date:>=#{@date_two_weeks_ago}+author:#{self.user}"
 
-    p response = self.class.get("/search/commits?#{query_string}", {query: @options, headers: accept_header})
+    response = self.class.get("/search/commits?#{query_string}", {query: @options, headers: accept_header})
     # response["items"]
   end
 
