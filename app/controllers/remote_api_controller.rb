@@ -13,7 +13,7 @@ class RemoteApiController < ApplicationController
 
   def recent_repos
     @api_response = @github_adapter.recent_repos
-    render json: @api_response.parsed_response.to_json
+    render json: @api_response.to_json
   end
 
   # ******* under construction *******
@@ -25,7 +25,8 @@ class RemoteApiController < ApplicationController
 
   # ============ LINKEDIN ACTIONS ===============
   def linkedin_profile
-    render json: @linkedin_adapter.profile
+    @api_response = @linkedin_adapter.profile
+    render json: @api_response
   end
 
   private

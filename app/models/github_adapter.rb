@@ -16,7 +16,7 @@ class GithubAdapter
   end 
 
   def all_repos
-    self.class.get("/users/#{self.user}/repos", query: @options
+    self.class.get("/users/#{self.user}/repos", query: @options)
   end
 
   def recent_repos

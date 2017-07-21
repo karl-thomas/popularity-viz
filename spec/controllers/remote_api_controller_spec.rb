@@ -13,11 +13,10 @@ describe RemoteApiController do
 
       it "responds with status code 200" do
         get :github_profile
-        puts response
         expect(response.status).to eq(200)
       end
 
-      pending it "successfully calls an api" do
+      xit "successfully calls an api" do
         get :github_profile
         puts response
       end
@@ -38,11 +37,10 @@ describe RemoteApiController do
 
       it "responds with status code 200" do
         get :recent_repos
-        puts response
         expect(response.status).to eq(200)
       end
 
-      it "successfully calls an api" do
+      xit "successfully calls an api" do
         get :recent_repos
         puts response
       end
@@ -64,7 +62,6 @@ describe RemoteApiController do
 
       it "responds with status code 200" do
         get :recent_commits
-        puts response
         expect(response.status).to eq(200)
       end
 
@@ -90,11 +87,10 @@ describe RemoteApiController do
 
       it "responds with status code 200" do
         get :linkedin_profile
-        puts response
         expect(response.status).to eq(200)
       end
 
-      pending it "successfully calls an api" do
+      xit "successfully calls an api" do
         get :linkedin_profile
         puts response
       end
