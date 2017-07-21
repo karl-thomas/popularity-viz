@@ -7,7 +7,8 @@ class RemoteApiController < ApplicationController
 
   # ============ GITHUB ACTIONS =================
   def github_profile
-    render json: @github_adapter.profile.to_json
+    @api_response = @github_adapter.profile
+    render json: @api_response.parsed_response.to_json
   end
 
   def recent_repos
@@ -15,9 +16,9 @@ class RemoteApiController < ApplicationController
   end
 
   # ******* under construction *******
-  # def recent_commits
-  #   render json: @github_adapter.all_recent_commits.to_json
-  # end
+  def recent_commits
+    render json: @github_adapter.all_recent_commits.to_json
+  end
   # ******* end of construction ******
 
   # ============ LINKEDIN ACTIONS ===============
