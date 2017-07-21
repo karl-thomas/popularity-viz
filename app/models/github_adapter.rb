@@ -4,7 +4,7 @@ class GithubAdapter
 
   attr_reader :user
 
-  def initialize(user)
+  def initialize
     @user = ENV['GITHUB_USERNAME'] 
     @options = {client_id: ENV['GITHUB_CLIENT_ID'], 
                 client_secret: ENV['GITHUB_CLIENT_SECRET']}
