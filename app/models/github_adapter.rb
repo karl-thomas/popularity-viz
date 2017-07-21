@@ -5,7 +5,7 @@ class GithubAdapter
   attr_reader :user
 
   def initialize(user)
-    @user = user 
+    @user = ENV['GITHUB_USERNAME'] 
     @options = {client_id: ENV['GITHUB_CLIENT_ID'], 
                 client_secret: ENV['GITHUB_CLIENT_SECRET']}
     @date_two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")

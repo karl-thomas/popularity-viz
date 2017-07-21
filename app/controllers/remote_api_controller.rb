@@ -26,7 +26,7 @@ class RemoteApiController < ApplicationController
   private
 
     def set_github_adapter
-      @github_adapter = GithubAdapter.new(ENV['GITHUB_USERNAME'])
+      @github_adapter = GithubAdapter.new
     end
 
     def set_linkedin_adapter
