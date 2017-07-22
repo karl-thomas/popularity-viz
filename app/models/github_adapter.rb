@@ -4,19 +4,19 @@ class GithubAdapter
 
   attr_reader :user
 
-  def initialize(user)
-    @user = user 
+  def initialize
+    @user = ENV['GITHUB_USERNAME'] 
     @options = {client_id: ENV['GITHUB_CLIENT_ID'], 
                 client_secret: ENV['GITHUB_CLIENT_SECRET']}
     @date_two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
 
   def profile
-    self.class.get("/users/#{self.user}", query: @options).parsed_response
+    self.class.get("/users/#{self.user}", query: @options)
   end 
 
   def all_repos
-    self.class.get("/users/#{self.user}/repos", query: @options).parsed_response
+    self.class.get("/users/#{self.user}/repos", query: @options)
   end
 
   def recent_repos
@@ -32,7 +32,7 @@ class GithubAdapter
   end
 
   def commits_for_repo(repo)
-    self.class.get("/repos/#{self.user}/#{repo}/commits", query: @options).parsed_response
+    self.class.get("/repos/#{self.user}/#{repo}/commits", query: @options)
   end
 
   def all_commits(arg_repos)
@@ -60,7 +60,7 @@ class GithubAdapter
     #query string for search api
     query_string = "q=author-date:>=#{@date_two_weeks_ago}+author:#{self.user}"
 
-    p response = self.class.get("/search/commits?#{query_string}", {query: @options, headers: accept_header})
+    response = self.class.get("/search/commits?#{query_string}", {query: @options, headers: accept_header})
     # response["items"]
   end
 
