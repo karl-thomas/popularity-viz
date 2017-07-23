@@ -8,7 +8,6 @@ class RemoteApiController < ApplicationController
   # ============ GITHUB ACTIONS =================
   def github_profile
     @api_response = @github_adapter.profile
-    # p @api_response.headers
     render json: @api_response.to_json
   end
 
@@ -26,7 +25,7 @@ class RemoteApiController < ApplicationController
 
   # ============ LINKEDIN ACTIONS ===============
   def linkedin_profile
-    p @api_response = @linkedin_adapter.profile
+    @api_response = @linkedin_adapter.profile
     render json: @api_response
   end
 
