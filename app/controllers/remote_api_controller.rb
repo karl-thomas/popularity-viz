@@ -14,7 +14,7 @@ class RemoteApiController < ApplicationController
 
   def recent_repos
     @api_response = @github_adapter.recent_repos
-    render json: @api_response.to_json
+    render json: @api_response["items"].to_json
   end
 
   # ******* under construction *******

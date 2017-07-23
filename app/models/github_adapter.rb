@@ -23,8 +23,7 @@ class GithubAdapter
     #query string for search api
     query_string = "q=pushed:>=#{@date_two_weeks_ago}+user:#{self.user}"
 
-    response = self.class.get("/search/repositories?#{query_string}", query: @options)
-    response["items"]
+    self.class.get("/search/repositories?#{query_string}", query: @options)
   end
 
   def all_repo_names(arg_repos)
