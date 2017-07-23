@@ -96,7 +96,7 @@ describe RemoteApiController do
       it "successfully calls an api" do
         get :linkedin_profile
         api_response = assigns(:api_response)
-        expect(api_response.headers["status"]).to include("200")
+        expect(api_response.response.code).to include("200")
       end
 
       it "renders json out as its response" do
