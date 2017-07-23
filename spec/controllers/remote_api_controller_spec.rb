@@ -9,6 +9,11 @@ describe RemoteApiController do
     describe "GET #github_profile" do
       before { get :github_profile }
 
+      it "assigns an instance of github adapter for requests" do
+        github_adapter = assigns(:github_adapter)
+        expect(github_adapter).to be_an_instance_of(GithubAdapter)
+      end
+
       it "assigns the result of an adapter function as api_reponse" do
         api_response = assigns(:api_response)
         expect(api_response).to_not be(nil)
@@ -32,6 +37,11 @@ describe RemoteApiController do
     describe "GET #recent_repos" do
       before { get :recent_repos }
 
+      it "assigns an instance of github adapter for requests" do
+        github_adapter = assigns(:github_adapter)
+        expect(github_adapter).to be_an_instance_of(GithubAdapter)
+      end
+
       it "assigns the result of an adapter function as api_reponse" do
         api_response = assigns(:api_response)
         expect(api_response).to_not be(nil)
@@ -54,6 +64,11 @@ describe RemoteApiController do
 
     pending describe "GET #recent_commits" do
       before { get :recent_commits}
+
+      it "assigns an instance of github adapter for requests" do
+        github_adapter = assigns(:github_adapter)
+        expect(github_adapter).to be_an_instance_of(GithubAdapter)
+      end
       
       it "assigns the result of an adapter function as api_reponse" do
         api_response = assigns(:api_response)
@@ -79,6 +94,11 @@ describe RemoteApiController do
 
     describe "GET #linkedin_profile" do
       before { get :linkedin_profile }
+
+      it "assigns an instance of linkedin_adapter for requests" do
+        linkedin_adapter = assigns(:linkedin_adapter)
+        expect(linkedin_adapter).to be_an_instance_of(LinkedinAdapter)
+      end
 
       it "assigns the result of an adapter function as api_reponse" do
         api_response = assigns(:api_response)
