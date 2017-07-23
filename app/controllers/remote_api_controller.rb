@@ -8,7 +8,8 @@ class RemoteApiController < ApplicationController
   # ============ GITHUB ACTIONS =================
   def github_profile
     @api_response = @github_adapter.profile
-    render json: @api_response.parsed_response.to_json
+    # p @api_response.headers
+    render json: @api_response.to_json
   end
 
   def recent_repos

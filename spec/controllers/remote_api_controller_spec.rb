@@ -16,9 +16,10 @@ describe RemoteApiController do
         expect(response.status).to eq(200)
       end
 
-      xit "successfully calls an api" do
+      it "successfully calls an api" do
         get :github_profile
-        puts response
+        api_response = assigns(:api_response)
+        expect(api_response.headers["status"]).to include("200")
       end
 
       it "renders json out as its response" do
@@ -40,9 +41,10 @@ describe RemoteApiController do
         expect(response.status).to eq(200)
       end
 
-      xit "successfully calls an api" do
+      it "successfully calls an api" do
         get :recent_repos
-        puts response
+        api_response = assigns(:api_response)
+        expect(api_response.headers["status"]).to include("200")
       end
 
       it "renders json out as its response" do
@@ -65,9 +67,10 @@ describe RemoteApiController do
         expect(response.status).to eq(200)
       end
 
-      pending it "successfully calls an api" do
+      it "successfully calls an api" do
         get :recent_commits
-        puts response
+        api_response = assigns(:api_response)
+        expect(api_response.headers["status"]).to include("200")
       end
 
       it "renders json out as its response" do
@@ -90,9 +93,10 @@ describe RemoteApiController do
         expect(response.status).to eq(200)
       end
 
-      xit "successfully calls an api" do
+      it "successfully calls an api" do
         get :linkedin_profile
-        puts response
+        api_response = assigns(:api_response)
+        expect(api_response.headers["status"]).to include("200")
       end
 
       it "renders json out as its response" do
