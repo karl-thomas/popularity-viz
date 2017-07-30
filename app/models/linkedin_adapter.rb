@@ -11,7 +11,7 @@ class LinkedinAdapter
   end
 
   def profile
-    p self.class.get("/v1/people/~?oauth2_access_token=#{@auth[:Authorization]}", query: @options)
+    self.class.get("/v1/people/~?oauth2_access_token=#{@auth[:Authorization]}", query: @options)
   end
 end
 
