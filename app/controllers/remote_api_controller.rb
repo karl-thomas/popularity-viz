@@ -29,6 +29,11 @@ class RemoteApiController < ApplicationController
     render json: @api_response
   end
 
+  # ============ TWITTER ACTIONS =================
+  def twitter_profile
+
+  end
+  
   private
 
     def set_github_adapter
