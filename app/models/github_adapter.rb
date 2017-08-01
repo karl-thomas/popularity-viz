@@ -52,15 +52,15 @@ class GithubAdapter
   # {"cache-control":["no-cache"],"connection":["close"],"content-type":["text/html"]
   # otherwise the header is required.  
 
-  def all_recent_commits
-    # set custom header for search commits api, right now its under dev.
-    accept_header = {"Accept" => "application/vnd.github.cloak-preview"}
+  # def all_recent_commits
+  #   # set custom header for search commits api, right now its under dev.
+  #   accept_header = {"Accept" => "application/vnd.github.cloak-preview"}
 
-    #query string for search api
-    query_string = "q=author-date:>=#{@date_two_weeks_ago}+author:#{self.user}"
+  #   #query string for search api
+  #   query_string = "q=author-date:>=#{@date_two_weeks_ago}+author:#{self.user}"
 
-    response = self.class.get("/search/commits?#{query_string}", {query: @options, headers: accept_header})
-    # response["items"]
-  end
+  #   response = self.class.get("/search/commits?#{query_string}", {query: @options, headers: accept_header})
+  #   # response["items"]
+  # end
 
 end

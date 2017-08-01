@@ -10,6 +10,6 @@ Rails.application.routes.draw do
   # linkedin info
   get 'remote_api/linkedin_profile', to: 'remote_api#linkedin_profile'
 
-  #twitter info
+  # twitter info
   get 'remtote_api/twitter_profile', to: 'remote_api#twitter_profile'
 end
