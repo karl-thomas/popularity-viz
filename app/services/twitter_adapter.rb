@@ -23,7 +23,12 @@ class TwitterAdapter
     self.client.search("from:#{self.user_name} since:#{@date_two_weeks_ago}").take(100).collect.to_a
   end
 
-  def recent_tweeteds
+  def recent_replies
     self.client.search("to:#{self.user_name} since:#{@date_two_weeks_ago}").take(100).collect.to_a
   end
+
+  def recent_mentions
+    self.client.search("@#{self.user_name} since:#{@date_two_weeks_ago}").take(100).collect.to_a
+  end
+
 end
