@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
 
-  root to: 'remote_api#recent_tweets'
+  root to: 'remote_api#recent_replies'
 
   # github info
   get 'remote_api/github_profile', to: 'remote_api#github_profile'
