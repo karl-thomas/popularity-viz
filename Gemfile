@@ -27,7 +27,8 @@ gem 'webpacker'
 # gem "octokit", "~> 4.0"
 # basic api requests 
 gem 'httparty'
-
+# interacting with twitter
+gem 'twitter'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails', '~> 4.2'
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
