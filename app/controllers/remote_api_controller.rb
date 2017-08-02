@@ -1,5 +1,5 @@
 class RemoteApiController < ApplicationController
-  before_action :set_github_adapter, only: [:github_profile, 
+  before_action :set_github_adapter, only: [:github_profile,
                                             :recent_repos,
                                             :recent_commits]
 
@@ -35,7 +35,7 @@ class RemoteApiController < ApplicationController
   # ============ TWITTER ACTIONS =================
   def twitter_profile
     @api_response = @twitter_adapter.profile
-    render body: @api_response
+    render body: @api_response.methods.sort
   end
 
   private
