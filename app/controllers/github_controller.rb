@@ -1,7 +1,7 @@
 class GithubController < ApplicaitonController
   before_action :set_github_adapter
 
-  def github_profile
+  def profile
     @api_response = @github_adapter.profile
     render json: @api_response.to_json
   end
