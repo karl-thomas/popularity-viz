@@ -3,7 +3,7 @@ class RemoteApiController < ApplicationController
                                             :recent_repos,
                                             :recent_commits]
 
-  before_action :set_linkedin_adapter, only: [:linkedin_profile]
+ 
 
 
 
@@ -24,21 +24,11 @@ class RemoteApiController < ApplicationController
     render json: @api_response.parsed_response.to_json
   end
   # ******* end of construction ******
-
-  # ============ LINKEDIN ACTIONS ===============
-  def linkedin_profile
-    @api_response = @linkedin_adapter.profile
-    render json: @api_response
-  end
-
+  
   private
 
     def set_github_adapter
       @github_adapter = GithubAdapter.new
-    end
-
-    def set_linkedin_adapter
-      @linkedin_adapter = LinkedinAdapter.new
     end
 
 end
