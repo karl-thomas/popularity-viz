@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   get 'github/recent_commits', to: 'remote_api#recent_commits'
 
   # linkedin info
-  get 'remote_api/linkedin_profile', to: 'remote_api#linkedin_profile'
+  get 'linkedin/profile', to: 'linkedin#profile'
 
   # twitter info
   get 'twitter/profile', to: 'twitter#profile'
