@@ -1,9 +1,14 @@
 class TwitterController < ApplicationController
   before_action :set_twitter_adapter
 
-  def profile
-    @api_response = @twitter_adapter.profile
+  def full_profile
+    @api_response = @twitter_adapter.full_profile
     puts @api_response.methods.sort
+    render json: @api_response.to_json
+  end
+
+  def formatted_profile
+    @api_response = @twitter_adapter.formatted_profile
     render json: @api_response.to_json
   end
 
