@@ -13,7 +13,8 @@ class TwitterAdapter
     end
     @date_two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
-
+  
+  #note to karl, this gives you the count of the things below, very cool. 
   def profile
     self.client.user(self.user_name)
   end
@@ -23,15 +24,18 @@ class TwitterAdapter
   # end
 
   def recent_tweets
-    self.client.search("from:#{self.user_name} since:#{@date_two_weeks_ago}").take(100).collect.to_a
+    query = "from:#{self.user_name} since:#{@date_two_weeks_ago}"
+    self.client.search(query).take(100).collect.to_a
   end
 
   def recent_replies
-    self.client.search("to:#{self.user_name} since:#{@date_two_weeks_ago}").take(100).collect.to_a
+    query = "to:#{self.user_name} since:#{@date_two_weeks_ago}"
+    self.client.search(query).take(100).collect.to_a
   end
 
   def recent_mentions
-    self.client.search("@#{self.user_name} since:#{@date_two_weeks_ago}").take(100).collect.to_a
+    query = "@#{self.user_name} since:#{@date_two_weeks_ago}"
+    self.client.search(query).take(100).collect.to_a
   end
 
   def followers
@@ -41,4 +45,9 @@ class TwitterAdapter
   def friends
     self.client.friends(self.user_name, skip_status: 't')
   end
+
+  def favorites
+    self.client.friend(self.user_name, count: 100)
+  end
+
 end

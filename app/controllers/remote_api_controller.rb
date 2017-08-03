@@ -64,6 +64,7 @@ class RemoteApiController < ApplicationController
     p @api_response = @twitter_adapter.friends
     render json: @api_response
   end
+  
   private
 
     def set_github_adapter
