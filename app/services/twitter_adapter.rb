@@ -13,8 +13,9 @@ class TwitterAdapter
     end
     @date_two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
-  
-  #note to karl, this gives you the count of the things below, very cool. 
+
+  # note to karl, this gives you the count of the things below, very cool. 
+  # so to take the count of thing, I can mostly use this. 
   def profile
     self.client.user(self.user_name)
   end
