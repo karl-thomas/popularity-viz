@@ -39,16 +39,20 @@ class TwitterAdapter
     self.client.search(query).take(100).collect.to_a
   end
 
-  def followers
+  def retrieve_followers
     self.client.followers(self.user_name, skip_status: 't')
   end
 
-  def friends
+  def retrieve_friends
     self.client.friends(self.user_name, skip_status: 't')
   end
 
-  def favorites
-    self.client.friend(self.user_name, count: 100)
+  def retrieve_favorites
+    self.client.favorites(self.user_name, count: 1)
   end
 
+  # def user_profile_counts
+  #   profile = self.profile
+  #   puts
+  # end
 end
