@@ -7,7 +7,9 @@ class RemoteApiController < ApplicationController
 
   before_action :set_twitter_adapter, only: [:twitter_profile,
                                              :recent_tweets,
-                                             :recent_replies]
+                                             :recent_replies,
+                                             :recent_followers,
+                                             :recent_friends]
 
 
   # ============ GITHUB ACTIONS =================
@@ -37,7 +39,7 @@ class RemoteApiController < ApplicationController
   # ============ TWITTER ACTIONS =================
   def twitter_profile
     @api_response = @twitter_adapter.profile
-    p @api_response.methods.sort
+    puts @api_response.methods.sort
     render json: @api_response.to_json
   end
 
@@ -51,6 +53,17 @@ class RemoteApiController < ApplicationController
     render json: @api_response
   end
 
+  def recent_followers
+    # this is not returning the most recent followers, but all of them
+    p @api_response = @twitter_adapter.followers
+    render json: @api_response
+  end
+
+  def recent_friends
+    # this is not returning the most recent followers, but all of them
+    p @api_response = @twitter_adapter.friends
+    render json: @api_response
+  end
   private
 
     def set_github_adapter

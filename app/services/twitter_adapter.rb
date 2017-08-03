@@ -18,12 +18,11 @@ class TwitterAdapter
     self.client.user(self.user_name)
   end
 
-  def test
-    self.client.search("kerl since:#{@date_two_weeks_ago}").take(100).collect.to_a
-  end
+  # def test
+  #   self.client.search("kerl since:#{@date_two_weeks_ago}").take(100).collect.to_a
+  # end
 
   def recent_tweets
-    p self.user_name
     self.client.search("from:#{self.user_name} since:#{@date_two_weeks_ago}").take(100).collect.to_a
   end
 
@@ -35,4 +34,11 @@ class TwitterAdapter
     self.client.search("@#{self.user_name} since:#{@date_two_weeks_ago}").take(100).collect.to_a
   end
 
+  def followers
+    self.client.followers(self.user_name, skip_status: 't')
+  end
+
+  def friends
+    self.client.friends(self.user_name, skip_status: 't')
+  end
 end
