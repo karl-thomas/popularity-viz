@@ -73,5 +73,6 @@ class TwitterAdapter
     # in my database, i then can use whats in the database and compare it to the next polling
     profile_info = self.formatted_profile
     tweet_info = self.tweet_counts
+    #then i'll merge em
   end
 end
