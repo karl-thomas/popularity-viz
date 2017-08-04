@@ -60,10 +60,14 @@ class TwitterAdapter
   end
 
   def aggregate_user_data
-   #the idea here will be to pair the profile info with data out side of the profile
-   # mainly the data from other tweets, and merge that data together and save it 
-   # in my database, i then can use whats in the database and compare it to the next polling
-
-
+    #the idea here will be to pair the profile info with data out side of the profile
+    # mainly the data from other tweets, and merge that data together and save it 
+    # in my database, i then can use whats in the database and compare it to the next polling
+    profile_info = self.formatted_profile
+    tweets_hash = {
+                    tweets: self.recent_tweets.count,
+                    mentions: self.recent_mentions.count,
+                    replies: self.recent_replies.count,
+                  }
   end
 end
