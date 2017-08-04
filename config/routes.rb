@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
 
-  root to: 'twitter#recent_favorites'
+  root to: 'twitter#test'
 
   # github info
   get 'github/profile', to: 'github#profile'
@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   get 'twitter/profile', to: 'twitter#profile'
   get 'twitter/recent_tweets', to: 'twitter#recent_tweets'
   get 'twitter/recent_replies', to: 'twitter#recent_replies'
+  get 'twitter/recent_mentions', to: 'twitter#recent_mentions'
   get 'twitter/recent_friends', to: 'twitter#recent_friends'
   get 'twitter/recent_followers', to: 'twitter#recent_followers'
   get 'twitter/recent_favorites', to: 'twitter#recent_favorites'

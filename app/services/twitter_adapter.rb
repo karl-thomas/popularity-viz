@@ -46,7 +46,7 @@ class TwitterAdapter
   end
 
   def formatted_profile
-    profile = self.profile
+    profile = self.retrieve_profile
     {   
         screen_name: profile.screen_name,
         description: profile.description,
@@ -63,7 +63,7 @@ class TwitterAdapter
     {
       recent_tweets: self.recent_tweets.count,
       recent_mentions: self.recent_mentions.count,
-      replies: self.recent_replies.count
+      recent_replies: self.recent_replies.count
     }
   end
 
@@ -73,6 +73,7 @@ class TwitterAdapter
     # in my database, i then can use whats in the database and compare it to the next polling
     profile_info = self.formatted_profile
     tweet_info = self.tweet_counts
+    profile_info.merge(tweet_info)
     #then i'll merge em
   end
 end
