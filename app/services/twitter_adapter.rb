@@ -1,5 +1,7 @@
 require 'twitter'
 require 'pry'
+require 'benchmark'
+
 class TwitterAdapter
 
   attr_reader :client, :user_name
@@ -47,15 +49,16 @@ class TwitterAdapter
 
   def formatted_profile
     profile = self.retrieve_profile
+    
     {   
-        screen_name: profile.screen_name,
-        description: profile.description,
-        followers_count: profile.followers_count,
-        friends_count: profile.friends_count,
-        tweets_count: profile.statuses_count,
-        favorites_count: profile.favorites_count,
-        listed_count: profile.listed_count,
-        current_status_id: profile.status.id
+      screen_name: profile.screen_name,
+      description: profile.description,
+      followers_count: profile.followers_count,
+      friends_count: profile.friends_count,
+      tweets_count: profile.statuses_count,
+      favorites_count: profile.favorites_count,
+      listed_count: profile.listed_count,
+      current_status_id: profile.status.id
     }
   end
 
@@ -71,8 +74,10 @@ class TwitterAdapter
     #the idea here will be to pair the profile info with data out side of the profile
     # mainly the data from other tweets, and merge that data together and save it 
     # in my database, i then can use whats in the database and compare it to the next polling
+   
     profile_info = self.formatted_profile
     tweet_info = self.tweet_counts
+   
     profile_info.merge(tweet_info)
     #then i'll merge em
   end

@@ -25,6 +25,7 @@ gem 'webpacker'
 gem 'pry'
 # github api implementation
 # gem "octokit", "~> 4.0"
+gem 'parallel'
 # basic api requests 
 gem 'httparty'
 # interacting with twitter
