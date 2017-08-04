@@ -1,0 +1,2 @@
+class TwitterRecord < ApplicationRecord
+end

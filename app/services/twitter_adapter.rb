@@ -49,7 +49,7 @@ class TwitterAdapter
 
   def formatted_profile
     profile = self.retrieve_profile
-    
+
     {   
       screen_name: profile.screen_name,
       description: profile.description,
@@ -71,14 +71,10 @@ class TwitterAdapter
   end
 
   def aggregate_user_data
-    #the idea here will be to pair the profile info with data out side of the profile
-    # mainly the data from other tweets, and merge that data together and save it 
-    # in my database, i then can use whats in the database and compare it to the next polling
-   
     profile_info = self.formatted_profile
     tweet_info = self.tweet_counts
    
     profile_info.merge(tweet_info)
-    #then i'll merge em
   end
+
 end

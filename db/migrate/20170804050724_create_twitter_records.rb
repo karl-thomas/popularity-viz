@@ -1,6 +1,6 @@
-class CreateTweetRecords < ActiveRecord::Migration[5.1]
+class CreateTwitterRecords < ActiveRecord::Migration[5.1]
   def change
-    create_table :tweet_records do |t|
+    create_table :twitter_records do |t|
       t.string :screen_name 
       t.string :description 
       t.integer :followers_count 
