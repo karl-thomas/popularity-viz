@@ -1,6 +1,4 @@
 require 'twitter'
-require 'pry'
-require 'benchmark'
 
 class TwitterAdapter
 
