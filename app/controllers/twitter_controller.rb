@@ -1,8 +1,8 @@
 class TwitterController < ApplicationController
   before_action :set_twitter_adapter
 
-  def full_profile
-    @api_response = @twitter_adapter.full_profile
+  def profile
+    @api_response = @twitter_adapter.retrieve_profile
     puts @api_response.methods.sort
     render json: @api_response.to_json
   end
@@ -24,18 +24,19 @@ class TwitterController < ApplicationController
 
   def recent_followers
     # this is not returning the most recent followers, but all of them
-    p @api_response = @twitter_adapter.followers
+    # once i can compare against the previous week, i can specify how many
+    p @api_response = @twitter_adapter.retrieve_followers(10)
     render json: @api_response
   end
 
   def recent_friends
     # this is not returning the most recent followers, but all of them
-    @api_response = @twitter_adapter.friends
+    @api_response = @twitter_adapter.retrieve_friends(10)
     render json: @api_response
   end
 
   def recent_favorites
-    p @api_response = @twitter_adapter.retrieve_favorites
+    p @api_response = @twitter_adapter.retrieve_favorites(10)
     render json: @api_response
   end
 

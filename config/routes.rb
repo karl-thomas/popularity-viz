@@ -11,7 +11,7 @@ Rails.application.routes.draw do
   get 'linkedin/profile', to: 'linkedin#profile'
 
   # twitter info
-  get 'twitter/full_profile', to: 'twitter#full_profile'
+  get 'twitter/profile', to: 'twitter#profile'
   get 'twitter/recent_tweets', to: 'twitter#recent_tweets'
   get 'twitter/recent_replies', to: 'twitter#recent_replies'
   get 'twitter/recent_friends', to: 'twitter#recent_friends'

@@ -14,9 +14,7 @@ class TwitterAdapter
     @date_two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
 
-  # note to karl, this gives you the count of the things below, very cool. 
-  # so to take the count of thing, I can mostly use this. 
-  def full_profile
+  def retrieve_profile
     self.client.user(self.user_name)
   end
 
@@ -35,29 +33,37 @@ class TwitterAdapter
     self.client.search(query).take(100).collect.to_a
   end
 
-  def retrieve_followers
+  def retrieve_followers(new_followers)
     self.client.followers(self.user_name, skip_status: 't')
   end
 
-  def retrieve_friends
+  def retrieve_friends(new_friends)
     self.client.friends(self.user_name, skip_status: 't')
   end
 
-  def retrieve_favorites
-    self.client.favorites(self.user_name, count: 1)
+  def retrieve_favorites(new_favorites)
+    self.client.favorites(self.user_name, count: 40)
   end
 
   def formatted_profile
     profile = self.profile
     {   
-        screen:
-        description: profile.description
+        screen_name: profile.screen_name,
+        description: profile.description,
         followers_count: profile.followers_count,
         friends_count: profile.friends_count,
         tweets_count: profile.statuses_count,
         favorites_count: profile.favorites_count,
-        listed_count: profile.listed_count
-        status_id: profile.status.id
+        listed_count: profile.listed_count,
+        current_status_id: profile.status.id
     }
+  end
+
+  def aggregate_user_data
+   #the idea here will be to pair the profile info with data out side of the profile
+   # mainly the data from other tweets, and merge that data together and save it 
+   # in my database, i then can use whats in the database and compare it to the next polling
+
+
   end
 end
