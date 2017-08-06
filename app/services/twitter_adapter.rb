@@ -14,31 +14,65 @@ class TwitterAdapter
     @date_two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
 
-  def profile
+  def retrieve_profile
     self.client.user(self.user_name)
   end
 
-  # def test
-  #   self.client.search("kerl since:#{@date_two_weeks_ago}").take(100).collect.to_a
-  # end
-
   def recent_tweets
-    self.client.search("from:#{self.user_name} since:#{@date_two_weeks_ago}").take(100).collect.to_a
+    query = "from:#{self.user_name} since:#{@date_two_weeks_ago}"
+    self.client.search(query).take(100).collect.to_a
   end
 
   def recent_replies
-    self.client.search("to:#{self.user_name} since:#{@date_two_weeks_ago}").take(100).collect.to_a
+    query = "to:#{self.user_name} since:#{@date_two_weeks_ago}"
+    self.client.search(query).take(100).collect.to_a
   end
 
   def recent_mentions
-    self.client.search("@#{self.user_name} since:#{@date_two_weeks_ago}").take(100).collect.to_a
+    query = "@#{self.user_name} since:#{@date_two_weeks_ago}"
+    self.client.search(query).take(100).collect.to_a
   end
 
-  def followers
+  def retrieve_followers(new_followers)
     self.client.followers(self.user_name, skip_status: 't')
   end
 
-  def friends
+  def retrieve_friends(new_friends)
     self.client.friends(self.user_name, skip_status: 't')
   end
+
+  def retrieve_favorites(new_favorites)
+    self.client.favorites(self.user_name, count: 40)
+  end
+
+  def formatted_profile
+    profile = self.retrieve_profile
+
+    {   
+      screen_name: profile.screen_name,
+      description: profile.description,
+      followers_count: profile.followers_count,
+      friends_count: profile.friends_count,
+      tweets_count: profile.statuses_count,
+      favorites_count: profile.favorites_count,
+      listed_count: profile.listed_count,
+      current_status_id: profile.status.id
+    }
+  end
+
+  def recent_tweet_counts
+    {
+      recent_tweets: self.recent_tweets.count,
+      recent_mentions: self.recent_mentions.count,
+      recent_replies: self.recent_replies.count
+    }
+  end
+
+  def aggregate_user_data
+    profile_info = self.formatted_profile
+    tweet_info = self.recent_tweet_counts
+   
+    profile_info.merge(tweet_info)
+  end
+
 end
