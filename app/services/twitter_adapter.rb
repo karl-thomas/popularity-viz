@@ -60,7 +60,7 @@ class TwitterAdapter
     }
   end
 
-  def tweet_counts
+  def recent_tweet_counts
     {
       recent_tweets: self.recent_tweets.count,
       recent_mentions: self.recent_mentions.count,
@@ -70,7 +70,7 @@ class TwitterAdapter
 
   def aggregate_user_data
     profile_info = self.formatted_profile
-    tweet_info = self.tweet_counts
+    tweet_info = self.recent_tweet_counts
    
     profile_info.merge(tweet_info)
   end

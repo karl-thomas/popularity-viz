@@ -1,9 +1,9 @@
+require 'pry'
 class TwitterController < ApplicationController
   before_action :set_twitter_adapter
 
   def test
-    @api_response = @twitter_adapter.aggregate_user_data
-    puts @api_response
+    @api_response = @twitter_adapter.profile
     render json: @api_response.to_json
   end
 
