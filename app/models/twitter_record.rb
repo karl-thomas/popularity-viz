@@ -8,7 +8,7 @@ class TwitterRecord < ApplicationRecord
   end
 
   def inspect_old_data
-    last_record = TweetRecord.find(self.id - 1)
+    last_record = TwitterRecord.find(self.id - 1)
     old_data = last_record.attributes
     # use each pair to check old data against new data
     self.differences = old_data.map do |column_name, old_value| 
@@ -34,8 +34,6 @@ class TwitterRecord < ApplicationRecord
         compare_favorites_count(old_value, new_value)
       when "listed_count"
         compare_lists_count(old_value, new_value)
-      when "tweets_count"
-        new_value
       when "recent_tweets"
         new_value
       when "recent_mention"

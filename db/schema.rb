@@ -23,7 +23,6 @@ ActiveRecord::Schema.define(version: 20170807054255) do
     t.integer "tweets_count"
     t.integer "favorites_count"
     t.integer "listed_count"
-    t.integer "current_status_id"
     t.integer "recent_tweets"
     t.integer "recent_mentions"
     t.integer "recent_replies"

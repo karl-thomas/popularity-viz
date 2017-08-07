@@ -56,7 +56,6 @@ class TwitterAdapter
       tweets_count: profile.statuses_count,
       favorites_count: profile.favorites_count,
       listed_count: profile.listed_count,
-      current_status_id: profile.status.id
     }
   end
 
