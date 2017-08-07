@@ -5,14 +5,18 @@ class TwitterRecord < ApplicationRecord
     @twitter_adapter = TwitterAdapter.new
   end
 
-  def compare_last_records_data
-    old_record = TweetRecord.last
+  def inspect_old_data
+    old_record = TweetRecord.find(self.id - 1)
     old_data = old_record.attributes
-    # sue each pair to check old data against new data
-    old_data.map do |column_name, old_value|
+    # use each pair to check old data against new data
+    @differences = old_data.map do |column_name, old_value| 
       new_value = self.send(column_name)
+      assign_differences(column_name, old_value, new_value)
+    end
+  end
 
-      case column_name
+  def assign_differences(column_name, old_value, new_value)
+    case column_name
       when "screen_name"
         old_value != new_value ? new_value : nil
       when "description"
@@ -38,7 +42,6 @@ class TwitterRecord < ApplicationRecord
       else
         nil
       end
-    end
   end
 
   def compare_friends_count(old_value, new_value)
