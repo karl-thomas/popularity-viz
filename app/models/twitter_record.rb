@@ -1,18 +1,21 @@
 class TwitterRecord < ApplicationRecord
 
+  attr_accessor :differences
+
   def initialize(args={})
     super(args)
     @twitter_adapter = TwitterAdapter.new
   end
 
   def inspect_old_data
-    old_record = TweetRecord.find(self.id - 1)
-    old_data = old_record.attributes
+    last_record = TweetRecord.find(self.id - 1)
+    old_data = last_record.attributes
     # use each pair to check old data against new data
-    @differences = old_data.map do |column_name, old_value| 
+    self.differences = old_data.map do |column_name, old_value| 
       new_value = self.send(column_name)
       assign_differences(column_name, old_value, new_value)
     end
+
   end
 
   def assign_differences(column_name, old_value, new_value)

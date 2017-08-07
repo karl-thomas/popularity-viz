@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170804050724) do
+ActiveRecord::Schema.define(version: 20170807054255) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -29,6 +29,11 @@ ActiveRecord::Schema.define(version: 20170804050724) do
     t.integer "recent_replies"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "recent_friends"
+    t.integer "recent_followers"
+    t.integer "recent_favorites"
+    t.integer "recent_lists"
+    t.integer "total_differences"
   end
 
 end
