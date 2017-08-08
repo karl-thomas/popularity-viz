@@ -3,17 +3,36 @@ class TwitterRecord < ApplicationRecord
 
   def initialize(args={})
     super(args)
-    inspect_old_data
+    @differences = inspect_old_data
+    assign_total_differences(@differences)
   end
 
   def inspect_old_data
     last_record = TwitterRecord.last
     old_data = last_record.attributes
     # use each pair to check old data against new data
-    self.differences = old_data.map do |column_name, old_value| 
+    old_data.map do |column_name, old_value| 
       new_value = self.send(column_name)
       assign_differences(column_name, old_value, new_value)
     end
+  end
+
+  def sub_differences(differences)
+    differences.map { |diff| diff.class == String ? 1 : diff }
+  end
+
+  def filter_differences(differences)
+    differences.reject { |diff| diff.nil? }
+  end
+
+  def sum_up_differences(differences)
+    differences.reduce(:+)
+  end
+
+  def assign_total_differences(differences)
+    valid_differences = sub_differences(differences)
+    valid_differences = filter_differences(valid_differences)
+    self.total_differences = sum_up_differences(valid_differences)
   end
 
   def assign_differences(column_name, old_value, new_value)
