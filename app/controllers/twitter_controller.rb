@@ -3,7 +3,7 @@ class TwitterController < ApplicationController
   before_action :set_twitter_adapter
 
   def test
-    @api_response = @twitter_adapter.profile
+    @api_response = @twitter_adapter.profile 
     render json: @api_response.to_json
   end
 

@@ -24,7 +24,7 @@ gem 'webpacker'
 # gem 'therubyracer', platforms: :ruby
 gem 'pry'
 # github api implementation
-# gem "octokit", "~> 4.0"
+gem "octokit", "~> 4.0"
 gem 'parallel'
 # basic api requests 
 gem 'httparty'

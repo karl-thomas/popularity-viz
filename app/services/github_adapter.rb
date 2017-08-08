@@ -1,13 +1,16 @@
+require 'octokit'
 class GithubAdapter
   include HTTParty
   base_uri 'https://api.github.com'
 
-  attr_reader :user
+  attr_reader :user, :client
 
   def initialize
     @user = ENV['GITHUB_USERNAME'] 
-    @options = {client_id: ENV['GITHUB_CLIENT_ID'], 
-                client_secret: ENV['GITHUB_CLIENT_SECRET']}
+    @client = Octokit::Client.new \
+      :client_id     => ENV['GITHUB_CLIENT_ID'],
+      :client_secret => ENV['GITHUB_CLIENT_SECRET']
+
     @date_two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
 
