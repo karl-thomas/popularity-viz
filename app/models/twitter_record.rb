@@ -18,7 +18,7 @@ class TwitterRecord < ApplicationRecord
   end
 
   def sub_differences(differences)
-    differences.map { |diff| diff.class == String ? 1 : diff }
+    differences.map { |diff| diff.class == String ? 1 : diff.abs }
   end
 
   def filter_differences(differences)
