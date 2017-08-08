@@ -13,7 +13,7 @@ class GithubAdapter
   end
 
   def profile
-    self.class.get("/users/#{self.user}", query: @options)
+    p self.class.get("/users/#{self.user}", query: @options)
   end 
 
   def all_repos
