@@ -2,27 +2,44 @@ require 'pry'
 require 'octokit'
 
 class GithubAdapter
-  attr_reader :user, :client
+  attr_reader :user, :client, :two_weeks_ago
 
   def initialize
     application_client
     @user = ENV['GITHUB_USERNAME'] 
-    @date_two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
+    @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
 
 
-  def retrieve_profile
+  def profile
     @profile ||= self.client.user(self.user)
   end 
 
   def profile_data
     {
+      username: profile.login
       public_repos: profile.public_repos,
       public_gists: profile.public_gists,
       followers: profile.followers,
       following: profile.following,
       starred_repos: self.starred_repos.count
     }
+  end
+
+  def owned_repos
+    self.client.repos(self.user, affiliation: "owner")
+  end
+
+  def collaborated_repos
+    self.client.repos(self.user, affiliation: "collaborator")
+  end
+
+  def organizations_repos
+    self.client.repos(self.user, affiliation: "organization_member")
+  end
+
+  def recent_updated_repos(repos)
+    repos.select { |repo| repo[:pushed_at] > two_weeks_ago }
   end
 
   def starred_repos
