@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
 
-  root to: 'twitter#test'
+  root to: 'github#test'
 
   # github info
   get 'github/profile', to: 'github#profile'

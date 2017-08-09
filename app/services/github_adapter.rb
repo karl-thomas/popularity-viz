@@ -1,67 +1,76 @@
 require 'pry'
-class GithubAdapter
-  include HTTParty
-  base_uri 'https://api.github.com'
+require 'octokit'
 
-  attr_reader :user
+class GithubAdapter
+  attr_reader :user, :client, :two_weeks_ago
 
   def initialize
+    application_client
     @user = ENV['GITHUB_USERNAME'] 
-    @options = {client_id: ENV['GITHUB_CLIENT_ID'], 
-                client_secret: ENV['GITHUB_CLIENT_SECRET']}
-    @date_two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
+    @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
+
 
   def profile
-    p self.class.get("/users/#{self.user}", query: @options)
+    @profile ||= self.client.user(self.user)
   end 
 
-  def all_repos
-    self.class.get("/users/#{self.user}/repos", query: @options)
+  def profile_data
+    {
+      username: profile.login
+      public_repos: profile.public_repos,
+      public_gists: profile.public_gists,
+      followers: profile.followers,
+      following: profile.following,
+      starred_repos: self.starred_repos.count
+    }
   end
 
-  def recent_repos
-    #query string for search api
-    query_string = "q=pushed:>=#{@date_two_weeks_ago}+user:#{self.user}"
-
-    self.class.get("/search/repositories?#{query_string}", query: @options)
+  def owned_repos
+    self.client.repos(self.user, affiliation: "owner")
   end
 
-  def all_repo_names(arg_repos)
-    arg_repos.map {|repo| repo["name"]}
+  def collaborated_repos
+    self.client.repos(self.user, affiliation: "collaborator")
   end
 
-  def commits_for_repo(repo)
-    self.class.get("/repos/#{self.user}/#{repo}/commits", query: @options)
+  def organizations_repos
+    self.client.repos(self.user, affiliation: "organization_member")
   end
 
-  def all_commits(arg_repos)
-    self.all_repo_names(arg_repos).map{ |repo_name| commits_for_repo(repo_name)}
+  def recent_updated_repos(repos)
+    repos.select { |repo| repo[:pushed_at] > two_weeks_ago }
   end
 
-  def all_recent_commits
-    recent_repo_commits = all_commits(self.recent_repos).flatten
-    
-    recent_repo_commits.keep_if do |commit|
-      commit["commit"]["author"]["name"] == self.user &&
-      commit["commit"]["author"]["date"] >= @date_two_weeks_ago 
+  def starred_repos
+    application_client
+    self.client.starred(self.user)
+  end
+
+  def recent_views_for_repo(exact_repo_name)
+    personal_client
+    self.client.views(exact_repo_name, per: "week")
+  end
+
+  def recent_clones_for_repo(exact_repo_name)
+    personal_client
+    self.client.clones(exact_repo_name, per: "week")
+  end
+
+  private
+    def application_client
+      if !self.client || self.client.client_id.nil?
+        @client  = Octokit::Client.new \
+          :client_id     => ENV['GITHUB_CLIENT_ID'],
+          :client_secret => ENV['GITHUB_CLIENT_SECRET']
+      end    
     end
-  end
-  # ==== currently broken, 
-  # => id prefer to do it this way, because it's only one request.
-  # when passing in the correct header it returns
-  # {"cache-control":["no-cache"],"connection":["close"],"content-type":["text/html"]
-  # otherwise the header is required.  
 
-  # def all_recent_commits
-  #   # set custom header for search commits api, right now its under dev.
-  #   accept_header = {"Accept" => "application/vnd.github.cloak-preview"}
-
-  #   #query string for search api
-  #   query_string = "q=author-date:>=#{@date_two_weeks_ago}+author:#{self.user}"
-
-  #   response = self.class.get("/search/commits?#{query_string}", {query: @options, headers: accept_header})
-  #   # response["items"]
-  # end
-
+    def personal_client
+      if !self.client || self.client.login.nil?
+        @client = Octokit::Client.new \
+          :login => ENV['GITHUB_USERNAME'],
+          :password => ENV['GITHUB_PASSWORD']
+      end
+    end
 end
