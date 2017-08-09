@@ -30,9 +30,14 @@ class GithubAdapter
     self.client.starred(self.user)
   end
 
-  def views_for_repo(exact_repo_name)
+  def recent_views_for_repo(exact_repo_name)
     personal_client
     self.client.views(exact_repo_name, per: "week")
+  end
+
+  def recent_clones_for_repo(exact_repo_name)
+    personal_client
+    self.client.clones(exact_repo_name, per: "week")
   end
 
   private
