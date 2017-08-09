@@ -26,7 +26,7 @@ class GithubAdapter
   end
 
   def starred_repos
-    application_clientst
+    application_client
     self.client.starred(self.user)
   end
 
