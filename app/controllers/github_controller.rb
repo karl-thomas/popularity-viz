@@ -1,4 +1,4 @@
-class GithubController < ApplicaitonController
+class GithubController < ApplicationController
   before_action :set_github_adapter
 
   def profile
