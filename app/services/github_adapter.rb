@@ -14,66 +14,26 @@ class GithubAdapter
   end
 
   def retrieve_profile
-    self.client.user(self.user)
+    @profile ||= self.client.user(self.user)
   end 
 
-  def repo_data
-    repos = self.recent_repos.parsed_response["items"]
-    binding.pry
+  def profile_data
     {
-      recent_repos: repos.count
+      public_repos: profile.public_repos,
+      public_gists: profile.public_gists,
+      followers: profile.followers,
+      following: profile.following
     }
-
-  end
-  
-  def all_repos
-    self.class.get("/users/#{self.user}/repos", query: @options)
   end
 
-  def recent_repos
-    #query string for search api
-    query_string = "q=pushed:>=#{@date_two_weeks_ago}+user:#{self.user}"
-
-    self.class.get("/search/repositories?#{query_string}", query: @options)
+  def starred_repos
+    self.client.starred(self.user)
   end
 
-  def all_repo_names(arg_repos)
-    arg_repos.map {|repo| repo["name"]}
+  def recent_starred_repos
+    repos = self.starred_repos
+    binding.pry
   end
 
-  def commits_for_repo(repo)
-    self.class.get("/repos/#{self.user}/#{repo}/commits", query: @options)
-  end
-
-  def all_commits(arg_repos)
-    names_of_repos = self.all_repo_names(arg_repos)
-    names_of_repos.map{ |repo_name| commits_for_repo(repo_name)}
-  end
-
-  def all_recent_commits(repos)
-    target_repos = self.recent_repos.parsed_response["items"]
-    recent_repo_commits = all_commits(target_repos).flatten
-    
-    recent_repo_commits.keep_if do |commit|
-      commit["commit"]["author"]["name"] == self.user &&
-      commit["commit"]["author"]["date"] >= @date_two_weeks_ago 
-    end
-  end
-  # ==== currently broken, 
-  # => id prefer to do it this way, because it's only one request.
-  # when passing in the correct header it returns
-  # {"cache-control":["no-cache"],"connection":["close"],"content-type":["text/html"]
-  # otherwise the header is required.  
-
-  # def all_recent_commits
-  #   # set custom header for search commits api, right now its under dev.
-  #   accept_header = {"Accept" => "application/vnd.github.cloak-preview"}
-
-  #   #query string for search api
-  #   query_string = "q=author-date:>=#{@date_two_weeks_ago}+author:#{self.user}"
-
-  #   response = self.class.get("/search/commits?#{query_string}", {query: @options, headers: accept_header})
-  #   # response["items"]
-  # end
 
 end

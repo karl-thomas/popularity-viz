@@ -4,7 +4,7 @@ class GithubController < ApplicationController
   before_action :set_github_adapter
 
   def test
-    profile = GithubProfileAdapter.new
+    profile = GithubAdapter.new
     @api_response = profile.recent_starred_repos
     render json: @api_response.to_json
   end
