@@ -1,21 +1,31 @@
 require 'pry'
-class GithubAdapter
-  include HTTParty
-  base_uri 'https://api.github.com'
+require 'octokit'
 
-  attr_reader :user
+class GithubAdapter
+  attr_reader :user, :client
 
   def initialize
     @user = ENV['GITHUB_USERNAME'] 
-    @options = {client_id: ENV['GITHUB_CLIENT_ID'], 
-                client_secret: ENV['GITHUB_CLIENT_SECRET']}
+    @client = Octokit::Client.new \
+      :client_id     => ENV['GITHUB_CLIENT_ID'],
+      :client_secret => ENV['GITHUB_CLIENT_SECRET']
+
     @date_two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
 
-  def profile
-    p self.class.get("/users/#{self.user}", query: @options)
+  def retrieve_profile
+    self.client.user(self.user)
   end 
 
+  def repo_data
+    repos = self.recent_repos.parsed_response["items"]
+    binding.pry
+    {
+      recent_repos: repos.count
+    }
+
+  end
+  
   def all_repos
     self.class.get("/users/#{self.user}/repos", query: @options)
   end
@@ -36,11 +46,13 @@ class GithubAdapter
   end
 
   def all_commits(arg_repos)
-    self.all_repo_names(arg_repos).map{ |repo_name| commits_for_repo(repo_name)}
+    names_of_repos = self.all_repo_names(arg_repos)
+    names_of_repos.map{ |repo_name| commits_for_repo(repo_name)}
   end
 
-  def all_recent_commits
-    recent_repo_commits = all_commits(self.recent_repos).flatten
+  def all_recent_commits(repos)
+    target_repos = self.recent_repos.parsed_response["items"]
+    recent_repo_commits = all_commits(target_repos).flatten
     
     recent_repo_commits.keep_if do |commit|
       commit["commit"]["author"]["name"] == self.user &&
