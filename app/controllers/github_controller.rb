@@ -1,12 +1,12 @@
-require 'pry'
+# require_relative '../services/github_adapter_profile' 
 
 class GithubController < ApplicationController
   before_action :set_github_adapter
 
   def test
-    @api_response = @github_adapter
-    binding.pry
-    render json: @api_response
+    @api_response = @github_adapter.profile_data
+    binding.pruy
+    render json: @api_response.to_json
   end
 
   def profile
