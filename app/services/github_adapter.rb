@@ -5,12 +5,9 @@ class GithubAdapter
   attr_reader :user, :client, :two_weeks_ago
 
   def initialize
+    application_client
     @user = ENV['GITHUB_USERNAME'] 
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
-  end
-
-  def client
-    @client ||= application_client
   end
 
   def profile
@@ -28,26 +25,17 @@ class GithubAdapter
     }
   end
 
-  def repo_data(repository_hash)
-    repo = Repo.new(repository_hash)
-    {
-      recent_commits: recent_commits(repo).count,
-      recent_comments: recent_comments(commit_comments(repo)).count,
-      recent_views: recent_views_for_repo(repo),
-      recent_clones: recent_clones_for_repo(repo),
-    }
-  end
 
   def owned_repos
-    self.client.repos(self.user, affiliation: "owner")
+    self.client.repos( self.user, affiliation: "owner" )
   end
 
   def collaborated_repos
-    self.client.repos(self.user, affiliation: "collaborator")
+    self.client.repos( self.user, affiliation: "collaborator" )
   end
 
   def organizations_repos
-    self.client.repos(self.user, affiliation: "organization_member")
+    self.client.repos( self.user, affiliation: "organization_member" )
   end
 
   def recent_updated_repos(repos)
@@ -59,27 +47,47 @@ class GithubAdapter
     self.client.starred(self.user)
   end
 
-  def recent_commits(repo)
-    self.client.commits_since(repo, two_weeks_ago, author: self.user)
+  def recent_gists
+    self.client.gists( self.user, since: two_weeks_ago )
   end
 
-  def commit_comments(repo)
-    self.client.list_commit_comments(repo)
+  def recent_starred_gists
+    personal_client
+    self.client.starred_gists( since: two_weeks_ago )
   end
 
-  def recent_comments(comments)
+  # repo behaviour, these things should be in a repo class. 
+  def recent_commits(repo_name)
+    self.client.commits_since(repo_name, two_weeks_ago, author: self.user)
+  end
+
+  def all_commit_comments(repo_name)
+    self.client.list_commit_comments(repo_name)
+  end
+
+  def recent_commit_comments(repo_name)
+    comments = commit_comments(repo_name)
     return [] if comments.empty?
-    comments.select {|comment| comment[:created_at] > two_weeks_ago}
+    comments.select { |comment| comment[:created_at] > two_weeks_ago }
   end
 
-  def recent_clones_for_repo(exact_repo_name)
+  def recent_clones_for_repo(repo_name)
     personal_client
-    self.client.clones(exact_repo_name, per: "week")
+    self.client.clones(repo_name, per: "week")
   end
 
-  def recent_views_for_repo(exact_repo_name)
+  def recent_views_for_repo(repo_name)
     personal_client
-    self.client.views(exact_repo_name, per: "week")
+    self.client.views(repo_name, per: "week")
+  end
+
+  def repo_data(repo_name)
+    {
+      recent_commits: recent_commits(repo_name).count,
+      recent_comments: recent_comments(repo_name).count,
+      recent_views: recent_views_for_repo(repo_name),
+      recent_clones: recent_clones_for_repo(repo_name),
+    }
   end
 
   private

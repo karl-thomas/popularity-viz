@@ -4,8 +4,8 @@ class GithubController < ApplicationController
   before_action :set_github_adapter
 
   def test
-    @api_response = @github_adapter.profile_data
-    binding.pruy
+    @api_response = @github_adapter
+    binding.pry
     render json: @api_response.to_json
   end
 
