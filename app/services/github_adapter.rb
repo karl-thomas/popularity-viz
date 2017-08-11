@@ -17,24 +17,38 @@ class GithubAdapter
   def profile_data
     {
       username: profile.login,
-      public_repos: profile.public_repos,
-      public_gists: profile.public_gists,
+      repos: total_repos,
+      gists: total_gists,
       followers: profile.followers,
       following: profile.following,
-      starred_repos: self.starred_repos.count
+      starred_repos: self.starred_repos.count,
+      recent_projects: recent_updated_repos(owned_repos).count
     }
   end
 
+  def total_gists
+    application_client
+    profile.public_gists + profile.private_gists
+  end
 
+  def total_repos
+    application_client
+    profile.public_repos + profile.total_private_repos
+  end
+
+  # repo collections 
   def owned_repos
+    application_client
     self.client.repos( self.user, affiliation: "owner" )
   end
 
   def collaborated_repos
+    application_client
     self.client.repos( self.user, affiliation: "collaborator" )
   end
 
   def organizations_repos
+    application_client
     self.client.repos( self.user, affiliation: "organization_member" )
   end
 
@@ -47,7 +61,9 @@ class GithubAdapter
     self.client.starred(self.user)
   end
 
+  # gists
   def recent_gists
+    application_client
     self.client.gists( self.user, since: two_weeks_ago )
   end
 
@@ -56,19 +72,51 @@ class GithubAdapter
     self.client.starred_gists( since: two_weeks_ago )
   end
 
-  # repo behaviour, these things should be in a repo class. 
+  # repo behaviour, returns recent info, these things should be in a repo class. 
+  def collect_repo_data
+    recent_repos.map {|repo| repo_data(repo[:full_name])}
+  end
+
+  def repo_data(repo_name)
+    {
+      recent_commits: recent_commits(repo_name).count,
+      recent_comments: recent_commit_comments(repo_name).count,
+    }
+  end
+
   def recent_commits(repo_name)
+    application_client
     self.client.commits_since(repo_name, two_weeks_ago, author: self.user)
   end
 
   def all_commit_comments(repo_name)
+    application_client
     self.client.list_commit_comments(repo_name)
   end
 
   def recent_commit_comments(repo_name)
-    comments = commit_comments(repo_name)
+    application_client
+    comments = all_commit_comments(repo_name)
     return [] if comments.empty?
     comments.select { |comment| comment[:created_at] > two_weeks_ago }
+  end
+
+  def deployments(repo_name)
+    self.client.deployments(repo_name)
+  end
+
+  def recent_deployments(repo_name)
+    all_deployments = deployments(repo_name)
+    return [] if deployments.empty?
+    deployments.select { |deployments| deployments[:created_at] > two_weeks_ago }
+  end
+
+  # repo traffic, for all owned repos --------------
+  def traffic_data(repo)
+    {
+      recent_views: recent_views_for_repo(repo)[:count],
+      recent_clones: recent_clones_for_repo(repo)[:count]
+    }  
   end
 
   def recent_clones_for_repo(repo_name)
@@ -81,14 +129,6 @@ class GithubAdapter
     self.client.views(repo_name, per: "week")
   end
 
-  def repo_data(repo_name)
-    {
-      recent_commits: recent_commits(repo_name).count,
-      recent_comments: recent_comments(repo_name).count,
-      recent_views: recent_views_for_repo(repo_name),
-      recent_clones: recent_clones_for_repo(repo_name),
-    }
-  end
 
   private
     def application_client
