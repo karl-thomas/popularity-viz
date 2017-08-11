@@ -21,8 +21,10 @@ class GithubAdapter
       gists: total_gists,
       followers: profile.followers,
       following: profile.following,
-      starred_repos: starred_repos.count,
-      recent_projects: recent_updated_repos(owned_repos).count
+      starred_repos: self.starred_repos.count, # the recent calc needs be done DB side
+      recent_projects: self.recent_updated_repos(owned_repos).count,
+      recent_gists: self.recent_gists,
+      recently_starred_gists: self.recent_starred_gists
     }
   end
 
@@ -73,16 +75,25 @@ class GithubAdapter
   end
 
   # repo behaviour, returns recent info, these things should be in a repo class. 
-  def collect_repo_data
-    recent_repos.map {|repo| repo_data(repo[:full_name])}
+  def repo_data(repo)
+    {
+      recent_commits: recent_commits(repo[:full_name]).count,
+      recent_comments: recent_commit_comments(repo[:full_name]).count,
+      recent_deployments: recent_deployments(repo[:full_name])
+    }
   end
 
-  def repo_data(repo_name)
-    {
-      recent_commits: recent_commits(repo_name).count,
-      recent_comments: recent_commit_comments(repo_name).count,
-      recent_deployments: recent_deployments(repo_name)
-    }
+  def collect_repo_data
+    recent_repos = self.recent_updated_repos(owned_repos)
+    recent_repos.map {|repo| repo_data(repo)}
+  end
+
+  def reduce_repo_data
+    collect_repo_data.reduce(Hash.new(0)) do |aggregate, pairs|
+      pairs.each do |key, value|
+      end
+      aggregate
+    end
   end
 
   def recent_commits(repo_name)
@@ -110,11 +121,21 @@ class GithubAdapter
   def recent_deployments(repo_name)
     application_client
     all_deployments = deployments(repo_name)
-    return [] if deployments.empty?
-    deployments.select { |deployments| deployments[:created_at] > two_weeks_ago }
+    return [] if all_deployments.empty?
+    all_deployments.select { |deployments| deployments[:created_at] > two_weeks_ago }
   end
 
   # repo traffic, for all owned repos --------------
+  def traffic_data(repo)
+    recent_views = recent_views_for_repo(repo.full_name)
+    {
+      repo_id: repo.id,
+      recent_views: recent_views[:count],
+      unique_views: recent_views[:uniques],
+      recent_clones: recent_clones_for_repo(repo.full_name)[:count]
+    }  
+  end
+
   def collect_traffic_data
     self.owned_repos.map {|repo| traffic_data(repo) }
   end
@@ -134,15 +155,6 @@ class GithubAdapter
   end
 
 
-  def traffic_data(repo)
-    recent_views = recent_views_for_repo(repo.full_name)
-    {
-      repo_id: repo.id,
-      recent_views: recent_views[:count],
-      unique_views: recent_views[:uniques],
-      recent_clones: recent_clones_for_repo(repo.full_name)[:count]
-    }  
-  end
 
   def recent_clones_for_repo(repo_name)
     personal_client
@@ -175,7 +187,7 @@ class GithubAdapter
     def choose_warmest_repo(starting_data, aggregate, key, id )
       if key == :repo_id
         aggregate[:hottest_repo] = id if aggregate[:hottest_repo] == 0
-        
+
         new_repo = traffic_data_sift(starting_data, id)  
         tracked_repo = traffic_data_sift(starting_data, aggregate[:hottest_repo])
 
