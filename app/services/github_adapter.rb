@@ -76,46 +76,32 @@ class GithubAdapter
 
   # repo behaviour, returns recent info, these things should be in a repo class. 
   def repo_data(repo)
-    {
+    { 
+      repo: repo,
       recent_commits: recent_commits(repo[:full_name]).count,
       recent_comments: recent_commit_comments(repo[:full_name]).count,
-      recent_deployments: recent_deployments(repo[:full_name])
+      recent_deployments: recent_deployments(repo[:full_name]).count,
+      branches: branches(repo[:full_name]).count
     }
   end
 
   def collect_repo_data
-    recent_repos = self.recent_updated_repos(owned_repos)
+    recent_repos = self.recent_updated_repos(collaborated_repos)
     recent_repos.map {|repo| repo_data(repo)}
   end
 
   def reduce_repo_data
-    collect_repo_data.reduce(Hash.new(0)) do |aggregate, pairs|
+    repositories = collect_repo_data
+    repositories.reduce(Hash.new(0)) do |aggregate, pairs|
+
+      choose_recent_project(repositories, aggregate, pairs)
       pairs.each do |key, value|
-        reduce_commits(aggregate, key, value)
-        reduce_comments(aggregate, key, value)
-        reduce_deployments(aggregate, key, value)
+        reduce_repo_keys(aggregate, key, value)
       end
       aggregate
     end
   end
 
-  def reduce_commits(aggregate, key, value)
-    if key == :recent_commits
-      aggregate[key] += value
-    end
-  end
-
-  def reduce_deployments(aggregate, key, value)
-    if key == :recent_deployments
-      aggregate[key] += value.count
-    end
-  end
-
-  def reduce_comments(aggregate, key, value)
-    if key == :recent_comments
-      aggregate[key] += value 
-    end
-  end
 
   def recent_commits(repo_name)
     application_client
@@ -146,6 +132,10 @@ class GithubAdapter
     all_deployments.select { |deployments| deployments[:created_at] > two_weeks_ago }
   end
 
+  def branches(repo_name)
+    self.client.branches(repo_name)
+  end
+
   # repo traffic, for all owned repos --------------
   def traffic_data(repo)
     recent_views = recent_views_for_repo(repo.full_name)
@@ -168,14 +158,11 @@ class GithubAdapter
       pairs.each do |key, value|
         choose_warmest_repo(starting_data, aggregate, key, value)
         reduce_uniques(aggregate, key, value)
-        reduce_views(aggregate, key, value)
-        reduce_clones(aggregate, key, value)
+        reduce_traffic_keys(aggregate, key, value)
       end
       aggregate
     end
   end
-
-
 
   def recent_clones_for_repo(repo_name)
     personal_client
@@ -226,14 +213,6 @@ class GithubAdapter
       sifted_traffic[:recent_clones] + sifted_traffic[:recent_views]
     end
 
-    def reduce_uniques(aggregate, key, views)
-      if key == :unique_views
-        aggregate[key] = 1 if aggregate[key] == 0 || aggregate[key] == nil
-        aggregate[key] += views - 1 if views > 1
-        aggregate
-      end
-    end
-
     def reduce_views(aggregate, key, views)
       if key == :recent_views
         aggregate[key] += views
@@ -246,4 +225,48 @@ class GithubAdapter
       end
     end
 
+    def reduce_uniques(aggregate, key, views)
+      if key == :unique_views
+        aggregate[key] = 1 if aggregate[key] == 0 || aggregate[key] == nil
+        aggregate[key] += views - 1 if views > 1
+        aggregate
+      end
+    end
+
+
+    def reduce_traffic_keys(aggregate, key, value) 
+      if simple_traffic_reducers.include?(key)
+        aggregate[key] += value
+      end
+    end
+
+
+    def simple_traffic_reducers
+      [:recent_clones, :recent_views]
+    end
+
+    def reduce_repo_keys(aggregate, key, value) 
+      if simple_repo_reducers.include?(key)
+        aggregate[key] += value
+      end
+    end
+
+    def simple_repo_reducers
+      [:recent_comments, :branches, :recent_deployments, :recent_commits]
+    end
+
+    def choose_recent_project(collected_repositories, aggregate, pairs)
+      tracked_repo = sift_repo_data(collected_repositories, aggregate[:most_recent_project])
+      new_repo = sift_repo_data(collected_repositories, pairs[:repo].id)
+
+      if aggregate[:most_recent_project] == 0 
+        aggregate[:most_recent_project] = pairs[:repo].id 
+      elsif tracked_repo[:repo].pushed_at < new_repo[:repo].pushed_at
+        aggregate[:most_recent_project] = pairs[:repo].id
+      end
+    end
+
+    def sift_repo_data(collected_repositories, id)
+      collected_repositories.find {|repo| repo[:repo].id == id}
+    end
 end
