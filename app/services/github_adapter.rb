@@ -120,13 +120,19 @@ class GithubAdapter
   end
 
   def reduced_traffic_data
-    @github_adapter.collect_traffic_data.reduce(Hash.new(0)) do |aggregate, pairs|
+    starting_data = collect_traffic_data
+
+    starting_data.reduce(Hash.new(0)) do |aggregate, pairs|
       pairs.each do |key, value|
-        truncate_uniques(aggregate, key, value)
+        choose_warmest_repo(starting_data, aggregate, key, value)
+        reduce_uniques(aggregate, key, value)
+        reduce_views(aggregate, key, value)
+        reduce_clones(aggregate, key, value)
       end
       aggregate
     end
   end
+
 
   def traffic_data(repo)
     recent_views = recent_views_for_repo(repo.full_name)
@@ -166,13 +172,45 @@ class GithubAdapter
       end
     end
 
-    def truncate_uniques(hashy, key, number)
-      if key == :unique_views
-        hashy[key] = 1 if hashy[key] == 0 || hashy[key] == nil
-
-        hashy[key] += number if number > 0
+    def choose_warmest_repo(starting_data, aggregate, key, id )
+      if key == :repo_id
+        aggregate[:hottest_repo] = id if aggregate[:hottest_repo] == 0
         
-        hashy
+        new_repo = traffic_data_sift(starting_data, id)  
+        tracked_repo = traffic_data_sift(starting_data, aggregate[:hottest_repo])
+
+        if sum_of_traffic(new_repo) > sum_of_traffic(tracked_repo)
+          aggregate[:hottest_repo] = new_repo[:repo_id]
+        end
       end
     end
+
+    def traffic_data_sift(traffic_data, id)
+      traffic_data.find {|pairs| pairs[:repo_id] == id}
+    end
+
+    def sum_of_traffic(sifted_traffic)
+      sifted_traffic[:recent_clones] + sifted_traffic[:recent_views]
+    end
+
+    def reduce_uniques(aggregate, key, views)
+      if key == :unique_views
+        aggregate[key] = 1 if aggregate[key] == 0 || aggregate[key] == nil
+        aggregate[key] += views - 1 if views > 1
+        aggregate
+      end
+    end
+
+    def reduce_views(aggregate, key, views)
+      if key == :recent_views
+        aggregate[key] += views
+      end
+    end
+
+    def reduce_clones(aggregate, key, clones)
+      if key == :recent_clones
+        aggregate[key] += clones
+      end
+    end
+
 end
