@@ -16,6 +16,3 @@ class LinkedinAdapter
     self.class.get(profile_request + "?oauth2_access_token=#{@auth[:Authorization]}", query: @options)
   end
 end
-
-# == get all info, hopefully
-#https://api.linkedin.com/
