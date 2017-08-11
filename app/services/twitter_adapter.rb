@@ -34,15 +34,15 @@ class TwitterAdapter
   end
 
   def retrieve_followers(new_followers)
-    self.client.followers(self.user_name, skip_status: 't')
+    self.client.followers(self.user_name, skip_status: 't').take(new_followers)
   end
 
   def retrieve_friends(new_friends)
-    self.client.friends(self.user_name, skip_status: 't')
+    self.client.friends(self.user_name, skip_status: 't').take(new_friends)
   end
 
   def retrieve_favorites(new_favorites)
-    self.client.favorites(self.user_name, count: 40)
+    self.client.favorites(self.user_name, count: new_favorites)
   end
 
   def formatted_profile

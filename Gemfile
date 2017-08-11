@@ -22,7 +22,8 @@ gem 'uglifier', '>= 1.3.0'
 gem 'webpacker'
 # See https://github.com/rails/execjs#readme for more supported runtimes
 # gem 'therubyracer', platforms: :ruby
-gem 'pry'
+# replace irb
+gem 'pry-rails', :group => :development
 # github api implementation
 gem "octokit", "~> 4.0"
 gem 'parallel'
