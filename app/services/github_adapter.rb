@@ -21,7 +21,7 @@ class GithubAdapter
       gists: total_gists,
       followers: profile.followers,
       following: profile.following,
-      starred_repos: self.starred_repos.count,
+      starred_repos: starred_repos.count,
       recent_projects: recent_updated_repos(owned_repos).count
     }
   end
@@ -81,6 +81,7 @@ class GithubAdapter
     {
       recent_commits: recent_commits(repo_name).count,
       recent_comments: recent_commit_comments(repo_name).count,
+      recent_deployments: recent_deployments(repo_name)
     }
   end
 
@@ -102,16 +103,22 @@ class GithubAdapter
   end
 
   def deployments(repo_name)
+    application_client
     self.client.deployments(repo_name)
   end
 
   def recent_deployments(repo_name)
+    application_client
     all_deployments = deployments(repo_name)
     return [] if deployments.empty?
     deployments.select { |deployments| deployments[:created_at] > two_weeks_ago }
   end
 
   # repo traffic, for all owned repos --------------
+  def collect_traffic_data
+    self.owned_repos.map {|repo| traffic_data(repo[:full_name]) }
+  end
+
   def traffic_data(repo)
     {
       recent_views: recent_views_for_repo(repo)[:count],
