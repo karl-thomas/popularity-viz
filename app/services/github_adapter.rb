@@ -24,7 +24,7 @@ class GithubAdapter
       starred_repos: self.starred_repos.count, # the recent calc needs be done DB side
       recent_projects: self.recent_updated_repos(owned_repos).count,
       recent_gists: self.recent_gists,
-      recently_starred_gists: self.recent_starred_gists
+      recently_starred_gists: self.recent_starred_gists.count
     }
   end
 
@@ -91,8 +91,29 @@ class GithubAdapter
   def reduce_repo_data
     collect_repo_data.reduce(Hash.new(0)) do |aggregate, pairs|
       pairs.each do |key, value|
+        reduce_commits(aggregate, key, value)
+        reduce_comments(aggregate, key, value)
+        reduce_deployments(aggregate, key, value)
       end
       aggregate
+    end
+  end
+
+  def reduce_commits(aggregate, key, value)
+    if key == :recent_commits
+      aggregate[key] += value
+    end
+  end
+
+  def reduce_deployments(aggregate, key, value)
+    if key == :recent_deployments
+      aggregate[key] += value.count
+    end
+  end
+
+  def reduce_comments(aggregate, key, value)
+    if key == :recent_comments
+      aggregate[key] += value 
     end
   end
 
