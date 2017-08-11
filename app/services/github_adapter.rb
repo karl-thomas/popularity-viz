@@ -116,13 +116,25 @@ class GithubAdapter
 
   # repo traffic, for all owned repos --------------
   def collect_traffic_data
-    self.owned_repos.map {|repo| traffic_data(repo[:full_name]) }
+    self.owned_repos.map {|repo| traffic_data(repo) }
+  end
+
+  def reduced_traffic_data
+    @github_adapter.collect_traffic_data.reduce(Hash.new(0)) do |aggregate, pairs|
+      pairs.each do |key, value|
+        truncate_uniques(aggregate, key, value)
+      end
+      aggregate
+    end
   end
 
   def traffic_data(repo)
+    recent_views = recent_views_for_repo(repo.full_name)
     {
-      recent_views: recent_views_for_repo(repo)[:count],
-      recent_clones: recent_clones_for_repo(repo)[:count]
+      repo_id: repo.id,
+      recent_views: recent_views[:count],
+      unique_views: recent_views[:uniques],
+      recent_clones: recent_clones_for_repo(repo.full_name)[:count]
     }  
   end
 
@@ -151,6 +163,16 @@ class GithubAdapter
         @client = Octokit::Client.new \
           :login => ENV['GITHUB_USERNAME'],
           :password => ENV['GITHUB_PASSWORD']
+      end
+    end
+
+    def truncate_uniques(hashy, key, number)
+      if key == :unique_views
+        hashy[key] = 1 if hashy[key] == 0 || hashy[key] == nil
+
+        hashy[key] += number if number > 0
+        
+        hashy
       end
     end
 end
