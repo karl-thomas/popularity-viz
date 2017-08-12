@@ -108,7 +108,6 @@ class GithubAdapter
     end
   end
 
-
   def recent_commits(repo_name)
     application_client
     self.client.commits_since(repo_name, two_weeks_ago, author: self.user)
@@ -127,8 +126,13 @@ class GithubAdapter
   end
 
   def stargazers(repo_name)
-    slef.client.stargazers(repo_name)
+    self.client.stargazers(repo_name, accept: 'application/vnd.github.v3.star+json', auto_traversal: true)
   end
+
+  def recent_stargazers(repo_name)
+    self.stargazers(repo_name).select { |stargazer| stargazer[:starred_at] > two_weeks_ago}
+  end
+
   def deployments(repo_name)
     application_client
     self.client.deployments(repo_name)
@@ -151,9 +155,9 @@ class GithubAdapter
     {
       repo_id: repo.id,
       recent_views: recent_views[:count],
-      unique_views: recent_views[:uniques],
       recent_clones: recent_clones_for_repo(repo.full_name)[:count],
-      stargazers: repo.stargazers_count,
+      unique_views: recent_views[:uniques],
+      recent_stargazers: recent_stargazers(repo.full_name).count,
       watchers: repo.watchers_count
     }  
   end
@@ -192,7 +196,8 @@ class GithubAdapter
         @client  = Octokit::Client.new \
           :client_id     => ENV['GITHUB_CLIENT_ID'],
           :client_secret => ENV['GITHUB_CLIENT_SECRET']
-      end    
+      end  
+      self.client.auto_paginate = true  
     end
 
     def personal_client
@@ -201,6 +206,7 @@ class GithubAdapter
           :login => ENV['GITHUB_USERNAME'],
           :password => ENV['GITHUB_PASSWORD']
       end
+      self.client.auto_paginate = true 
     end
 
     def choose_warmest_repo(starting_data, aggregate, key, id )
@@ -253,7 +259,7 @@ class GithubAdapter
 
 
     def simple_traffic_reducers
-      [:recent_clones, :recent_views, :stargazers, :watchers]
+      [:recent_clones, :recent_views, :recent_stargazers, :watchers]
     end
 
     def reduce_repo_keys(aggregate, key, value) 
