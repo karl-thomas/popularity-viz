@@ -14,6 +14,11 @@ class GithubAdapter
     @profile ||= self.client.user(self.user)
   end 
 
+  def aggregrate_data_record
+   profile_and_repos =  profile_data.merge(reduced_repo_data)
+   profile_and_repos.merge(reduced_traffic_data)
+  end
+
   def profile_data
     {
       username: profile.login,
@@ -23,18 +28,20 @@ class GithubAdapter
       following: profile.following,
       starred_repos: self.starred_repos.count, # the recent calc needs be done DB side
       recent_projects: self.recent_updated_repos(owned_repos).count,
-      recent_gists: self.recent_gists,
+      recent_gists: self.recent_gists.count,
       recently_starred_gists: self.recent_starred_gists.count
     }
   end
 
   def total_gists
     application_client
+    return profile.public_gists if profile.private_gists.nil?
     profile.public_gists + profile.private_gists
   end
 
   def total_repos
     application_client
+    return profile.public_repos if profile.total_private_repos.nil?
     profile.public_repos + profile.total_private_repos
   end
 
@@ -80,8 +87,7 @@ class GithubAdapter
       repo: repo,
       recent_commits: recent_commits(repo[:full_name]).count,
       recent_comments: recent_commit_comments(repo[:full_name]).count,
-      recent_deployments: recent_deployments(repo[:full_name]).count,
-      branches: branches(repo[:full_name]).count
+      recent_deployments: recent_deployments(repo[:full_name]).count
     }
   end
 
@@ -90,7 +96,7 @@ class GithubAdapter
     recent_repos.map {|repo| repo_data(repo)}
   end
 
-  def reduce_repo_data
+  def reduced_repo_data
     repositories = collect_repo_data
     repositories.reduce(Hash.new(0)) do |aggregate, pairs|
 
@@ -120,6 +126,9 @@ class GithubAdapter
     comments.select { |comment| comment[:created_at] > two_weeks_ago }
   end
 
+  def stargazers(repo_name)
+    slef.client.stargazers(repo_name)
+  end
   def deployments(repo_name)
     application_client
     self.client.deployments(repo_name)
@@ -143,7 +152,9 @@ class GithubAdapter
       repo_id: repo.id,
       recent_views: recent_views[:count],
       unique_views: recent_views[:uniques],
-      recent_clones: recent_clones_for_repo(repo.full_name)[:count]
+      recent_clones: recent_clones_for_repo(repo.full_name)[:count],
+      stargazers: repo.stargazers_count,
+      watchers: repo.watchers_count
     }  
   end
 
@@ -242,7 +253,7 @@ class GithubAdapter
 
 
     def simple_traffic_reducers
-      [:recent_clones, :recent_views]
+      [:recent_clones, :recent_views, :stargazers, :watchers]
     end
 
     def reduce_repo_keys(aggregate, key, value) 
@@ -252,7 +263,7 @@ class GithubAdapter
     end
 
     def simple_repo_reducers
-      [:recent_comments, :branches, :recent_deployments, :recent_commits]
+      [:recent_comments, :recent_deployments, :recent_commits]
     end
 
     def choose_recent_project(collected_repositories, aggregate, pairs)
