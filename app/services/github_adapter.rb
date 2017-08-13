@@ -100,14 +100,15 @@ class GithubAdapter
 
   def reduced_repo_data
     repositories = collect_repo_data
-    repositories.reduce(Hash.new(0)) do |aggregate, pairs|
-
+    reduced_data = repositories.reduce(Hash.new(0)) do |aggregate, pairs|
       choose_recent_project(repositories, aggregate, pairs)
       pairs.each do |key, value|
         reduce_repo_keys(aggregate, key, value)
+        choose_hottest_language(aggregate, key, value)
       end
       aggregate
     end
+    truncate_most_used_lang(reduced_data)
   end
 
   def recent_commits(repo_name)
@@ -152,7 +153,7 @@ class GithubAdapter
   end
 
   def languages(repo_name)
-    self.client.languages(repo_name)
+    p self.client.languages(repo_name)
   end
 
 
@@ -268,23 +269,47 @@ class GithubAdapter
     end
 
     def choose_recent_project(collected_repositories, aggregate, pairs)
+      p "here"
       tracked_repo = sift_repo_data(collected_repositories, aggregate[:most_recent_project])
       new_repo = sift_repo_data(collected_repositories, pairs[:repo].id)
-
+      p "not sifting"
       if aggregate[:most_recent_project] == 0 
+        p "intial assignment"
         aggregate[:most_recent_project] = pairs[:repo].id 
       elsif tracked_repo[:repo].pushed_at < new_repo[:repo].pushed_at
+        "compared"
         aggregate[:most_recent_project] = pairs[:repo].id
       end
     end
 
     def sift_repo_data(collected_repositories, id)
+
       collected_repositories.find {|repo| repo[:repo].id == id}
     end
 
+    def truncate_most_used_lang(reduced_data)
+      p reduced_data[:most_used_lang]
+      reduced_data[:most_used_lang] = reduced_data[:most_used_lang][0]
+      reduced_data
+    end
+
     def choose_hottest_language(aggregate, key, lang_hash)
+
       if key == :languages
-        
+        lang = most_used_lang(lang_hash)
+        if aggregate[key] == 0
+          p lang_hash
+          aggregate[:most_used_lang] = lang
+        else
+          if aggregate[key][1] < lang[1]
+            aggregate[:most_used_lang] = lang
+          end
+        end
       end
+    end
+
+    # returns a two element array
+    def most_used_lang(lang_hash)
+      lang_hash.max_by {|lang, bytes| bytes}
     end
 end
