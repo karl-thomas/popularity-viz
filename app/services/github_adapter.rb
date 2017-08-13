@@ -87,7 +87,8 @@ class GithubAdapter
       repo: repo,
       recent_commits: recent_commits(repo[:full_name]).count,
       recent_comments: recent_commit_comments(repo[:full_name]).count,
-      recent_deployments: recent_deployments(repo[:full_name]).count
+      recent_deployments: recent_deployments(repo[:full_name]).count,
+      branches: branches(repo[:full_name]).count
     }
   end
 
@@ -148,6 +149,11 @@ class GithubAdapter
   def branches(repo_name)
     self.client.branches(repo_name)
   end
+
+  def languages(repo_name)
+    self.client.languages(repo_name)
+  end
+
 
   # repo traffic, for all owned repos --------------
   def traffic_data(repo)
@@ -269,7 +275,7 @@ class GithubAdapter
     end
 
     def simple_repo_reducers
-      [:recent_comments, :recent_deployments, :recent_commits]
+      [:recent_comments, :recent_deployments, :recent_commits, :branches]
     end
 
     def choose_recent_project(collected_repositories, aggregate, pairs)
