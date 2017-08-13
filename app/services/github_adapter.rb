@@ -81,15 +81,15 @@ class GithubAdapter
     self.client.starred_gists( since: two_weeks_ago )
   end
 
-  # repo behaviour, returns recent info, these things should be in a repo class. 
+  # repo behaviour, returns recent info, these things should be in a repo class, but they are so intertwined with #client that it hasnt behaved.  
   def repo_data(repo)
     { 
       repo: repo,
       recent_commits: recent_commits(repo[:full_name]).count,
       recent_comments: recent_commit_comments(repo[:full_name]).count,
       recent_deployments: recent_deployments(repo[:full_name]).count,
-      branches: branches(repo[:full_name]).count
-      languages: languages(repo)
+      branches: branches(repo[:full_name]).count,
+      languages: languages(repo[:full_name])
     }
   end
 
@@ -280,5 +280,11 @@ class GithubAdapter
 
     def sift_repo_data(collected_repositories, id)
       collected_repositories.find {|repo| repo[:repo].id == id}
+    end
+
+    def choose_hottest_language(aggregate, key, lang_hash)
+      if key == :languages
+        
+      end
     end
 end

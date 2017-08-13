@@ -18,6 +18,7 @@ class TwitterRecord < ApplicationRecord
   end
 
   def sub_differences(differences)
+    p differences
     differences.map { |diff| diff.class == String ? 1 : diff.abs }
   end
 
@@ -30,8 +31,8 @@ class TwitterRecord < ApplicationRecord
   end
 
   def assign_total_differences(differences)
-    valid_differences = sub_differences(differences)
-    valid_differences = filter_differences(valid_differences)
+    valid_differences = filter_differences(differences)
+    valid_differences = sub_differences(valid_differences)
     self.total_differences = sum_up_differences(valid_differences)
   end
 
