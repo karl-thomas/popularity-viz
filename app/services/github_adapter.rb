@@ -153,7 +153,7 @@ class GithubAdapter
   end
 
   def languages(repo_name)
-    p self.client.languages(repo_name)
+    self.client.languages(repo_name)
   end
 
 
@@ -269,15 +269,11 @@ class GithubAdapter
     end
 
     def choose_recent_project(collected_repositories, aggregate, pairs)
-      p "here"
       tracked_repo = sift_repo_data(collected_repositories, aggregate[:most_recent_project])
       new_repo = sift_repo_data(collected_repositories, pairs[:repo].id)
-      p "not sifting"
       if aggregate[:most_recent_project] == 0 
-        p "intial assignment"
         aggregate[:most_recent_project] = pairs[:repo].id 
       elsif tracked_repo[:repo].pushed_at < new_repo[:repo].pushed_at
-        "compared"
         aggregate[:most_recent_project] = pairs[:repo].id
       end
     end
