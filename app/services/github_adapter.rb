@@ -89,6 +89,7 @@ class GithubAdapter
       recent_comments: recent_commit_comments(repo[:full_name]).count,
       recent_deployments: recent_deployments(repo[:full_name]).count,
       branches: branches(repo[:full_name]).count
+      languages: languages(repo)
     }
   end
 
@@ -177,7 +178,7 @@ class GithubAdapter
 
     starting_data.reduce(Hash.new(0)) do |aggregate, pairs|
       pairs.each do |key, value|
-        choose_warmest_repo(starting_data, aggregate, key, value)
+        choose_hottest_repo(starting_data, aggregate, key, value)
         reduce_uniques(aggregate, key, value)
         reduce_traffic_keys(aggregate, key, value)
       end
@@ -215,7 +216,7 @@ class GithubAdapter
       self.client.auto_paginate = true 
     end
 
-    def choose_warmest_repo(starting_data, aggregate, key, id )
+    def choose_hottest_repo(starting_data, aggregate, key, id )
       if key == :repo_id
         aggregate[:hottest_repo] = id if aggregate[:hottest_repo] == 0
 
@@ -234,18 +235,6 @@ class GithubAdapter
 
     def sum_of_traffic(sifted_traffic)
       sifted_traffic[:recent_clones] + sifted_traffic[:recent_views]
-    end
-
-    def reduce_views(aggregate, key, views)
-      if key == :recent_views
-        aggregate[key] += views
-      end
-    end
-
-    def reduce_clones(aggregate, key, clones)
-      if key == :recent_clones
-        aggregate[key] += clones
-      end
     end
 
     def reduce_uniques(aggregate, key, views)
