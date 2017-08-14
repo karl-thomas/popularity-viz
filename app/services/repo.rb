@@ -9,6 +9,10 @@ class Repo < GithubAdapter
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
 
+  def recent?
+    self.updated_at? > two_weeks_ago || self.pushed_at > two_weeks_ago
+  end
+
   def recent_commits
     application_client
     self.client.commits_since(self.full_name, two_weeks_ago, author: self.user)
@@ -56,6 +60,10 @@ class Repo < GithubAdapter
     self.client.languages(self.full_name)
   end
 
+  def most_used_lang
+    languages.max_by {|lang, bytes| bytes}
+  end
+  
   def dependent_repo_data
     { 
       recent_commits: self.recent_commits.count,

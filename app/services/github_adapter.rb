@@ -62,7 +62,7 @@ class GithubAdapter
   end
 
   def recent_updated_repos(repos)
-    repos.select { |repo| repo[:pushed_at] > two_weeks_ago }
+    repos.select { |repo| repo.recent? }
   end
 
   def starred_repos
@@ -80,83 +80,26 @@ class GithubAdapter
     personal_client
     self.client.starred_gists( since: two_weeks_ago )
   end
+ 
+  def collect_repo_data
+    recent_repos = self.recent_updated_repos(collaborated_repos)
+    recent_repos.map {|repo| repo_data(repo)}
+  end
 
-  # repo behaviour, returns recent info, these things should be in a repo class, but they are so intertwined with #client that it hasnt behaved.  
-  # def repo_data(repo)
-  #   { 
-  #     repo: repo,
-  #     recent_commits: recent_commits(repo[:full_name]).count,
-  #     recent_comments: recent_commit_comments(repo[:full_name]).count,
-  #     recent_deployments: recent_deployments(repo[:full_name]).count,
-  #     branches: branches(repo[:full_name]).count,
-  #     languages: languages(repo[:full_name])
-  #   }
-  # end
+  def reduced_repo_data
+    repositories = collect_repo_data
+    reduced_data = repositories.reduce(Hash.new(0)) do |aggregate, pairs|
+      choose_recent_project(repositories, aggregate, pairs)
+      pairs.each do |key, value|
+        reduce_repo_keys(aggregate, key, value)
+        choose_hottest_language(aggregate, key, value)
+      end
+      aggregate
+    end
+    truncate_most_used_lang(reduced_data)
+  end
 
-  # def collect_repo_data
-  #   recent_repos = self.recent_updated_repos(collaborated_repos)
-  #   recent_repos.map {|repo| repo_data(repo)}
-  # end
-
-  # def reduced_repo_data
-  #   repositories = collect_repo_data
-  #   reduced_data = repositories.reduce(Hash.new(0)) do |aggregate, pairs|
-  #     choose_recent_project(repositories, aggregate, pairs)
-  #     pairs.each do |key, value|
-  #       reduce_repo_keys(aggregate, key, value)
-  #       choose_hottest_language(aggregate, key, value)
-  #     end
-  #     aggregate
-  #   end
-  #   truncate_most_used_lang(reduced_data)
-  # end
-
-  # def recent_commits(repo_name)
-  #   application_client
-  #   self.client.commits_since(repo_name, two_weeks_ago, author: self.user)
-  # end
-
-  # def all_commit_comments(repo_name)
-  #   application_client
-  #   self.client.list_commit_comments(repo_name)
-  # end
-
-  # def recent_commit_comments(repo_name)
-  #   application_client
-  #   comments = all_commit_comments(repo_name)
-  #   return [] if comments.empty?
-  #   comments.select { |comment| comment[:created_at] > two_weeks_ago }
-  # end
-
-  # def stargazers(repo_name)
-  #   self.client.stargazers(repo_name, accept: 'application/vnd.github.v3.star+json', auto_traversal: true)
-  # end
-
-  # def recent_stargazers(repo_name)
-  #   self.stargazers(repo_name).select { |stargazer| stargazer[:starred_at] > two_weeks_ago}
-  # end
-
-  # def deployments(repo_name)
-  #   application_client
-  #   self.client.deployments(repo_name)
-  # end
-
-  # def recent_deployments(repo_name)
-  #   application_client
-  #   all_deployments = deployments(repo_name)
-  #   return [] if all_deployments.empty?
-  #   all_deployments.select { |deployments| deployments[:created_at] > two_weeks_ago }
-  # end
-
-  # def branches(repo_name)
-  #   self.client.branches(repo_name)
-  # end
-
-  # def languages(repo_name)
-  #   self.client.languages(repo_name)
-  # end
-
-
+ 
   # repo traffic, for all owned repos --------------
   def traffic_data(repo)
     recent_views = recent_views_for_repo(repo.full_name)
@@ -284,7 +227,7 @@ class GithubAdapter
     end
 
     def truncate_most_used_lang(reduced_data)
-      reduced_data[:most_used_lang]
+      p reduced_data[:most_used_lang]
       reduced_data[:most_used_lang] = reduced_data[:most_used_lang][0]
       reduced_data
     end
