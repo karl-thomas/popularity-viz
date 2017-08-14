@@ -82,16 +82,16 @@ class GithubAdapter
   end
 
   # repo behaviour, returns recent info, these things should be in a repo class, but they are so intertwined with #client that it hasnt behaved.  
-  def repo_data(repo)
-    { 
-      repo: repo,
-      recent_commits: recent_commits(repo[:full_name]).count,
-      recent_comments: recent_commit_comments(repo[:full_name]).count,
-      recent_deployments: recent_deployments(repo[:full_name]).count,
-      branches: branches(repo[:full_name]).count,
-      languages: languages(repo[:full_name])
-    }
-  end
+  # def repo_data(repo)
+  #   { 
+  #     repo: repo,
+  #     recent_commits: recent_commits(repo[:full_name]).count,
+  #     recent_comments: recent_commit_comments(repo[:full_name]).count,
+  #     recent_deployments: recent_deployments(repo[:full_name]).count,
+  #     branches: branches(repo[:full_name]).count,
+  #     languages: languages(repo[:full_name])
+  #   }
+  # end
 
   # def collect_repo_data
   #   recent_repos = self.recent_updated_repos(collaborated_repos)
@@ -284,7 +284,7 @@ class GithubAdapter
     end
 
     def truncate_most_used_lang(reduced_data)
-      p reduced_data[:most_used_lang]
+      reduced_data[:most_used_lang]
       reduced_data[:most_used_lang] = reduced_data[:most_used_lang][0]
       reduced_data
     end

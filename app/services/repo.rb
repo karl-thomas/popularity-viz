@@ -1,11 +1,12 @@
 class Repo < GithubAdapter
-  attr_reader :client, :full_name
+  attr_reader :client, :full_name, :two_weeks_ago
 
   def initialize(sawyer_resource = {}) 
     application_client
     @id = sawyer_resource.id || nil
     @full_name = sawyer_resource.full_name || nil
     @watchers_count = sawyer_resource.watchers_count || nil
+    @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
 
   def recent_commits
@@ -36,7 +37,7 @@ class Repo < GithubAdapter
 
   def deployments
     application_client
-    self.client.deployments
+    self.client.deployments(self.full_name)
   end
 
   def recent_deployments
@@ -53,6 +54,16 @@ class Repo < GithubAdapter
   def languages
     application_client
     self.client.languages(self.full_name)
+  end
+
+  def dependent_repo_data
+    { 
+      recent_commits: self.recent_commits.count,
+      recent_comments: self.recent_commit_comments.count,
+      recent_deployments: self.recent_deployments.count,
+      branches: self.branches.count,
+      languages: self.languages
+    }
   end
 
 end
