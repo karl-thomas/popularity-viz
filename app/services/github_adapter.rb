@@ -111,7 +111,7 @@ class GithubAdapter
   # repo traffic, for all owned repos --------------
 
   def collect_traffic_data
-    self.owned_repos.map {|repo| traffic_data(repo) }
+    self.owned_repos.map {|repo| repo.traffic_data }
   end
 
   def reduced_traffic_data
@@ -165,7 +165,7 @@ class GithubAdapter
     end
 
     def sum_of_traffic(sifted_traffic)
-      sifted_traffic[:recent_clones] + sifted_traffic[:recent_views]
+      sifted_traffic[:recent_clones] + sifted_traffic[:recent_views] + sifted_traffic[:recent_stargazers]
     end
 
     def reduce_uniques(aggregate, key, views)
@@ -202,7 +202,7 @@ class GithubAdapter
       tracked_repo = sift_repo_data(collected_repositories, aggregate[:most_recent_project])
       new_repo = sift_repo_data(collected_repositories, pairs[:repo].id)
       if aggregate[:most_recent_project] == 0 
-        aggregate[:most_recent_project] = pairs[:repo].id 
+        aggregate[:most_recent_project] = pairs[:repo].id
       elsif tracked_repo[:repo].pushed_at < new_repo[:repo].pushed_at
         aggregate[:most_recent_project] = pairs[:repo].id
       end
@@ -218,16 +218,14 @@ class GithubAdapter
       reduced_data
     end
 
-    def choose_hottest_language(aggregate, key, lang_hash)
+    def choose_hottest_language(aggregate, key, lang_array)
 
-      if key == :languages
-        lang = most_used_lang(lang_hash)
+      if key == :most_used_lang
         if aggregate[key] == 0
-          p lang_hash
-          aggregate[:most_used_lang] = lang
+          aggregate[:most_used_lang] = lang_array
         else
-          if aggregate[key][1] < lang[1]
-            aggregate[:most_used_lang] = lang
+          if aggregate[key][1] < lang_array[1]
+            aggregate[:most_used_lang] = lang_array
           end
         end
       end

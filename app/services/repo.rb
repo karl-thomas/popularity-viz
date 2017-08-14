@@ -59,11 +59,12 @@ class Repo < GithubAdapter
   
   def dependent_repo_data
     { 
+      repo: self,
       recent_commits: self.recent_commits.count,
       recent_comments: self.recent_commit_comments.count,
       recent_deployments: self.recent_deployments.count,
       branches: self.branches.count,
-      languages: self.languages
+      most_used_lang: self.most_used_lang
     }
   end
 
