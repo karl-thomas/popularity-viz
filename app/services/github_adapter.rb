@@ -93,68 +93,68 @@ class GithubAdapter
     }
   end
 
-  def collect_repo_data
-    recent_repos = self.recent_updated_repos(collaborated_repos)
-    recent_repos.map {|repo| repo_data(repo)}
-  end
+  # def collect_repo_data
+  #   recent_repos = self.recent_updated_repos(collaborated_repos)
+  #   recent_repos.map {|repo| repo_data(repo)}
+  # end
 
-  def reduced_repo_data
-    repositories = collect_repo_data
-    reduced_data = repositories.reduce(Hash.new(0)) do |aggregate, pairs|
-      choose_recent_project(repositories, aggregate, pairs)
-      pairs.each do |key, value|
-        reduce_repo_keys(aggregate, key, value)
-        choose_hottest_language(aggregate, key, value)
-      end
-      aggregate
-    end
-    truncate_most_used_lang(reduced_data)
-  end
+  # def reduced_repo_data
+  #   repositories = collect_repo_data
+  #   reduced_data = repositories.reduce(Hash.new(0)) do |aggregate, pairs|
+  #     choose_recent_project(repositories, aggregate, pairs)
+  #     pairs.each do |key, value|
+  #       reduce_repo_keys(aggregate, key, value)
+  #       choose_hottest_language(aggregate, key, value)
+  #     end
+  #     aggregate
+  #   end
+  #   truncate_most_used_lang(reduced_data)
+  # end
 
-  def recent_commits(repo_name)
-    application_client
-    self.client.commits_since(repo_name, two_weeks_ago, author: self.user)
-  end
+  # def recent_commits(repo_name)
+  #   application_client
+  #   self.client.commits_since(repo_name, two_weeks_ago, author: self.user)
+  # end
 
-  def all_commit_comments(repo_name)
-    application_client
-    self.client.list_commit_comments(repo_name)
-  end
+  # def all_commit_comments(repo_name)
+  #   application_client
+  #   self.client.list_commit_comments(repo_name)
+  # end
 
-  def recent_commit_comments(repo_name)
-    application_client
-    comments = all_commit_comments(repo_name)
-    return [] if comments.empty?
-    comments.select { |comment| comment[:created_at] > two_weeks_ago }
-  end
+  # def recent_commit_comments(repo_name)
+  #   application_client
+  #   comments = all_commit_comments(repo_name)
+  #   return [] if comments.empty?
+  #   comments.select { |comment| comment[:created_at] > two_weeks_ago }
+  # end
 
-  def stargazers(repo_name)
-    self.client.stargazers(repo_name, accept: 'application/vnd.github.v3.star+json', auto_traversal: true)
-  end
+  # def stargazers(repo_name)
+  #   self.client.stargazers(repo_name, accept: 'application/vnd.github.v3.star+json', auto_traversal: true)
+  # end
 
-  def recent_stargazers(repo_name)
-    self.stargazers(repo_name).select { |stargazer| stargazer[:starred_at] > two_weeks_ago}
-  end
+  # def recent_stargazers(repo_name)
+  #   self.stargazers(repo_name).select { |stargazer| stargazer[:starred_at] > two_weeks_ago}
+  # end
 
-  def deployments(repo_name)
-    application_client
-    self.client.deployments(repo_name)
-  end
+  # def deployments(repo_name)
+  #   application_client
+  #   self.client.deployments(repo_name)
+  # end
 
-  def recent_deployments(repo_name)
-    application_client
-    all_deployments = deployments(repo_name)
-    return [] if all_deployments.empty?
-    all_deployments.select { |deployments| deployments[:created_at] > two_weeks_ago }
-  end
+  # def recent_deployments(repo_name)
+  #   application_client
+  #   all_deployments = deployments(repo_name)
+  #   return [] if all_deployments.empty?
+  #   all_deployments.select { |deployments| deployments[:created_at] > two_weeks_ago }
+  # end
 
-  def branches(repo_name)
-    self.client.branches(repo_name)
-  end
+  # def branches(repo_name)
+  #   self.client.branches(repo_name)
+  # end
 
-  def languages(repo_name)
-    self.client.languages(repo_name)
-  end
+  # def languages(repo_name)
+  #   self.client.languages(repo_name)
+  # end
 
 
   # repo traffic, for all owned repos --------------
@@ -197,25 +197,25 @@ class GithubAdapter
     self.client.views(repo_name, per: "week")
   end
 
+  def application_client
+    if !self.client || self.client.client_id.nil?
+      @client  = Octokit::Client.new \
+        :client_id     => ENV['GITHUB_CLIENT_ID'],
+        :client_secret => ENV['GITHUB_CLIENT_SECRET']
+    end  
+    self.client.auto_paginate = true  
+  end
+
+  def personal_client
+    if !self.client || self.client.login.nil?
+      @client = Octokit::Client.new \
+        :login => ENV['GITHUB_USERNAME'],
+        :password => ENV['GITHUB_PASSWORD']
+    end
+    self.client.auto_paginate = true 
+  end
 
   private
-    def application_client
-      if !self.client || self.client.client_id.nil?
-        @client  = Octokit::Client.new \
-          :client_id     => ENV['GITHUB_CLIENT_ID'],
-          :client_secret => ENV['GITHUB_CLIENT_SECRET']
-      end  
-      self.client.auto_paginate = true  
-    end
-
-    def personal_client
-      if !self.client || self.client.login.nil?
-        @client = Octokit::Client.new \
-          :login => ENV['GITHUB_USERNAME'],
-          :password => ENV['GITHUB_PASSWORD']
-      end
-      self.client.auto_paginate = true 
-    end
 
     def choose_hottest_repo(starting_data, aggregate, key, id )
       if key == :repo_id
