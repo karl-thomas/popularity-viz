@@ -1,5 +1,5 @@
 class Repo < GithubAdapter
-  attr_reader :client, :full_name, :two_weeks_ago, :updated_at, :pushed_at
+  attr_reader :client, :id, :full_name, :two_weeks_ago, :watchers_count, :updated_at, :pushed_at
 
   def initialize(sawyer_resource = {}) 
     application_client
@@ -30,15 +30,6 @@ class Repo < GithubAdapter
     comments = all_commit_comments
     return [] if comments.empty?
     comments.select { |comment| comment[:created_at] > two_weeks_ago }
-  end
-
-  def stargazers
-    application_client
-    self.client.stargazers(self.full_name, accept: 'application/vnd.github.v3.star+json', auto_traversal: true)
-  end
-
-  def recent_stargazers
-    self.stargazers.select { |stargazer| stargazer[:starred_at] > two_weeks_ago}
   end
 
   def deployments
@@ -76,4 +67,34 @@ class Repo < GithubAdapter
     }
   end
 
+  def stargazers
+    application_client
+    self.client.stargazers(self.full_name, accept: 'application/vnd.github.v3.star+json', auto_traversal: true)
+  end
+
+  def recent_stargazers
+    self.stargazers.select { |stargazer| stargazer[:starred_at] > two_weeks_ago}
+  end
+
+  def recent_clones
+    personal_client
+    self.client.clones(self.full_name, per: "week")
+  end
+
+  def recent_views
+    personal_client
+    self.client.views(self.full_name, per: "week")
+  end
+
+  def traffic_data
+    views = self.recent_views
+    {
+      repo_id: self.id,
+      recent_views: views[:count],
+      recent_clones: self.recent_clones[:count],
+      unique_views: views[:uniques],
+      recent_stargazers: self.recent_stargazers.count,
+      watchers: self.watchers_count
+    }  
+  end
 end

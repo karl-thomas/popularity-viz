@@ -109,17 +109,6 @@ class GithubAdapter
 
  
   # repo traffic, for all owned repos --------------
-  def traffic_data(repo)
-    recent_views = recent_views_for_repo(repo.full_name)
-    {
-      repo_id: repo.id,
-      recent_views: recent_views[:count],
-      recent_clones: recent_clones_for_repo(repo.full_name)[:count],
-      unique_views: recent_views[:uniques],
-      recent_stargazers: recent_stargazers(repo.full_name).count,
-      watchers: repo.watchers_count
-    }  
-  end
 
   def collect_traffic_data
     self.owned_repos.map {|repo| traffic_data(repo) }
@@ -136,16 +125,6 @@ class GithubAdapter
       end
       aggregate
     end
-  end
-
-  def recent_clones_for_repo(repo_name)
-    personal_client
-    self.client.clones(repo_name, per: "week")
-  end
-
-  def recent_views_for_repo(repo_name)
-    personal_client
-    self.client.views(repo_name, per: "week")
   end
 
   def application_client
@@ -230,7 +209,6 @@ class GithubAdapter
     end
 
     def sift_repo_data(collected_repositories, id)
-
       collected_repositories.find {|repo| repo[:repo].id == id}
     end
 
