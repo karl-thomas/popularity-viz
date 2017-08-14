@@ -1,5 +1,5 @@
 class Repo < GithubAdapter
-  attr_reader :client, :id, :full_name, :two_weeks_ago, :watchers_count, :updated_at, :pushed_at
+  attr_reader :id, :full_name, :two_weeks_ago, :watchers_count, :updated_at, :pushed_at
 
   def initialize(sawyer_resource = {}) 
     application_client
