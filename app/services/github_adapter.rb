@@ -48,17 +48,24 @@ class GithubAdapter
   # repo collections 
   def owned_repos
     application_client
-    self.client.repos( self.user, affiliation: "owner" )
+    api_response = self.client.repos( self.user, affiliation: "owner" )
+    convert_to_repos(api_response)
   end
 
   def collaborated_repos
     application_client
-    self.client.repos( self.user, affiliation: "collaborator" )
+    api_response = self.client.repos( self.user, affiliation: "collaborator" )
+    convert_to_repos(api_response)
   end
 
   def organizations_repos
     application_client
-    self.client.repos( self.user, affiliation: "organization_member" )
+    api_response = self.client.repos( self.user, affiliation: "organization_member" )
+    convert_to_repos(api_response)
+  end
+
+  def convert_to_repos(sawyer_resources)
+    sawyer_resources.map { |resource| Repo.new(resource)}
   end
 
   def recent_updated_repos(repos)
@@ -80,10 +87,11 @@ class GithubAdapter
     personal_client
     self.client.starred_gists( since: two_weeks_ago )
   end
- 
+  
+  # recent project data --------------------------
   def collect_repo_data
     recent_repos = self.recent_updated_repos(collaborated_repos)
-    recent_repos.map {|repo| repo_data(repo)}
+    recent_repos.map {|repo| repo.dependent_repo_data}
   end
 
   def reduced_repo_data
@@ -245,10 +253,5 @@ class GithubAdapter
           end
         end
       end
-    end
-
-    # returns a two element array
-    def most_used_lang(lang_hash)
-      lang_hash.max_by {|lang, bytes| bytes}
     end
 end

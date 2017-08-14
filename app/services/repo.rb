@@ -1,16 +1,18 @@
 class Repo < GithubAdapter
-  attr_reader :client, :full_name, :two_weeks_ago
+  attr_reader :client, :full_name, :two_weeks_ago, :updated_at, :pushed_at
 
   def initialize(sawyer_resource = {}) 
     application_client
     @id = sawyer_resource.id || nil
     @full_name = sawyer_resource.full_name || nil
     @watchers_count = sawyer_resource.watchers_count || nil
+    @updated_at = sawyer_resource.updated_at
+    @pushed_at = sawyer_resource.pushed_at
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
 
   def recent?
-    self.updated_at? > two_weeks_ago || self.pushed_at > two_weeks_ago
+    self.updated_at > two_weeks_ago || self.pushed_at > two_weeks_ago
   end
 
   def recent_commits
