@@ -20,12 +20,16 @@ RSpec.describe GithubAdapter do
   end
 
   describe "#profile" do
+    it "assigns a profile instance variable" do
+      adapter.profile
+      expect(adapter.instance_variable_get(:@profile)).to not_be nil
+    end
+
     it "returns the profile of this adapters #user" do
       response = adapter.profile
       user = adapter.user
       expect(response[:login]).to eq(user)
     end
 
-    
   end
 end
