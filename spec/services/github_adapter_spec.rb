@@ -35,6 +35,29 @@ RSpec.describe GithubAdapter do
       user = adapter.user
       expect(response[:login]).to eq(user)
     end
+  end
 
+  describe "#personal_client" do
+    it "assigns a basic auth ocktokit client" do
+      adapter.personal_client
+      expect(adapter.client.login).to eq github_login
+    end
+
+    it "unassigns the application ocktokit client" do
+      adapter.personal_client
+      expect(adapter.client.client_id).to eq nil
+    end
+  end
+
+  describe "#application_client" do
+    it "assigns a application ocktokit client" do
+      adapter.application_client
+      expect(adapter.client.client_id).to eq test_github_client_id
+    end
+
+    it "unassigns the application ocktokit client" do
+      adapter.application_client
+      expect(adapter.client.login).to eq nil
+    end
   end
 end

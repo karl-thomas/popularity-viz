@@ -9,6 +9,24 @@ class GithubAdapter
     @user = ENV['GITHUB_USERNAME']
   end
 
+  def application_client
+    if !self.client || self.client.client_id.nil?
+      @client  = Octokit::Client.new \
+        :client_id     => ENV['GITHUB_CLIENT_ID'],
+        :client_secret => ENV['GITHUB_CLIENT_SECRET']
+    end  
+    self.client.auto_paginate = true  
+  end
+
+  def personal_client
+    if !self.client || self.client.login.nil?
+      @client = Octokit::Client.new \
+        :login => ENV['GITHUB_USERNAME'],
+        :password => ENV['GITHUB_PASSWORD']
+    end
+    self.client.auto_paginate = true 
+  end
+  
   def two_weeks_ago
     2.weeks.ago.strftime("%Y-%m-%d")
   end
@@ -131,23 +149,6 @@ class GithubAdapter
     end
   end
 
-  def application_client
-    if !self.client || self.client.client_id.nil?
-      @client  = Octokit::Client.new \
-        :client_id     => ENV['GITHUB_CLIENT_ID'],
-        :client_secret => ENV['GITHUB_CLIENT_SECRET']
-    end  
-    self.client.auto_paginate = true  
-  end
-
-  def personal_client
-    if !self.client || self.client.login.nil?
-      @client = Octokit::Client.new \
-        :login => ENV['GITHUB_USERNAME'],
-        :password => ENV['GITHUB_PASSWORD']
-    end
-    self.client.auto_paginate = true 
-  end
 
   private
 
