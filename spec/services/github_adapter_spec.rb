@@ -60,4 +60,32 @@ RSpec.describe GithubAdapter do
       expect(adapter.client.login).to eq nil
     end
   end
+
+  describe "#profile_data" do
+    it "returns a hash of data", :vcr do
+      expect(adapter.profile_data).to match(
+       :username=> to_string_matching(github_login),
+       :repos=> an_instance_of(Integer),
+       :gists=> an_instance_of(Integer),
+       :followers=> an_instance_of(Integer),
+       :following=> an_instance_of(Integer),
+       :starred_repos=> an_instance_of(Integer),
+       :recent_projects=> an_instance_of(Integer),
+       :recent_gists=> an_instance_of(Integer),
+       :recently_starred_gists=> an_instance_of(Integer)
+      )
+    end
+  end
+
+  describe "#total_gists" do
+
+  end
+
+  describe "#total_repos" do
+
+  end
+
+  describe "#owned_repos" do
+
+  end
 end
