@@ -2,12 +2,15 @@ require 'pry'
 require 'octokit'
 
 class GithubAdapter
-  attr_reader :user, :client, :two_weeks_ago
+  attr_reader :user, :client
 
   def initialize
     application_client
-    @user = ENV['GITHUB_USERNAME'] 
-    @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
+    @user = ENV['GITHUB_USERNAME']
+  end
+
+  def two_weeks_ago
+    2.weeks.ago.strftime("%Y-%m-%d")
   end
 
   def profile
