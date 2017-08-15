@@ -20,6 +20,10 @@ RSpec.describe GithubAdapter do
   end
 
   describe "#profile" do
+    it "calls the github api with a request for a profile" do
+      
+    end
+
     it "assigns a profile instance variable" do
       adapter.profile
       expect(adapter.instance_variable_get(:@profile)).to not_be nil
