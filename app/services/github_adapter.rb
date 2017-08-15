@@ -14,6 +14,7 @@ class GithubAdapter
   end
 
   def profile
+    personal_client
     @profile ||= self.client.user(self.user)
   end 
 
