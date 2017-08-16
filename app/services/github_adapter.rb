@@ -26,7 +26,7 @@ class GithubAdapter
     end
     self.client.auto_paginate = true 
   end
-  
+
   def two_weeks_ago
     2.weeks.ago.strftime("%Y-%m-%d")
   end
@@ -56,13 +56,11 @@ class GithubAdapter
   end
 
   def total_gists
-    application_client
     return profile.public_gists if profile.private_gists.nil?
     profile.public_gists + profile.private_gists
   end
 
   def total_repos
-    application_client
     return profile.public_repos if profile.total_private_repos.nil?
     profile.public_repos + profile.total_private_repos
   end

@@ -1,14 +1,21 @@
 class Repo < GithubAdapter
-  attr_reader :id, :full_name, :two_weeks_ago, :watchers_count, :updated_at, :pushed_at
+  attr_reader :root, :owner, :id, :full_name, :two_weeks_ago, :watchers_count, :updated_at, :pushed_at
 
   def initialize(sawyer_resource = {}) 
     application_client
-    @id = sawyer_resource.id || nil
-    @full_name = sawyer_resource.full_name || nil
-    @watchers_count = sawyer_resource.watchers_count || nil
-    @updated_at = sawyer_resource.updated_at
-    @pushed_at = sawyer_resource.pushed_at
+    @root = sawyer_resource
+    @owner = root.owner
+    @id = root.id || nil
+    @full_name = root.full_name || nil
+    @watchers_count = root.watchers_count || nil
+    @updated_at = root.updated_at
+    @pushed_at = root.pushed_at
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
+  end
+
+  def collaborators
+    personal_client
+    self.client.collaborators(self.full_name).pluck(:login)
   end
 
   def recent?
