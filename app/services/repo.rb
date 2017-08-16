@@ -77,7 +77,7 @@ class Repo < GithubAdapter
 
   def stargazers
     application_client
-    self.client.stargazers(self.full_name, accept: 'application/vnd.github.v3.star+json', auto_traversal: true)
+    self.client.stargazers(self.full_name, accept: 'application/vnd.github.v3.star+json', auto_traversal: true).pluck(:user).pluck(:login)
   end
 
   def recent_stargazers
