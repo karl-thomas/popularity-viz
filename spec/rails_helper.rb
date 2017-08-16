@@ -186,6 +186,9 @@ def github_url(url)
   uri.to_s
 end
 
+def two_weeks_ago
+  2.weeks.ago.strftime("%Y-%m-%d")
+end
 
 def basic_github_url(path, options = {})
   url = File.join(Octokit.api_endpoint, path)

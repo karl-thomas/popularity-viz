@@ -136,10 +136,19 @@ RSpec.describe GithubAdapter do
     end
   end
 
-  xdescribe "#convert_to_repos" do
+  describe "#convert_to_repos" do
     it "converts an array of sawyers resource to a repo objects", :vcr do
       repos = adapter.client.repos(github_login)
+      converted_repos = adapter.convert_to_repos(repos)
+      expect(converted_repos.first).to be_an_instance_of Repo
+    end
+  end
 
+  describe "#recent_updated_repos" do
+    it "returns an array of repo objects pushed at more recently than two weeks ago", :vcr do
+      repos = adapter.owned_repos
+      filtered_repos = adapter.recent_updated_repos(repos)
+      expect(filtered_repos.first.pushed_at).to be >= two_weeks_ago
     end
   end
 end
