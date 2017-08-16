@@ -210,6 +210,41 @@ RSpec.describe GithubAdapter do
   end
 
   describe "#recent_starred_gists" do
+    it "makes a request to the github api for recent gists" do
+      adpater.recent_gists
+      request_uri = "/users/#{github_login}/gists?#{auth_client_params}&per_page=100"
+      assert_requested :get, github_url(request_uri)
+    end
     
+    describe "return values"
+      before do
+        adapter.personal_client
+        new_gist = {
+          :description => "A gist from Octokit",
+          :public      => true,
+          :files       => {
+            "zen.text" => { :content => "Keep it logically awesome." }
+          }
+        }
+
+        @gist = adapter.client.create_gist(new_gist)
+        @gist_comment = adapter.client.create_gist_comment(5421307, ":metal:")
+
+        @gists = adapter.recent_gists
+      end
+
+      after do
+        adapter.personal_client
+        adapter.client.delete_gist @gist.id
+      end
+
+      it "returns an array", :vcr do
+        expect(@gists).to be_an_instance_of Array
+      end
+
+      it "returns an array of gists written by user", :vcr do
+        expect(@gists).not_to be_empty
+        expect(@gists.first.owner.login).to eq github_login
+      end
   end
 end
