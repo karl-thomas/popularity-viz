@@ -2,15 +2,37 @@ require 'pry'
 require 'octokit'
 
 class GithubAdapter
-  attr_reader :user, :client, :two_weeks_ago
+  attr_reader :user, :client
 
   def initialize
     application_client
-    @user = ENV['GITHUB_USERNAME'] 
-    @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
+    @user = ENV['GITHUB_USERNAME']
+  end
+
+  def application_client
+    if !self.client || self.client.client_id.nil?
+      @client  = Octokit::Client.new \
+        :client_id     => ENV['GITHUB_CLIENT_ID'],
+        :client_secret => ENV['GITHUB_CLIENT_SECRET']
+    end  
+    self.client.auto_paginate = true  
+  end
+
+  def personal_client
+    if !self.client || self.client.login.nil?
+      @client = Octokit::Client.new \
+        :login => ENV['GITHUB_USERNAME'],
+        :password => ENV['GITHUB_PASSWORD']
+    end
+    self.client.auto_paginate = true 
+  end
+
+  def two_weeks_ago
+    2.weeks.ago.strftime("%Y-%m-%d")
   end
 
   def profile
+    personal_client
     @profile ||= self.client.user(self.user)
   end 
 
@@ -34,13 +56,11 @@ class GithubAdapter
   end
 
   def total_gists
-    application_client
     return profile.public_gists if profile.private_gists.nil?
     profile.public_gists + profile.private_gists
   end
 
   def total_repos
-    application_client
     return profile.public_repos if profile.total_private_repos.nil?
     profile.public_repos + profile.total_private_repos
   end
@@ -64,6 +84,12 @@ class GithubAdapter
     convert_to_repos(api_response)
   end
 
+  def starred_repos
+    application_client
+    api_response = self.client.starred(self.user)
+    convert_to_repos(api_response)
+  end
+  
   def convert_to_repos(sawyer_resources)
     sawyer_resources.map { |resource| Repo.new(resource)}
   end
@@ -72,10 +98,6 @@ class GithubAdapter
     repos.select { |repo| repo.recent? }
   end
 
-  def starred_repos
-    application_client
-    self.client.starred(self.user)
-  end
 
   # gists
   def recent_gists
@@ -127,23 +149,6 @@ class GithubAdapter
     end
   end
 
-  def application_client
-    if !self.client || self.client.client_id.nil?
-      @client  = Octokit::Client.new \
-        :client_id     => ENV['GITHUB_CLIENT_ID'],
-        :client_secret => ENV['GITHUB_CLIENT_SECRET']
-    end  
-    self.client.auto_paginate = true  
-  end
-
-  def personal_client
-    if !self.client || self.client.login.nil?
-      @client = Octokit::Client.new \
-        :login => ENV['GITHUB_USERNAME'],
-        :password => ENV['GITHUB_PASSWORD']
-    end
-    self.client.auto_paginate = true 
-  end
 
   private
 
