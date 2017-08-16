@@ -159,12 +159,23 @@ RSpec.describe GithubAdapter do
       @starred_repos = adapter.starred_repos
     end
 
+    it "makes a request to the github api for starred repos", :vcr do
+      client_id = "client_id=#{test_github_client_id}"
+      client_secret = "client_secret=#{test_github_client_secret}"
+      request_uri = "/users/#{github_login}/starred?#{client_id}&#{client_secret}&per_page=100"
+      assert_requested :get, github_url(request_uri) 
+    end
+
     it "returns an array", :vcr do
       expect(@starred_repos).to be_an_instance_of Array
     end
 
-    it "return an a array Repo objs", :vcr do
-      expect(@starred_repos.first.stargazers)
+    it "return an array of repo objs", :vcr do
+      expect(@starred_repos.first).to be_an_instance_of Repo
+    end
+
+    it "return an array of repos starred by the user", :vcr do
+      expect(@starred_repos.first.stargazers).to include github_login
     end
   end
 end
