@@ -146,11 +146,21 @@ RSpec.describe GithubAdapter do
   end
 
   describe "#recent_updated_repos" do
-    it "returns an array of repo objects pushed at more recently than two weeks ago", :vcr do
+    before(:each) do
       repos = adapter.owned_repos
-      filtered_repos = adapter.recent_updated_repos(repos)
-      expect(filtered_repos).to be_an_instance_of Array
-      expect(filtered_repos.first.pushed_at).to be >= two_weeks_ago
+      @filtered_repos = adapter.recent_updated_repos(repos)
+    end
+
+    it "returns an array", :vcr do
+      expect(@filtered_repos).to be_an_instance_of Array
+    end
+
+    it "returns an array of repo objects", :vcr do
+      expect(@filtered_repos.first). to be_an_instance_of Repo
+    end
+
+    it "returns an array of repo objects pushed at more recently than two weeks ago", :vcr do
+      expect(@filtered_repos.first.pushed_at).to be >= two_weeks_ago
     end
   end
 
