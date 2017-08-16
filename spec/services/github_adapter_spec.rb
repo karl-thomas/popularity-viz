@@ -64,28 +64,82 @@ RSpec.describe GithubAdapter do
   describe "#profile_data" do
     it "returns a hash of data", :vcr do
       expect(adapter.profile_data).to match(
-       :username=> to_string_matching(github_login),
-       :repos=> an_instance_of(Integer),
-       :gists=> an_instance_of(Integer),
-       :followers=> an_instance_of(Integer),
-       :following=> an_instance_of(Integer),
-       :starred_repos=> an_instance_of(Integer),
-       :recent_projects=> an_instance_of(Integer),
-       :recent_gists=> an_instance_of(Integer),
-       :recently_starred_gists=> an_instance_of(Integer)
+       :username=> a_string_matching(github_login),
+       :repos=> an_instance_of(Fixnum),
+       :gists=> an_instance_of(Fixnum),
+       :followers=> an_instance_of(Fixnum),
+       :following=> an_instance_of(Fixnum),
+       :starred_repos=> an_instance_of(Fixnum),
+       :recent_projects=> an_instance_of(Fixnum),
+       :recent_gists=> an_instance_of(Fixnum),
+       :recently_starred_gists=> an_instance_of(Fixnum)
       )
     end
   end
 
   describe "#total_gists" do
+    it "returns the sum of all gists", :vcr do
+      expect(adapter.total_gists).to be_an_instance_of Fixnum
 
+    end
   end
 
   describe "#total_repos" do
+    it "returns the sum of all repos", :vcr do
+      expect(adapter.total_repos).to be_an_instance_of Fixnum
 
+    end
   end
 
   describe "#owned_repos" do
+    it "makes a call to the gihub api for owned repos", :vcr do
+      adapter.owned_repos
+      affiliation = "affiliation=owner"
+      client_id = "client_id=#{test_github_client_id}"
+      client_secret = "client_secret=#{test_github_client_secret}"
+      request_uri = "/users/#{github_login}/repos?#{affiliation}&#{client_id}&#{client_secret}&per_page=100"
+      assert_requested :get, github_url(request_uri)
+    end
 
+    it "returns an array of repo objs owned by the user", :vcr do
+      owned_repos = adapter.owned_repos
+      expect(owned_repos).to be_an_instance_of Array
+      expect(owned_repos.first).to be_an_instance_of Repo
+      expect(owned_repos.first.owner[:login]).to eq github_login
+    end
+  end
+
+  describe "#collaborated_repos" do
+    it "makes a call to the gihub api for collaborated on repos", :vcr do
+      adapter.collaborated_repos
+      affiliation = "affiliation=collaborator"
+      client_id = "client_id=#{test_github_client_id}"
+      client_secret = "client_secret=#{test_github_client_secret}"
+      request_uri = "/users/#{github_login}/repos?#{affiliation}&#{client_id}&#{client_secret}&per_page=100"
+      assert_requested :get, github_url(request_uri)    
+    end
+
+    it "returns and array of repo objs collaborated on by the user", :vcr do
+      collaborated_repos = adapter.collaborated_repos
+      expect(collaborated_repos).to be_an_instance_of Array
+      expect(collaborated_repos.first).to be_an_instance_of Repo
+      expect(collaborated_repos.first.collaborators).to include github_login
+    end
+  end
+
+  xdescribe "#organizations_repos" do
+    it "returns and array of repo objs in the same organizations as the user.", :vcr do
+      organizations_repos = adapter.organizations_repos
+      expect(organizations_repos).to be_an_instance_of Array
+      expect(organizations_repos.first).to be_an_instance_of Repo
+      expect(organizations_repos.first.organization).to include github_organization
+    end
+  end
+
+  xdescribe "#convert_to_repos" do
+    it "converts an array of sawyers resource to a repo objects", :vcr do
+      repos = adapter.client.repos(github_login)
+
+    end
   end
 end
