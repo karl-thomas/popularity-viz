@@ -44,7 +44,8 @@ gem 'jbuilder', '~> 2.5'
 gem 'rails-controller-testing'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
-
+gem 'vcr'
+gem 'webmock'
 group :development, :test do
   gem 'rspec-rails'
   # Adds support for Capybara system testing and selenium driver
