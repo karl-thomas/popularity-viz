@@ -137,9 +137,10 @@ RSpec.describe GithubAdapter do
   end
 
   describe "#convert_to_repos" do
-    it "converts an array of sawyers resource to a repo objects", :vcr do
+    it "converts an array of sawyers resource to an array of repo objects", :vcr do
       repos = adapter.client.repos(github_login)
       converted_repos = adapter.convert_to_repos(repos)
+      expect(converted_repos).to be_an_instance_of Array
       expect(converted_repos.first).to be_an_instance_of Repo
     end
   end
@@ -148,7 +149,22 @@ RSpec.describe GithubAdapter do
     it "returns an array of repo objects pushed at more recently than two weeks ago", :vcr do
       repos = adapter.owned_repos
       filtered_repos = adapter.recent_updated_repos(repos)
+      expect(filtered_repos).to be_an_instance_of Array
       expect(filtered_repos.first.pushed_at).to be >= two_weeks_ago
+    end
+  end
+
+  describe "#starred_repos" do
+    before(:each) do
+      @starred_repos = adapter.starred_repos
+    end
+
+    it "returns an array", :vcr do
+      expect(@starred_repos).to be_an_instance_of Array
+    end
+
+    it "return an a array Repo objs", :vcr do
+      expect(@starred_repos.first.stargazers)
     end
   end
 end
