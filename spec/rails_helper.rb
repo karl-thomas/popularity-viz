@@ -175,6 +175,9 @@ def fixture(file)
   File.new(fixture_path + '/' + file)
 end
 
+def auth_client_params
+    "client_id=#{test_github_client_id}&client_secret=#{test_github_client_secret}"
+end
 
 def github_url(url)
   return url if url =~ /^http/
