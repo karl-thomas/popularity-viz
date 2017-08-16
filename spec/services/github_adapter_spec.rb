@@ -92,34 +92,49 @@ RSpec.describe GithubAdapter do
   end
 
   describe "#owned_repos" do
+    before(:each) do
+      @owned_repos = adapter.owned_repos
+    end
     it "makes a call to the gihub api for owned repos", :vcr do
-      adapter.owned_repos
       affiliation = "affiliation=owner"
       request_uri = "/users/#{github_login}/repos?#{affiliation}&#{auth_client_params}&per_page=100"
       assert_requested :get, github_url(request_uri)
     end
 
+    it "returns an array", :vcr do
+      expect(@owned_repos).to be_an_instance_of Array
+    end
+
+    it "returns an array of Repo objs", :vcr do
+      expect(@owned_repos.first).to be_an_instance_of Repo
+    end
+
     it "returns an array of repo objs owned by the user", :vcr do
-      owned_repos = adapter.owned_repos
-      expect(owned_repos).to be_an_instance_of Array
-      expect(owned_repos.first).to be_an_instance_of Repo
-      expect(owned_repos.first.owner[:login]).to eq github_login
+      expect(@owned_repos.first.owner[:login]).to eq github_login
     end
   end
 
   describe "#collaborated_repos" do
+    before(:each) do
+      @collaborated_repos = adapter.collaborated_repos
+    end
+
     it "makes a call to the gihub api for collaborated on repos", :vcr do
-      adapter.collaborated_repos
       affiliation = "affiliation=collaborator"
       request_uri = "/users/#{github_login}/repos?#{affiliation}&#{auth_client_params}&per_page=100"
       assert_requested :get, github_url(request_uri)    
     end
 
-    it "returns and array of repo objs collaborated on by the user", :vcr do
-      collaborated_repos = adapter.collaborated_repos
-      expect(collaborated_repos).to be_an_instance_of Array
-      expect(collaborated_repos.first).to be_an_instance_of Repo
-      expect(collaborated_repos.first.collaborators).to include github_login
+    it "returns an array", :vcr do
+      expect(@collaborated_repos).to be_an_instance_of Array
+    end
+
+    it "returns an array of Repo objs", :vcr do
+      expect(@collaborated_repos.first).to be_an_instance_of Repo
+    end
+
+    it "returns and array of repo objs collaborated on by the user", :vcr do     
+      expect(@collaborated_repos.first.collaborators).to include github_login
     end
   end
 
@@ -156,11 +171,17 @@ RSpec.describe GithubAdapter do
   end
 
   describe "#convert_to_repos" do
-    it "converts an array of sawyers resource to an array of repo objects", :vcr do
+    before(:each) do
       repos = adapter.client.repos(github_login)
-      converted_repos = adapter.convert_to_repos(repos)
-      expect(converted_repos).to be_an_instance_of Array
-      expect(converted_repos.first).to be_an_instance_of Repo
+      @converted_repos = adapter.convert_to_repos(repos)
+    end
+
+    it "returns an array", :vcr do
+      expect(@converted_repos).to be_an_instance_of Array
+    end
+
+    it "converts an array of sawyers resource to an array of repo objects", :vcr do
+      expect(@converted_repos.first).to be_an_instance_of Repo
     end
   end
 
@@ -184,5 +205,11 @@ RSpec.describe GithubAdapter do
   end
 
 
-  describe ""
+  describe "#recent_gists" do
+
+  end
+
+  describe "#recent_starred_gists" do
+    
+  end
 end
