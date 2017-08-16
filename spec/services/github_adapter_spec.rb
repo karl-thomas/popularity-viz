@@ -95,9 +95,7 @@ RSpec.describe GithubAdapter do
     it "makes a call to the gihub api for owned repos", :vcr do
       adapter.owned_repos
       affiliation = "affiliation=owner"
-      client_id = "client_id=#{test_github_client_id}"
-      client_secret = "client_secret=#{test_github_client_secret}"
-      request_uri = "/users/#{github_login}/repos?#{affiliation}&#{client_id}&#{client_secret}&per_page=100"
+      request_uri = "/users/#{github_login}/repos?#{affiliation}&#{auth_client_params}&per_page=100"
       assert_requested :get, github_url(request_uri)
     end
 
@@ -113,9 +111,7 @@ RSpec.describe GithubAdapter do
     it "makes a call to the gihub api for collaborated on repos", :vcr do
       adapter.collaborated_repos
       affiliation = "affiliation=collaborator"
-      client_id = "client_id=#{test_github_client_id}"
-      client_secret = "client_secret=#{test_github_client_secret}"
-      request_uri = "/users/#{github_login}/repos?#{affiliation}&#{client_id}&#{client_secret}&per_page=100"
+      request_uri = "/users/#{github_login}/repos?#{affiliation}&#{auth_client_params}&per_page=100"
       assert_requested :get, github_url(request_uri)    
     end
 
@@ -124,6 +120,29 @@ RSpec.describe GithubAdapter do
       expect(collaborated_repos).to be_an_instance_of Array
       expect(collaborated_repos.first).to be_an_instance_of Repo
       expect(collaborated_repos.first.collaborators).to include github_login
+    end
+  end
+
+  describe "#starred_repos" do
+    before(:each) do
+      @starred_repos = adapter.starred_repos
+    end
+
+    it "makes a request to the github api for starred repos", :vcr do
+      request_uri = "/users/#{github_login}/starred?#{auth_client_params}&per_page=100"
+      assert_requested :get, github_url(request_uri) 
+    end
+
+    it "returns an array", :vcr do
+      expect(@starred_repos).to be_an_instance_of Array
+    end
+
+    it "return an array of repo objs", :vcr do
+      expect(@starred_repos.first).to be_an_instance_of Repo
+    end
+
+    it "return an array of repos starred by the user", :vcr do
+      expect(@starred_repos.first.stargazers).to include github_login
     end
   end
 
@@ -164,28 +183,6 @@ RSpec.describe GithubAdapter do
     end
   end
 
-  describe "#starred_repos" do
-    before(:each) do
-      @starred_repos = adapter.starred_repos
-    end
 
-    it "makes a request to the github api for starred repos", :vcr do
-      client_id = "client_id=#{test_github_client_id}"
-      client_secret = "client_secret=#{test_github_client_secret}"
-      request_uri = "/users/#{github_login}/starred?#{client_id}&#{client_secret}&per_page=100"
-      assert_requested :get, github_url(request_uri) 
-    end
-
-    it "returns an array", :vcr do
-      expect(@starred_repos).to be_an_instance_of Array
-    end
-
-    it "return an array of repo objs", :vcr do
-      expect(@starred_repos.first).to be_an_instance_of Repo
-    end
-
-    it "return an array of repos starred by the user", :vcr do
-      expect(@starred_repos.first.stargazers).to include github_login
-    end
-  end
+  describe ""
 end
