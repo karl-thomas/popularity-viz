@@ -84,6 +84,12 @@ class GithubAdapter
     convert_to_repos(api_response)
   end
 
+  def starred_repos
+    application_client
+    api_response = self.client.starred(self.user)
+    convert_to_repos(api_response)
+  end
+  
   def convert_to_repos(sawyer_resources)
     sawyer_resources.map { |resource| Repo.new(resource)}
   end
@@ -92,10 +98,6 @@ class GithubAdapter
     repos.select { |repo| repo.recent? }
   end
 
-  def starred_repos
-    application_client
-    self.client.starred(self.user)
-  end
 
   # gists
   def recent_gists
