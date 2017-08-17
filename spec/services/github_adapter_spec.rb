@@ -285,4 +285,24 @@ RSpec.describe GithubAdapter do
       end
     end
   end
+
+  describe "#collect_traffic_data" do
+    it "returns an array of hashes ", :vcr do 
+      result = adapter.collect_traffic_data
+      expect(result).to be_an_instance_of Array
+      expect(result.first).to be_an_instance_of Hash
+    end
+
+    it "the hash it returns matches a certain structure", :vcr do
+      result = adapter.collect_traffic_data
+      expect(result.first).to match(
+       :repo_id=> an_instance_of(Fixnum),
+       :recent_views=> an_instance_of(Fixnum),
+       :recent_clones=> an_instance_of(Fixnum),
+       :unique_views=> an_instance_of(Fixnum),
+       :recent_stargazers=> an_instance_of(Fixnum),
+       :watchers=> an_instance_of(Fixnum)
+      )
+    end
+  end
 end
