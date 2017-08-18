@@ -1,22 +1,22 @@
 require 'rails_helper'
 
 RSpec.describe TwitterRecord, type: :model do
+  before(:each) do
+    @hash_1 = {
+              :screen_name=>"test-guy",
+              :description=>"/Web Developer and Does-Weller/",
+              :followers_count=>98,
+              :friends_count=>311,
+              :tweets_count=>1075,
+              :favorites_count=>396,
+              :listed_count=>0,
+              :recent_tweets=>0,
+              :recent_mentions=>0,
+                :recent_replies=>0
+              }
+    @record = TwitterRecord.new(@hash_1)
+  end
   describe "on initialization", :vcr do
-    before(:each) do
-      @hash_1 = {
-                :screen_name=>"test-guy",
-                :description=>"/Web Developer and Does-Weller/",
-                :followers_count=>98,
-                :friends_count=>311,
-                :tweets_count=>1075,
-                :favorites_count=>396,
-                :listed_count=>0,
-                :recent_tweets=>0,
-                :recent_mentions=>0,
-                  :recent_replies=>0
-                }
-        @record = TwitterRecord.new(@hash_1)
-      end
 
     describe "fields set by the given hash" do
       describe "#screen_name" do
@@ -214,48 +214,51 @@ RSpec.describe TwitterRecord, type: :model do
     end
   end
 
-
-  describe "#assign_total_differences" do
-
-  end
-
-  describe "#compare_friends_count" do
-    context "when there is a difference" do
+  describe "field assignment methods" do
+    let(:differences) { [nil, nil, "Web Developer and Does-Weller.", nil, 11, nil, -10, nil, 3, nil, 3, nil, nil, nil, nil, nil, nil, nil] }
+    
+    xdescribe "#assign_total_differences" do
 
     end
 
-    context "when there is no difference" do
+    describe "#compare_friends_count" do
+      context "when there is a difference" do
+        expect(adapter.compare_friends_count())
+      end
 
-    end
-  end
+      context "when there is no difference" do
 
-  describe "#compare_followers_count" do
-    context "when there is a difference" do
-
-    end
-
-    context "when there is no difference" do
-
-    end
-  end
-
-  describe "#compare_favorites_count" do
-    context "when there is a difference" do
-
+      end
     end
 
-    context "when there is no difference" do
+    describe "#compare_followers_count" do
+      context "when there is a difference" do
 
+      end
+
+      context "when there is no difference" do
+
+      end
     end
-  end
 
-  describe "#compare_lists_count" do
-    context "when there is a difference" do
+    describe "#compare_favorites_count" do
+      context "when there is a difference" do
 
+      end
+
+      context "when there is no difference" do
+
+      end
     end
 
-    context "when there is no difference" do
+    describe "#compare_lists_count" do
+      context "when there is a difference" do
 
+      end
+
+      context "when there is no difference" do
+
+      end
     end
   end
 

@@ -47,32 +47,32 @@ class TwitterRecord < ApplicationRecord
       end
   end
 
-  def compare_friends_count(old_value, new_value)
-    if old_value != new_value
+  def compare_friends_count(old_value)
+    if old_value != self.friends_count
       self.recent_friends = difference(old_value,new_value)
     else
       nil
     end
   end
 
-  def compare_followers_count(old_value, new_value)
-    if old_value != new_value
+  def compare_followers_count(old_value)
+    if old_value != self.followers_count
       self.recent_followers = difference(old_value,new_value)
     else
       nil
     end
   end
 
-  def compare_favorites_count(old_value, new_value)
-    if old_value != new_value
+  def compare_favorites_count(old_value)
+    if old_value != self.favorites_count
       self.recent_favorites = difference(old_value,new_value)
     else
       nil
     end
   end
 
-  def compare_lists_count(old_value, new_value)
-    if old_value != new_value
+  def compare_lists_count(old_value)
+    if old_value != self.listed_count
       self.recent_lists = difference(old_value,new_value)
     else
       nil
@@ -91,7 +91,7 @@ class TwitterRecord < ApplicationRecord
   def sum_up_differences(differences)
     differences.reduce(:+)
   end
-  
+
   private
     def difference(old_value, new_value)
       return new_value - old_value
