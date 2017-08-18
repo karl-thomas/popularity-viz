@@ -89,7 +89,7 @@ class GithubAdapter
     api_response = self.client.starred(self.user)
     convert_to_repos(api_response)
   end
-  
+
   def convert_to_repos(sawyer_resources)
     sawyer_resources.map { |resource| Repo.new(resource)}
   end
@@ -218,7 +218,6 @@ class GithubAdapter
     end
 
     def truncate_most_used_lang(reduced_data)
-      p reduced_data[:most_used_lang]
       reduced_data[:most_used_lang] = reduced_data[:most_used_lang][0]
       reduced_data
     end

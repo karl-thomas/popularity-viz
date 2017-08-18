@@ -86,12 +86,14 @@ class Repo < GithubAdapter
 
   def recent_clones
     personal_client
-    self.client.clones(self.full_name, per: "week")
+    media_type = "application/vnd.github.spiderman-preview"
+    self.client.clones(self.full_name, per: "week", accept: media_type)
   end
 
   def recent_views
     personal_client
-    self.client.views(self.full_name, per: "week")
+    media_type = "application/vnd.github.spiderman-preview"      
+    self.client.views(self.full_name, per: "week", accept: media_type)
   end
 
   def traffic_data
