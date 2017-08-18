@@ -204,47 +204,173 @@ RSpec.describe GithubAdapter do
     end
   end
 
-
-  describe "#recent_gists" do
-
-  end
-
-  describe "#recent_starred_gists" do
-    it "makes a request to the github api for recent gists" do
-      adpater.recent_gists
-      request_uri = "/users/#{github_login}/gists?#{auth_client_params}&per_page=100"
-      assert_requested :get, github_url(request_uri)
-    end
-    
-    describe "return values"
-      before do
-        adapter.personal_client
-        new_gist = {
-          :description => "A gist from Octokit",
-          :public      => true,
-          :files       => {
-            "zen.text" => { :content => "Keep it logically awesome." }
+  describe "gist methods" do 
+    let(:since) { "&since=#{two_weeks_ago}"}
+    describe "#recent_gists", :vcr do
+      it "makes a request to the github api for recent gists" do
+        adapter.recent_gists
+        request_uri = "/users/#{github_login}/gists?#{auth_client_params}&per_page=100" + since
+        assert_requested :get, github_url(request_uri)
+      end
+      
+      describe "return values" do
+        before do
+          adapter.personal_client
+          new_gist = {
+            :description => "A gist from Octokit",
+            :public      => true,
+            :files       => {
+              "zen.text" => { :content => "Keep it logically awesome." }
+            }
           }
-        }
 
-        @gist = adapter.client.create_gist(new_gist)
-        @gist_comment = adapter.client.create_gist_comment(5421307, ":metal:")
+          @gist = adapter.client.create_gist(new_gist)
+          @gist_comment = adapter.client.create_gist_comment(5421307, ":metal:")
 
-        @gists = adapter.recent_gists
+          @gists = adapter.recent_gists
+        end
+
+        after do
+          adapter.personal_client
+          adapter.client.delete_gist @gist.id
+        end
+
+        it "returns an array" do
+          expect(@gists).to be_an_instance_of Array
+        end
+
+        it "returns an array of gists written by user" do
+          expect(@gists).not_to be_empty
+          expect(@gists.first.owner.login).to eq github_login
+        end
       end
+    end
 
-      after do
-        adapter.personal_client
-        adapter.client.delete_gist @gist.id
+    describe "#recent_starred_gists", :vcr do
+      it "makes a request to the github api for recent gists" do
+        adapter.recent_gists
+        request_uri = "/users/#{github_login}/gists?#{auth_client_params}&per_page=100" + since
+        assert_requested :get, github_url(request_uri)
       end
+      
+      describe "return values" do
+        before do
+          adapter.personal_client
+          new_gist = {
+            :description => "A gist from Octokit",
+            :public      => true,
+            :files       => {
+              "zen.text" => { :content => "Keep it logically awesome." }
+            }
+          }
 
-      it "returns an array", :vcr do
-        expect(@gists).to be_an_instance_of Array
-      end
+          @gist = adapter.client.create_gist(new_gist)
+          adapter.client.star_gist(@gist.id)
+          @gists = adapter.recent_starred_gists
+        end
 
-      it "returns an array of gists written by user", :vcr do
-        expect(@gists).not_to be_empty
-        expect(@gists.first.owner.login).to eq github_login
+        after do
+          adapter.personal_client
+          adapter.client.delete_gist @gist.id
+        end
+
+        it "returns an array" do
+          expect(@gists).to be_an_instance_of Array
+        end
+
+        it "returns an array of gists starred by user" do
+          expect(@gists).not_to be_empty
+          expect(@gists.first.owner.login).to eq github_login
+        end
       end
+    end
   end
+
+  describe "#collect_repo_data" do
+    it "returns an array of hashes", :vcr do
+      expect(adapter.collect_repo_data).to be_an_instance_of Array
+      expect(adapter.collect_repo_data.first).to be_an_instance_of Hash
+    end
+
+    it "creates hashes of a certain structure", :vcr do
+      expect(adapter.collect_repo_data.first).to  match(
+          :repo=> an_instance_of(Repo),
+          :recent_commits=> an_instance_of(Fixnum),
+          :recent_comments=> an_instance_of(Fixnum),
+          :recent_deployments=> an_instance_of(Fixnum),
+          :branches=> an_instance_of(Fixnum),
+          :most_used_lang=> an_instance_of(Array)
+        )
+    end
+  end
+
+  describe "#reduce_repo_data" do
+    it "returns a hash of reduced information from collect_repo_data", :vcr do
+      result = adapter.reduced_repo_data
+      expect(result).to be_an_instance_of Hash
+    end
+
+    it "returns a hash with the default value of 0", :vcr do
+      result = adapter.reduced_repo_data
+      expect(result[:repo_id]).to eq 0
+    end
+
+    it "adds :most_recent_project", :vcr do
+      result = adapter.reduced_repo_data
+      expect(result[:most_recent_project]).not_to be 0
+    end
+
+    it "removes :repo", :vcr do
+      result = adapter.reduced_repo_data
+      expect(result[:repo]).to be 0
+    end
+
+    it "has a concise :most_used_lang", :vcr do
+      result = adapter.reduced_repo_data
+      expect(result[:most_used_lang]).to be_an_instance_of Symbol
+    end
+  end
+  
+  describe "#collect_traffic_data" do
+    it "returns an array of hashes ", :vcr do 
+      result = adapter.collect_traffic_data
+      expect(result).to be_an_instance_of Array
+      expect(result.first).to be_an_instance_of Hash
+    end
+
+    it "the hash it returns matches a certain structure", :vcr do
+      result = adapter.collect_traffic_data
+      expect(result.first).to match(
+       :repo_id=> an_instance_of(Fixnum),
+       :recent_views=> an_instance_of(Fixnum),
+       :recent_clones=> an_instance_of(Fixnum),
+       :unique_views=> an_instance_of(Fixnum),
+       :recent_stargazers=> an_instance_of(Fixnum),
+       :watchers=> an_instance_of(Fixnum)
+      )
+    end
+  end
+
+  describe "#reduced_traffic_data" do 
+    it "squashes the collected traffic data of all owned repos into a single hash", :vcr do
+      result = adapter.reduced_traffic_data
+      expect(result).to be_an_instance_of Hash
+    end
+
+    it "returns a hach with the default value of 0", :vcr do
+      result = adapter.reduced_traffic_data
+      expect(result[:repo_id]).to eq 0
+    end
+
+    it "does not include :repo_id", :vcr do
+      result = adapter.reduced_traffic_data
+      expect(result[:repo_id]).to eq 0
+    end
+
+    it "chooses the most trafficy repo", :vcr do
+      result = adapter.reduced_traffic_data
+      expect(result[:hottest_repo]).not_to be 0
+    end
+  end
+
 end
