@@ -14,7 +14,7 @@ RSpec.describe TwitterRecord, type: :model do
               :recent_mentions=>0,
                 :recent_replies=>0
               }
-    @record = TwitterRecord.new(@hash_1)
+    @record_1 = TwitterRecord.new(@hash_1)
   end
   describe "on initialization", :vcr do
 
@@ -215,7 +215,19 @@ RSpec.describe TwitterRecord, type: :model do
   end
 
   describe "field assignment methods" do
-    let(:differences) { [nil, nil, "Web Developer and Does-Weller.", nil, 11, nil, -10, nil, 3, nil, 3, nil, nil, nil, nil, nil, nil, nil] }
+    
+    before(:each) do
+    @record_1.save
+    @hash_2 = {:screen_name=>"test-guy-2", :description=>"/Web Developer and Does-Weller/", :followers_count=>96, :friends_count=>314, :tweets_count=>1075, :favorites_count=>398, :listed_count=>2, :recent_tweets=>2, :recent_mentions=>1, :recent_replies=>1 }   
+    @record_2 = TwitterRecord.new(@hash_2)
+
+    @differences = [nil, "test-guy-2", nil, -2, 3, nil, 2, 2, 2, nil, 1, nil, nil, nil, nil, nil, nil, nil]
+    
+    end
+
+    after(:each) do 
+      TwitterRecord.find(@record_1.id).destroy
+    end
     
     xdescribe "#assign_total_differences" do
 
