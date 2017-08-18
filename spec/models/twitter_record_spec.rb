@@ -213,4 +213,63 @@ RSpec.describe TwitterRecord, type: :model do
       end
     end
   end
+
+
+  describe "#assign_total_differences" do
+
+  end
+
+  describe "#compare_friends_count" do
+    context "when there is a difference" do
+
+    end
+
+    context "when there is no difference" do
+
+    end
+  end
+
+  describe "#compare_followers_count" do
+    context "when there is a difference" do
+
+    end
+
+    context "when there is no difference" do
+
+    end
+  end
+
+  describe "#compare_favorites_count" do
+    context "when there is a difference" do
+
+    end
+
+    context "when there is no difference" do
+
+    end
+  end
+
+  describe "#compare_lists_count" do
+    context "when there is a difference" do
+
+    end
+
+    context "when there is no difference" do
+
+    end
+  end
+
+  describe "difference calculations" do
+    describe "#sub_differences" do
+
+    end
+
+    describe "#filter_differences" do
+
+    end
+
+    describe "#sum_up_differences" do
+
+    end
+  end
 end
