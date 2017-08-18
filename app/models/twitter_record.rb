@@ -1,17 +1,13 @@
 class TwitterRecord < ApplicationRecord
+  before_validation :inspect_old_data, :assign_total_differences
+  
   attr_accessor :differences
-
-  def initialize(args={})
-    super(args)
-    @differences = inspect_old_data
-    assign_total_differences(@differences)
-  end
 
   def inspect_old_data
     last_record = TwitterRecord.last
     old_data = last_record.attributes
     # use each pair to check old data against new data
-    old_data.map do |column_name, old_value| 
+    @differences = old_data.map do |column_name, old_value| 
       new_value = self.send(column_name)
       assign_differences(column_name, old_value, new_value)
     end
@@ -30,8 +26,8 @@ class TwitterRecord < ApplicationRecord
     differences.reduce(:+)
   end
 
-  def assign_total_differences(differences)
-    valid_differences = filter_differences(differences)
+  def assign_total_differences
+    valid_differences = filter_differences(self.differences)
     valid_differences = sub_differences(valid_differences)
     self.total_differences = sum_up_differences(valid_differences)
   end
