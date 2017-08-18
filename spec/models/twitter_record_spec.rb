@@ -1,5 +1,4 @@
 require 'rails_helper'
-
 RSpec.describe TwitterRecord, type: :model do
   before(:each) do
     @hash_1 = {
@@ -218,15 +217,15 @@ RSpec.describe TwitterRecord, type: :model do
   describe "field assignment methods" do
     
     before(:each) do
-    @record_1.save
+    @record_1.save #save the first record to have something to compare
+
     @hash_2 = {:screen_name=>"test-guy-2", :description=>"/Web Developer and Does-Weller/", :followers_count=>96, :friends_count=>314, :tweets_count=>1075, :favorites_count=>398, :listed_count=>2, :recent_tweets=>2, :recent_mentions=>1, :recent_replies=>1 }   
     @record_2 = TwitterRecord.new(@hash_2)
-
     @differences = [nil, "test-guy-2", nil, -2, 3, nil, 2, 2, 2, nil, 1, nil, nil, nil, nil, nil, nil, nil] 
     end
 
     after(:each) do 
-      TwitterRecord.find(@record_1.id).destroy
+      TwitterRecord.find(@record_1.id).destroy #delete the saved request
     end
 
     # xdescribe "#assign_total_differences" do
@@ -240,9 +239,9 @@ RSpec.describe TwitterRecord, type: :model do
         end
 
         it "assigns recent_friends as the difference" do
-          difference = @record_2.compare_friends_count(@record_1.friends_count)
+          the_difference = @record_2.compare_friends_count(@record_1.friends_count)
 
-          expect(expect(@record_2.recent_friends)).to be difference
+          expect(@record_2.recent_friends).to eq the_difference
         end
       end
 
@@ -260,9 +259,9 @@ RSpec.describe TwitterRecord, type: :model do
         end
 
         it "assigns recent_followers as the difference" do
-          difference = @record_2.compare_followers_count(@record_1.followers_count)
+          the_difference = @record_2.compare_followers_count(@record_1.followers_count)
 
-          expect(expect(@record_2.recent_followers)).to be difference
+          expect(@record_2.recent_followers).to eq the_difference
         end
       end
 
@@ -280,8 +279,8 @@ RSpec.describe TwitterRecord, type: :model do
         end
 
         it "assigns recent_favorites as the difference" do
-          difference = @record_2.compare_favorites_count(@record_1.favorites_count)
-          expect(expect(@record_2.recent_favorites)).to be difference
+          the_difference = @record_2.compare_favorites_count(@record_1.favorites_count)
+          expect(@record_2.recent_favorites).to eq the_difference
         end
       end
 
@@ -295,12 +294,12 @@ RSpec.describe TwitterRecord, type: :model do
     describe "#compare_lists_count" do
       context "when there is a difference" do
         it "returns an integer" do
-          expect(@record_2.compare_lists_count(@record_1.listed_count)).to be 3
+          expect(@record_2.compare_lists_count(@record_1.listed_count)).to be 2
         end
 
         it "assigns recent_listed as the difference" do
-          difference = @record_2.compare_lists_count(@record_1.listed_count)
-          expect(expect(@record_2.recent_lists)).to be difference
+          the_difference = @record_2.compare_lists_count(@record_1.listed_count)
+          expect(@record_2.recent_lists).to eq the_difference
         end
       end
 
@@ -312,17 +311,17 @@ RSpec.describe TwitterRecord, type: :model do
     end
   end
 
-  describe "difference calculations" do
-    describe "#sub_differences" do
+  # describe "difference calculations" do
+  #   describe "#sub_differences" do
 
-    end
+  #   end
 
-    describe "#filter_differences" do
+  #   describe "#filter_differences" do
 
-    end
+  #   end
 
-    describe "#sum_up_differences" do
+  #   describe "#sum_up_differences" do
 
-    end
-  end
+  #   end
+  # end
 end
