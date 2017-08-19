@@ -4,8 +4,9 @@ class TwitterRecord < ApplicationRecord
   attr_accessor :differences
 
   def inspect_old_data
-    last_record = TwitterRecord.last
+    last_record = TwitterRecord.last || self #for when it is the first element
     old_data = last_record.attributes
+
     # use each pair to check old data against new data
     @differences = old_data.map do |column_name, old_value| 
       new_value = self.send(column_name)
@@ -80,7 +81,6 @@ class TwitterRecord < ApplicationRecord
   end
 
   def sub_differences(differences)
-    p differences
     differences.map { |diff| diff.class == String ? 1 : diff.abs }
   end
 
