@@ -1,7 +1,9 @@
 Rails.application.routes.draw do
 
-  root to: 'github#test'
+  # root to: 'github#test'
 
+  # the actual blog route
+  get '/', to: 'main#index'
   # github info
   get 'github/profile', to: 'github#profile'
   get 'github/recent_repos', to: 'github#recent_repos'
