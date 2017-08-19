@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 
-class Hello extends React.component {
-  props: { name: string };
+class Hello extends Component {
+  state = { name: '' };
 
-  changeName(e) {
+  changeName = e => {
     this.setState({
       name: e.target.value
     });
-  }
+  };
 
   render() {
     return (
