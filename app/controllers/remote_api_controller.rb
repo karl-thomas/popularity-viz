@@ -1,3 +1,0 @@
-class RemoteApiController < ApplicationController
-
-end

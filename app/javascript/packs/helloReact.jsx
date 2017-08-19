@@ -1,13 +1,14 @@
+// @flow
+
 import React, { Component } from 'react';
 import { render } from 'react-dom';
-import PropTypes from 'prop-types';
 
 class Hello extends Component {
-  state = { name: '' };
+  state = { name: '0' };
 
-  changeName = e => {
+  changeName = event => {
     this.setState({
-      name: e.target.value
+      name: event.target.value
     });
   };
 
@@ -26,3 +27,5 @@ class Hello extends Component {
 document.addEventListener('DOMContentLoaded', () => {
   render(<Hello />, document.getElementById('app'));
 });
+
+export default Hello; // we need this export for flow checking.
