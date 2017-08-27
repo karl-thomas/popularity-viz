@@ -5,7 +5,6 @@ class GithubController < ApplicationController
 
   def test
     @api_response = @github_adapter
-    binding.pry
     render json: @api_response.to_json
   end
 
