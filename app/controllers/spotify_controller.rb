@@ -1,8 +1,8 @@
 class SpotifyController < ApplicationController
-  before_each :set_adapter
-  
+  before_action :set_adapter
+
   def index
-    
+    render json: @spotify_adapter.profile
   end
 
   private
