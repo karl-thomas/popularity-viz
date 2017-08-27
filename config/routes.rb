@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
 
-  root to: 'github#test'
+  root to: 'spotify#index'
 
   # github info
   get 'github/profile', to: 'github#profile'
