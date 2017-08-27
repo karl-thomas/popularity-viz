@@ -19,14 +19,14 @@ gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
 # Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
-gem 'webpacker'
+# gem 'webpacker'
 # See https://github.com/rails/execjs#readme for more supported runtimes
 # gem 'therubyracer', platforms: :ruby
 # replace irb
 gem 'pry-rails', :group => :development
 # github api implementation
 gem "octokit", "~> 4.0"
-gem 'parallel'
+# gem 'parallel'
 # basic api requests 
 gem 'httparty'
 # interacting with twitter
@@ -35,6 +35,8 @@ gem 'twitter'
 # gem 'coffee-rails', '~> 4.2'
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 # gem 'turbolinks', '~> 5'
+# spotify api integration
+gem 'rspotify'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
 # Use Redis adapter to run Action Cable in production
