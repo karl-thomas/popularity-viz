@@ -1,0 +1,3 @@
+class SpotifyAdapter
+  
+end
