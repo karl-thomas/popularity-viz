@@ -1,9 +1,10 @@
 class SpotifyController < ApplicationController
   before_action :set_adapter
 
-  def index
-    render json: @spotify_adapter.profile
-  end
+ def callback
+  @spotify_user = RSpotify::User.new(request.env['rack.request.query_hash']['code'])
+  binding.pry
+ end
 
   private
 
