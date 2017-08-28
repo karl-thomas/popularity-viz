@@ -14,13 +14,17 @@ class SpotifyAdapter
 
   def aggregate_data
     recent_tracks = find_tracks(recently_added_track_ids)
-    averages = average_audio_features(track_objs)
+    averages = average_audio_features(recent_tracks)
     {
       recent_playlists: recent_playlists.count,
       recently_added_tracks: recent_tracks.count,
       most_occuring_feature: most_occuring_feature(averages),
       average_energy: averages["average_energy"]
     }
+  end
+
+  def recent_saved_tracks
+    recent_tracks(self.user)
   end
 
   def owned_playlists_short
@@ -56,8 +60,12 @@ class SpotifyAdapter
     recent_playlists.flat_map {|playlist| recent_tracks(playlist) }
   end
 
-  def recent_tracks(playlist)
-    playlist.tracks_added_at.keys.select {|key| playlist.tracks_added_at[key] > two_weeks_ago}
+  def recent_tracks(entity)
+    entity.tracks_added_at.keys.select {|key| entity.tracks_added_at[key] > two_weeks_ago}
+  end
+
+  def track(id)
+    RSpotify::Track.find(id)
   end
 
   def find_tracks(array_of_ids)
@@ -79,7 +87,7 @@ class SpotifyAdapter
   end
 
   def sum_of_audio_features(track_objs)
-    @sum_of_audio_features ||= tracks_objs.reduce(Hash.new(0)) do |aggregate, track|
+    @sum_of_audio_features ||= track_objs.reduce(Hash.new(0)) do |aggregate, track|
       reduce_important_features(aggregate, track)
       aggregate
     end
