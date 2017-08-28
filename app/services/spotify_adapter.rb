@@ -1,6 +1,6 @@
 class SpotifyAdapter
   attr_reader :user, :two_weeks_ago
-  IMPORTANT_FEATURES = ["acousticness", "danceability", "duration_ms", "energy", "instrumentalness", "liveness", "loudness", "speechiness", "tempo", "valence"]
+  IMPORTANT_FEATURES = ["acousticness", "danceability", "duration_ms", "energy", "instrumentalness", "speechiness", "tempo", "valence"]
   
   def initialize
     RSpotify.authenticate(ENV["SPOTIFY_CLIENT_ID"], ENV["SPOTIFY_CLIENT_SECRET"] )
@@ -13,10 +13,13 @@ class SpotifyAdapter
   end
 
   def aggregate_data
-
+    recent_tracks = find_tracks(recently_added_track_ids)
+    averages = average_audio_features(track_objs)
     {
       recent_playlists: recent_playlists.count,
-      recently_added_tracks: recently_added_track_ids.count
+      recently_added_tracks: recent_tracks.count,
+      most_occuring_feature: most_occuring_feature(averages),
+      average_energy: averages["average_energy"]
     }
   end
 
@@ -60,17 +63,44 @@ class SpotifyAdapter
   def find_tracks(array_of_ids)
     RSpotify::Track.find(array_of_ids)
   end
-    
 
-  def average_audio_features
-    tracks = find_tracks(recently_added_track_ids)
-    tracks.reduce(Hash.new(0)) do |aggregate, track|
-      IMPORTANT_FEATURES.each do |feature|
-        value = track.audio_features.instance_variable_get("@#{feature}")
-        aggregate["average_#{feature}"] += value
-      end
+
+  # tracks_objs = find_tracks(recently_added_track_ids)
+  def average_audio_features(track_objs)
+    if !@averages
+      sum = sum_of_audio_features(track_objs)
+      @averages ||= sum.tap do |sum|
+        sum.each do |key,val|
+          sum[key] = (val/10).floor(2)
+        end  
+      end 
+    end
+    @averages
+  end
+
+  def sum_of_audio_features(track_objs)
+    @sum_of_audio_features ||= tracks_objs.reduce(Hash.new(0)) do |aggregate, track|
+      reduce_important_features(aggregate, track)
       aggregate
     end
   end
 
+  def most_occuring_feature(averages)
+    skimmed = skim_for_countable_averages(averages)
+    feature_array = skimmed.max_by {|key, value| value }
+    feature_array[0].partition("_")[2]
+  end
+
+private 
+  def reduce_important_features(aggregate, track)
+    IMPORTANT_FEATURES.each do |feature|
+      value = track.audio_features.instance_variable_get("@#{feature}")
+      aggregate["average_#{feature}"] += value
+    end 
+  end
+
+  def skim_for_countable_averages(averages)
+    countables = ["average_acousticness", "average_danceability", "average_energy", "average_instrumentalness", "average_speechiness"]
+    averages.select { |k,v| countables.include?(k)}
+  end
 end
