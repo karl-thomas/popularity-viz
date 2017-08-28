@@ -19,4 +19,7 @@ Rails.application.routes.draw do
   get 'twitter/recent_followers', to: 'twitter#recent_followers'
   get 'twitter/recent_favorites', to: 'twitter#recent_favorites'
   get 'twitter/formatted_profile', to: 'twitter#formatted_profile'
+
+  # spotify
+  get '/auth/spotify/callback', to: 'spotify#callback'
 end
