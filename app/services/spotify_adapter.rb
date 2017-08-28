@@ -3,7 +3,7 @@ class SpotifyAdapter
   IMPORTANT_FEATURES = ["acousticness", "danceability", "duration_ms", "energy", "instrumentalness", "speechiness", "tempo", "valence"]
   
   def initialize
-    RSpotify.authenticate(ENV["SPOTIFY_CLIENT_ID"], ENV["SPOTIFY_CLIENT_SECRET"] )
+    RSpotify.authenticate(ENV["SPOTIFY_CLIENT_ID"], ENV["SPOTIFY_CLIENT_SECRET"])
     @user = ENV['SPOTIFY_USERNAME']
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
@@ -24,7 +24,7 @@ class SpotifyAdapter
   end
 
   def recent_saved_tracks
-    recent_tracks(self.user)
+    recent_tracks(self.profile)
   end
 
   def owned_playlists_short
