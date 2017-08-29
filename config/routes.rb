@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
 
-  root to: 'spotify#index'
+  root to: 'spotify#start'
 
   # github info
   get 'github/profile', to: 'github#profile'
@@ -22,4 +22,5 @@ Rails.application.routes.draw do
 
   # spotify
   get '/auth/spotify/callback', to: 'spotify#callback'
+  get '/auth/spotify/index', to: 'spotify#index'
 end
