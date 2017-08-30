@@ -1,12 +1,17 @@
 class SpotifyAdapter
-  attr_reader :user, :profile, :two_weeks_ago
+  attr_reader :user, :username, :profile, :two_weeks_ago
   IMPORTANT_FEATURES = ["acousticness", "danceability", "duration_ms", "energy", "instrumentalness", "speechiness", "tempo", "valence"]
   
   def initialize
     RSpotify.authenticate(ENV["SPOTIFY_CLIENT_ID"], ENV["SPOTIFY_CLIENT_SECRET"])
-    @profile = RSpotify::User.find(ENV['SPOTIFY_USERNAME'])
+    @username = ENV['SPOTIFY_USERNAME']
+    load_profile
     load_user
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
+  end
+
+  def load_profile
+    @profile = RSpotify::User.find(ENV['SPOTIFY_USERNAME'])
   end
  
   def load_user
@@ -31,11 +36,13 @@ class SpotifyAdapter
   end
 
   def recent_saved_tracks
-    recent_tracks(self.profile)
+    self.user.saved_tracks # this populates tracks added at
+    write_user
+    recent_tracks(self.user.tracks_added_at)
   end
 
   def owned_playlists_short
-    self.profile.playlists.select { |playlist| playlist.owner.id == self.user }
+    self.profile.playlists.select { |playlist| playlist.owner.id == self.username }
   end
 
   # for some reason you cant see track info from user.playlists, so you have to go find the playlists individually. 
@@ -45,7 +52,7 @@ class SpotifyAdapter
 
   # access full playlist info
   def full_playlist(id)
-    RSpotify::Playlist.find(self.user, id)
+    RSpotify::Playlist.find(self.username, id)
   end
 
   def owned_playlists_full
@@ -68,7 +75,11 @@ class SpotifyAdapter
   end
 
   def recent_tracks(entity)
-    entity.tracks_added_at.keys.select {|key| entity.tracks_added_at[key] > two_weeks_ago}
+    if entity.class == Hash
+      entity.keys.select {|key| entity[key] > two_weeks_ago}
+    elsif  
+      entity.tracks_added_at.keys.select {|key| entity.tracks_added_at[key] > two_weeks_ago}
+    end
   end
 
   def track(id)
