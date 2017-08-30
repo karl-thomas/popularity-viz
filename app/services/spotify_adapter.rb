@@ -1,16 +1,23 @@
 class SpotifyAdapter
-  attr_reader :user, :two_weeks_ago
+  attr_reader :user, :profile, :two_weeks_ago
   IMPORTANT_FEATURES = ["acousticness", "danceability", "duration_ms", "energy", "instrumentalness", "speechiness", "tempo", "valence"]
   
   def initialize
     RSpotify.authenticate(ENV["SPOTIFY_CLIENT_ID"], ENV["SPOTIFY_CLIENT_SECRET"])
-    @user = ENV['SPOTIFY_USERNAME']
+    @profile = RSpotify::User.find(ENV['SPOTIFY_USERNAME'])
+    load_user
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
-
-  def profile 
-    @profile ||= RSpotify::User.find(self.user)
+ 
+  def load_user
+    user_preload = YAML.load_file('./user.yml')
+    @user = RSpotify::User.new(user_preload)
   end
+
+  def write_user
+    File.write("./user.yml", self.user.to_hash.to_yaml)
+  end
+
 
   def aggregate_data
     recent_tracks = find_tracks(recently_added_track_ids)
