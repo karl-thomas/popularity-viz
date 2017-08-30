@@ -1,6 +1,6 @@
 class SpotifyController < ApplicationController
   def index
-    redirect_to "http://google.com" if params[:rabbit] == ENV['RABBIT']
+    # redirect_to "http://google.com" if params[:rabbit] == ENV['RABBIT']
     @spotify_adapter = SpotifyAdapter.new
   end
 
