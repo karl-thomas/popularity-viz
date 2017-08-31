@@ -1,9 +1,7 @@
 Rails.application.routes.draw do
 
-  # root to: 'github#test'
-
-  # the actual blog route
-  get '/', to: 'main#index'
+  root 'spotify#index'
+  get '/auth/spotify/callback', to: 'spotify#spotify'
   # github info
   get 'github/profile', to: 'github#profile'
   get 'github/recent_repos', to: 'github#recent_repos'
@@ -21,4 +19,6 @@ Rails.application.routes.draw do
   get 'twitter/recent_followers', to: 'twitter#recent_followers'
   get 'twitter/recent_favorites', to: 'twitter#recent_favorites'
   get 'twitter/formatted_profile', to: 'twitter#formatted_profile'
+
+
 end
