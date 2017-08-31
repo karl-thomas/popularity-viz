@@ -10,6 +10,7 @@ class SpotifyAdapter
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
 
+
   def load_profile
     @profile = RSpotify::User.find(ENV['SPOTIFY_USERNAME'])
   end
@@ -129,4 +130,22 @@ private
     countables = ["average_acousticness", "average_danceability", "average_energy", "average_instrumentalness", "average_speechiness"]
     averages.select { |k,v| countables.include?(k)}
   end
+  
+  def auth_header
+    {
+      'Authorization' => "Basic #{ENV['SPOTIFY_BASE']}",
+      'Content-Type'  => 'application/json'
+    }
+  end
+  
+  def refresh_token
+    request_body = {
+      grant_type: 'refresh_token',
+      refresh_token: self.user.credentials['refresh_token']
+    }
+    response = RestClient.post('https://accounts.spotify.com/api/token', request_body, self.auth_header)
+    json = JSON.parse(response)
+    self.user.credentials['token'] = json['access_token']
+  end
+
 end
