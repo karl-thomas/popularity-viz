@@ -3,28 +3,16 @@ class SpotifyAdapter
   IMPORTANT_FEATURES = ["acousticness", "danceability", "duration_ms", "energy", "instrumentalness", "speechiness", "tempo", "valence"]
   
   def initialize
-    RSpotify.authenticate(ENV["SPOTIFY_CLIENT_ID"], ENV["SPOTIFY_CLIENT_SECRET"])
+    @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
     @username = ENV['SPOTIFY_USERNAME']
+
+    RSpotify.authenticate(ENV["SPOTIFY_CLIENT_ID"], ENV["SPOTIFY_CLIENT_SECRET"])
+    
     load_profile
     load_user
-    @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
+    refresh_token
   end
-
-
-  def load_profile
-    @profile = RSpotify::User.find(ENV['SPOTIFY_USERNAME'])
-  end
- 
-  def load_user
-    user_preload = YAML.load_file('./user.yml')
-    @user = RSpotify::User.new(user_preload)
-  end
-
-  def write_user
-    File.write("./user.yml", self.user.to_hash.to_yaml)
-  end
-
-
+  
   def aggregate_data
     recent_tracks = find_tracks(recently_added_track_ids)
     averages = average_audio_features(recent_tracks)
@@ -118,7 +106,21 @@ class SpotifyAdapter
     feature_array[0].partition("_")[2]
   end
 
-private 
+private
+
+  def load_profile
+    @profile = RSpotify::User.find(ENV['SPOTIFY_USERNAME'])
+  end
+ 
+  def load_user
+    user_preload = YAML.load_file('./user.yml')
+    @user = RSpotify::User.new(user_preload)
+  end
+
+  def write_user
+    File.write("./user.yml", self.user.to_hash.to_yaml)
+  end
+
   def reduce_important_features(aggregate, track)
     IMPORTANT_FEATURES.each do |feature|
       value = track.audio_features.instance_variable_get("@#{feature}")
@@ -143,7 +145,7 @@ private
       grant_type: 'refresh_token',
       refresh_token: self.user.credentials['refresh_token']
     }
-    response = RestClient.post('https://accounts.spotify.com/api/token', request_body, self.auth_header)
+    response = RestClient.post('https://accounts.spotify.com/api/token', request_body, auth_header)
     json = JSON.parse(response)
     self.user.credentials['token'] = json['access_token']
   end
