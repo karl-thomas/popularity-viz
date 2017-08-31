@@ -51,7 +51,7 @@ class TwitterController < ApplicationController
   end
 
   def recent_favorites
-    p @api_response = @twitter_adapter.retrieve_favorites(10)
+    @api_response = @twitter_adapter.retrieve_favorites(10)
     render json: @api_response
   end
 
