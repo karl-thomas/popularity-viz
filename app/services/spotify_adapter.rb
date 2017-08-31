@@ -9,12 +9,14 @@ class SpotifyAdapter
     RSpotify.authenticate(ENV["SPOTIFY_CLIENT_ID"], ENV["SPOTIFY_CLIENT_SECRET"])
     
     load_profile
-    load_user
+    load_user_auth
     refresh_token
   end
 
   def aggregate_data
-    recent_tracks = find_tracks(recently_added_track_ids)
+    pl_tracks = find_tracks(recently_added_track_ids)
+    recent_tracks = pl_tracks.concat(recent_saved_tracks)
+
     averages = average_audio_features(recent_tracks)
     {
       recent_playlists: recent_playlists.count,
@@ -59,9 +61,6 @@ class SpotifyAdapter
     playlist.tracks_added_at.any? { |track, added_at| added_at > two_weeks_ago }
   end
 
-  def recently_added_track_ids
-    recent_playlists.flat_map {|playlist| recent_tracks(playlist) }
-  end
 
   def recent_tracks(entity)
     if entity.class == Hash
@@ -71,6 +70,10 @@ class SpotifyAdapter
     end
   end
 
+  def recently_added_track_ids
+    recent_playlists.flat_map {|playlist| recent_tracks(playlist) }
+  end
+
   def track(id)
     RSpotify::Track.find(id)
   end
@@ -78,7 +81,6 @@ class SpotifyAdapter
   def find_tracks(array_of_ids)
     RSpotify::Track.find(array_of_ids)
   end
-
 
   # tracks_objs = find_tracks(recently_added_track_ids)
   def average_audio_features(track_objs)
@@ -112,7 +114,7 @@ private
     @profile = RSpotify::User.find(ENV['SPOTIFY_USERNAME'])
   end
  
-  def load_user
+  def load_user_auth
     user_preload = YAML.load_file('./user.yml')
     @user = RSpotify::User.new(user_preload)
   end
