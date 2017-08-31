@@ -12,7 +12,7 @@ class SpotifyAdapter
     load_user
     refresh_token
   end
-  
+
   def aggregate_data
     recent_tracks = find_tracks(recently_added_track_ids)
     averages = average_audio_features(recent_tracks)
@@ -66,8 +66,8 @@ class SpotifyAdapter
   def recent_tracks(entity)
     if entity.class == Hash
       entity.keys.select {|key| entity[key] > two_weeks_ago}
-    elsif  
-      entity.tracks_added_at.keys.select {|key| entity.tracks_added_at[key] > two_weeks_ago}
+    else
+      entity.tracks_added_at.map { |id, time| id if time > two_weeks_ago }
     end
   end
 
