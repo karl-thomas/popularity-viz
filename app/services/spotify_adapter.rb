@@ -14,13 +14,13 @@ class SpotifyAdapter
   end
 
   def aggregate_data
-    pl_tracks = find_tracks(recently_added_track_ids)
-    recent_tracks = pl_tracks.concat(recent_saved_tracks)
-
-    averages = average_audio_features(recent_tracks)
+    pl_tracks = recently_added_track_ids
+    tracks = pl_tracks.concat(recent_saved_tracks)
+    track_objs = find_tracks(tracks)
+    averages = average_audio_features(track_objs)
     {
       recent_playlists: recent_playlists.count,
-      recently_added_tracks: recent_tracks.count,
+      recently_added_tracks: tracks.count,
       most_occuring_feature: most_occuring_feature(averages),
       average_energy: averages["average_energy"]
     }
@@ -96,7 +96,7 @@ class SpotifyAdapter
   end
 
   def sum_of_audio_features(track_objs)
-    @sum_of_audio_features ||= track_objs.reduce(Hash.new(0)) do |aggregate, track|
+    track_objs.reduce(Hash.new(0)) do |aggregate, track|
       reduce_important_features(aggregate, track)
       aggregate
     end
