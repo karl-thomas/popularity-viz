@@ -37,7 +37,7 @@ gem 'twitter'
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 # gem 'turbolinks', '~> 5'
 # spotify api integration
-gem 'rspotify', git: 'https://github.com/guilhermesad/rspotify.git'
+gem 'rspotify'#, git: 'https://github.com/guilhermesad/rspotify.git'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.5'
 # Use Redis adapter to run Action Cable in production
