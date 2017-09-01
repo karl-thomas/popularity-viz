@@ -29,6 +29,14 @@ class SpotifyAdapter
     pl_tracks = recently_added_track_ids
     tracks = pl_tracks.concat(recent_saved_tracks)
   end
+
+  def recent_top_tracks
+    self.user.top_tracks(time_range: 'short_term')
+  end
+
+  def recent_top_artists
+    self.user.top_tracks(time_range: 'short_term')
+  end
   
   def recent_saved_tracks
     self.user.saved_tracks # this populates tracks added at
