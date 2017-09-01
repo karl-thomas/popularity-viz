@@ -14,8 +14,7 @@ class SpotifyAdapter
   end
 
   def aggregate_data
-    pl_tracks = recently_added_track_ids
-    tracks = pl_tracks.concat(recent_saved_tracks)
+    tracks = all_recent_tracks
     track_objs = find_tracks(tracks)
     averages = average_audio_features(track_objs)
     {
@@ -26,10 +25,19 @@ class SpotifyAdapter
     }
   end
 
+  def all_recent_tracks
+    pl_tracks = recently_added_track_ids
+    tracks = pl_tracks.concat(recent_saved_tracks)
+  end
+
   def recent_saved_tracks
     self.user.saved_tracks # this populates tracks added at
     write_user
     recent_tracks(self.user.tracks_added_at)
+  end
+  
+  def recommendations(track_ids)
+    RSpotify::Recommendations.generate(limit: 1, seed_tracks: track_ids)
   end
 
   def owned_playlists_short
