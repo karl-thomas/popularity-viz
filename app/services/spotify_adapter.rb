@@ -29,14 +29,14 @@ class SpotifyAdapter
     pl_tracks = recently_added_track_ids
     tracks = pl_tracks.concat(recent_saved_tracks)
   end
-
+  
   def recent_saved_tracks
     self.user.saved_tracks # this populates tracks added at
     write_user
     recent_tracks(self.user.tracks_added_at)
   end
   
-  def recommendations(track_ids)
+  def most_recommended_recommendation(track_ids)
     RSpotify::Recommendations.generate(limit: 1, seed_tracks: track_ids)
   end
 
