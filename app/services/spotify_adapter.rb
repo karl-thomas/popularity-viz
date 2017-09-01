@@ -25,6 +25,10 @@ class SpotifyAdapter
     }
   end
 
+  def recently_played
+    RSpotify.resolve_auth_request(self.username, 'me/player/recently-played?limit=30'
+  end
+
   def all_recent_tracks
     pl_tracks = recently_added_track_ids
     tracks = pl_tracks.concat(recent_saved_tracks)
