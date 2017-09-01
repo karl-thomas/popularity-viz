@@ -21,12 +21,14 @@ class SpotifyAdapter
       recent_playlists: recent_playlists.count,
       recently_added_tracks: tracks.count,
       most_occuring_feature: most_occuring_feature(averages),
-      average_energy: averages["average_energy"]
+      average_energy: averages["average_energy"],
+      top_track_artist: top_track.artists[0].name,
+      top_track: top_track.name
     }
   end
 
   def recently_played
-    RSpotify.resolve_auth_request(self.username, 'me/player/recently-played?limit=30'
+    RSpotify.resolve_auth_request(self.username, 'me/player/recently-played?limit=30')
   end
 
   def all_recent_tracks
@@ -34,14 +36,20 @@ class SpotifyAdapter
     tracks = pl_tracks.concat(recent_saved_tracks)
   end
 
-  def recent_top_tracks
-    self.user.top_tracks(time_range: 'short_term')
+  def top_track
+    self.user.top_tracks(time_range: 'short_term')[0]
   end
 
   def recent_top_artists
-    self.user.top_tracks(time_range: 'short_term')
+    self.user.top_artists(time_range: 'short_term')
   end
   
+  def recent_genres
+    recent_top_artists.flat_map {|a| a.genres }.sort
+  end
+
+  # interesting genres
+
   def recent_saved_tracks
     self.user.saved_tracks # this populates tracks added at
     write_user
