@@ -1,7 +1,7 @@
 class SpotifyAdapter
   attr_reader :user, :username, :profile, :two_weeks_ago
   IMPORTANT_FEATURES = ["acousticness", "danceability", "duration_ms", "energy", "instrumentalness", "speechiness", "tempo", "valence"]
-  
+  FUN_GENRES = ["alternative emo", "anti-folk", "brooklyn indie", "chamber pop", "chamber psych", "chillwave", "dance-punk", "deep australian indie", "escape room", "experimental rock", "folk punk", "freak folk", "garage psych", "indie psych-pop", "indie psych-rock", "indietronica", "lo-fi", "neo-psychedelic", "new americana", "noise pop", "nu gaze", "nu metal", "preverb", "punk blues", "slow core", "space rock", "stomp and holler", "stoner rock" ]
   def initialize
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
     @username = ENV['SPOTIFY_USERNAME']
@@ -17,13 +17,18 @@ class SpotifyAdapter
     tracks = all_recent_tracks
     track_objs = find_tracks(tracks)
     averages = average_audio_features(track_objs)
+    artists = recent_top_artists
+    genres = recent_genres(artists)
+    fun_genres = filter_boring_genres(genres)
     {
       recent_playlists: recent_playlists.count,
       recently_added_tracks: tracks.count,
       most_occuring_feature: most_occuring_feature(averages),
       average_energy: averages["average_energy"],
       top_track_artist: top_track.artists[0].name,
-      top_track: top_track.name
+      top_track: top_track.name,
+      recent_genres: genres.count,
+      interesting_genre: fun_genres.sample
     }
   end
 
@@ -44,11 +49,13 @@ class SpotifyAdapter
     self.user.top_artists(time_range: 'short_term')
   end
   
-  def recent_genres
-    recent_top_artists.flat_map {|a| a.genres }.sort
+  def recent_genres(artists)
+    artists.flat_map {|a| a.genres }.sort.uniq
   end
 
-  # interesting genres
+  def filter_boring_genres(genres)
+    genres.select {|genre| FUN_GENRES.include?(genre)}
+  end
 
   def recent_saved_tracks
     self.user.saved_tracks # this populates tracks added at
@@ -159,7 +166,7 @@ private
   end
 
   def skim_for_countable_averages(averages)
-    countables = ["average_acousticness", "average_danceability", "average_energy", "average_instrumentalness", "average_speechiness"]
+    countables = ["average_acousticness", "average_danceability", "average_instrumentalness", "average_speechiness"]
     averages.select { |k,v| countables.include?(k)}
   end
   
