@@ -22,6 +22,10 @@ class Repo < GithubAdapter
     self.updated_at > two_weeks_ago || self.pushed_at > two_weeks_ago
   end
 
+  def  recent_commit_dates
+    recent_commits.group_by(&:group_by_day)
+  end
+
   def recent_commits
     application_client
     self.client.commits_since(self.full_name, two_weeks_ago, author: self.user)
@@ -107,4 +111,9 @@ class Repo < GithubAdapter
       watchers: self.watchers_count
     }  
   end
+
+  private
+    def group_by_day
+      self[:commit][:author][:date].to_date.to_s  
+    end
 end
