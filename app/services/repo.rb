@@ -22,6 +22,23 @@ class Repo < GithubAdapter
     self.updated_at > two_weeks_ago || self.pushed_at > two_weeks_ago
   end
 
+  def recent_commit_time_ranges
+    recent_commit_dates.map do |day, commits|
+      commits.map do |commit| 
+        commit[:commit][:author][:date]
+      end
+    end
+    .delete_if {|dates| dates.count < 2}
+  end
+
+  def recent_commit_dates
+    recent_commits.group_by { |commit| group_by_day(commit) }
+  end
+
+  def group_by_day commit
+    commit[:commit][:author][:date].to_date.to_s  
+  end
+
   def recent_commits
     application_client
     self.client.commits_since(self.full_name, two_weeks_ago, author: self.user)
