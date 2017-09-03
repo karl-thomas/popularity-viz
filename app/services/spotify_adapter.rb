@@ -32,8 +32,9 @@ class SpotifyAdapter
     }
   end
 
-  def recently_played
-    RSpotify.resolve_auth_request(self.username, 'me/player/recently-played?limit=30')
+  def get_songs_after date
+    date = date.to_i
+    RSpotify.resolve_auth_request(self.username, "me/player/recently-played?after=#{date}&limit=50")
   end
 
   def all_recent_tracks
