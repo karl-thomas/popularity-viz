@@ -65,7 +65,7 @@ class SpotifyAdapter
   end
   
   def most_recommended_recommendation(track_ids)
-    RSpotify::Recommendations.generate(limit: 1, seed_tracks: track_ids)
+    RSpotify::Recommendations.generate(limit: 20, seed_tracks: track_ids)
   end
 
   def owned_playlists_short
