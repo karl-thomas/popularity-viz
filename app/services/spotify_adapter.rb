@@ -12,7 +12,7 @@ class SpotifyAdapter
     load_user_auth
     refresh_token
   end
-
+  
   def aggregate_data
     tracks = all_recent_tracks
     track_objs = find_tracks(tracks)
@@ -20,6 +20,7 @@ class SpotifyAdapter
     artists = recent_top_artists
     genres = recent_genres(artists)
     fun_genres = filter_boring_genres(genres)
+    
     {
       recent_playlists: recent_playlists.count,
       recently_added_tracks: tracks.count,
@@ -28,7 +29,8 @@ class SpotifyAdapter
       top_track_artist: top_track.artists[0].name,
       top_track: top_track.name,
       recent_genres: genres.count,
-      interesting_genre: fun_genres.sample
+      interesting_genre: fun_genres.sample,
+      saved_albums: saved_albums
     }
   end
 
@@ -40,6 +42,10 @@ class SpotifyAdapter
   def all_recent_tracks
     pl_tracks = recently_added_track_ids
     tracks = pl_tracks.concat(recent_saved_tracks)
+  end
+
+  def saved_albums
+    self.user.saved_albums.count
   end
 
   def top_track
@@ -65,7 +71,7 @@ class SpotifyAdapter
   end
   
   def most_recommended_recommendation(track_ids)
-    RSpotify::Recommendations.generate(limit: 20, seed_tracks: track_ids)
+    RSpotify::Recommendations.generate(limit: 1, seed_tracks: track_ids)
   end
 
   def owned_playlists_short
