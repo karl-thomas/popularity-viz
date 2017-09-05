@@ -1,7 +1,10 @@
 class SpotifyAdapter
+  
   attr_reader :user, :username, :profile, :two_weeks_ago
+
   IMPORTANT_FEATURES = ["acousticness", "danceability", "duration_ms", "energy", "instrumentalness", "speechiness", "tempo", "valence"]
   FUN_GENRES = ["alternative emo", "anti-folk", "brooklyn indie", "chamber pop", "chamber psych", "chillwave", "dance-punk", "deep australian indie", "escape room", "experimental rock", "folk punk", "freak folk", "garage psych", "indie psych-pop", "indie psych-rock", "indietronica", "lo-fi", "neo-psychedelic", "new americana", "noise pop", "nu gaze", "nu metal", "preverb", "punk blues", "slow core", "space rock", "stomp and holler", "stoner rock" ]
+  
   def initialize
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
     @username = ENV['SPOTIFY_USERNAME']
@@ -12,7 +15,7 @@ class SpotifyAdapter
     load_user_auth
     refresh_token
   end
-
+  
   def aggregate_data
     tracks = all_recent_tracks
     track_objs = find_tracks(tracks)
@@ -20,6 +23,7 @@ class SpotifyAdapter
     artists = recent_top_artists
     genres = recent_genres(artists)
     fun_genres = filter_boring_genres(genres)
+
     {
       recent_playlists: recent_playlists.count,
       recently_added_tracks: tracks.count,
@@ -28,7 +32,8 @@ class SpotifyAdapter
       top_track_artist: top_track.artists[0].name,
       top_track: top_track.name,
       recent_genres: genres.count,
-      interesting_genre: fun_genres.sample
+      interesting_genre: fun_genres.sample,
+      saved_albums: saved_albums
     }
   end
 
@@ -40,6 +45,10 @@ class SpotifyAdapter
   def all_recent_tracks
     pl_tracks = recently_added_track_ids
     tracks = pl_tracks.concat(recent_saved_tracks)
+  end
+
+  def saved_albums
+    self.user.saved_albums.count
   end
 
   def top_track
