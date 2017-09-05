@@ -1,7 +1,10 @@
 class SpotifyAdapter
+  
   attr_reader :user, :username, :profile, :two_weeks_ago
+
   IMPORTANT_FEATURES = ["acousticness", "danceability", "duration_ms", "energy", "instrumentalness", "speechiness", "tempo", "valence"]
   FUN_GENRES = ["alternative emo", "anti-folk", "brooklyn indie", "chamber pop", "chamber psych", "chillwave", "dance-punk", "deep australian indie", "escape room", "experimental rock", "folk punk", "freak folk", "garage psych", "indie psych-pop", "indie psych-rock", "indietronica", "lo-fi", "neo-psychedelic", "new americana", "noise pop", "nu gaze", "nu metal", "preverb", "punk blues", "slow core", "space rock", "stomp and holler", "stoner rock" ]
+  
   def initialize
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
     @username = ENV['SPOTIFY_USERNAME']
@@ -20,7 +23,7 @@ class SpotifyAdapter
     artists = recent_top_artists
     genres = recent_genres(artists)
     fun_genres = filter_boring_genres(genres)
-    
+
     {
       recent_playlists: recent_playlists.count,
       recently_added_tracks: tracks.count,
