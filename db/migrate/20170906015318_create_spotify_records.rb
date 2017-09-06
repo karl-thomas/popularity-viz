@@ -10,6 +10,7 @@ class CreateSpotifyRecords < ActiveRecord::Migration[5.1]
       t.integer :recent_genres  
       t.string :interesting_genre
       t.integer :saved_albums
+      t.integer :recent_saved_albums
       
       t.timestamps
     end
