@@ -1,4 +1,4 @@
-class TwitterRecord < ApplicationRecord
+class TwitterRecord
   before_validation :inspect_old_data, :assign_total_differences
   
   attr_accessor :differences
