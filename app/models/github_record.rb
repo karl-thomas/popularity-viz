@@ -1,2 +1,2 @@
-class GithubRecord < ApplicationRecord
+class GithubRecord 
 end
