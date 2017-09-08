@@ -29,8 +29,7 @@ class SpotifyAdapter
       recently_added_tracks: tracks.count,
       most_occuring_feature: most_occuring_feature(averages),
       average_energy: averages["average_energy"],
-      top_track_artist: top_track.artists[0].name,
-      top_track: top_track.name,
+      top_track: { track: top_track.name, artist: top_track.artists[0].name },
       recent_genres: genres.count,
       interesting_genre: fun_genres.sample,
       saved_albums: saved_albums
@@ -124,7 +123,8 @@ class SpotifyAdapter
   end
 
   def find_tracks(array_of_ids)
-    RSpotify::Track.find(array_of_ids)
+    ids = array_of_ids.reject {|id| id.nil? }
+    RSpotify::Track.find(ids)
   end
 
   # tracks_objs = find_tracks(recently_added_track_ids)
