@@ -1,6 +1,6 @@
 class Post
   include Mongoid::Document
-  field :spotify_record, type: String
-  field :github_record: String
-  field :twitter_record, type: String
+  field :spotify_record, type: Hash
+  field :github_record, type: Hash
+  field :twitter_record, type: Hash
 end

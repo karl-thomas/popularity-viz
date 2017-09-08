@@ -123,7 +123,8 @@ class SpotifyAdapter
   end
 
   def find_tracks(array_of_ids)
-    RSpotify::Track.find(array_of_ids)
+    ids = array_of_ids.reject {|id| id.nil? }
+    RSpotify::Track.find(ids)
   end
 
   # tracks_objs = find_tracks(recently_added_track_ids)
