@@ -13,6 +13,12 @@ class Repo < GithubAdapter
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
 
+  # -- todo -- Pull requestin,
+  def recent_pull_requests
+    personal_client
+    self.client.pull_requests(id, since: two_weeks_ago)
+  end
+
   def collaborators
     personal_client
     self.client.collaborators(self.full_name).pluck(:login)
