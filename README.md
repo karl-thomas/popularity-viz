@@ -1,6 +1,6 @@
 # Automatic Blog
 
-This is the back end of the automatic blog. An program that writes a blog post for me every two weeks using information from API's of the websites and applications I use the most, such as this one, Github! I'll have a link up to a the front end that I will serve this backend to pretty soon (as of 9/9/2017).
+This is the back end of the Automatic Blog. A program that writes a blog post for me every two weeks using information from API's of the websites and applications I use the most, such as this one, Github! I'll have a link up to the front end that will serve this backend pretty soon (as of 9/9/2017).
 
 ## Stack and Setup
 This project is using 
