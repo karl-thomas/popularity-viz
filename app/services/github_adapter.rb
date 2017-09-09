@@ -89,7 +89,7 @@ class GithubAdapter
     api_response = self.client.starred(self.user)
     convert_to_repos(api_response)
   end
-
+  
   def convert_to_repos(sawyer_resources)
     sawyer_resources.map { |resource| Repo.new(resource)}
   end
