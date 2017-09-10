@@ -89,7 +89,7 @@ class GithubAdapter
     api_response = self.client.starred(self.user)
     convert_to_repos(api_response)
   end
-  
+
   def convert_to_repos(sawyer_resources)
     sawyer_resources.map { |resource| Repo.new(resource)}
   end
@@ -200,7 +200,7 @@ class GithubAdapter
     end
 
     def simple_repo_reducers
-      [:recent_comments, :recent_deployments, :recent_commits, :branches]
+      [:recent_comments, :recent_deployments, :recent_commits, :recent_pull_requests, :branches]
     end
 
     def choose_recent_project(collected_repositories, aggregate, pairs)
