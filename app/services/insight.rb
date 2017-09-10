@@ -8,16 +8,16 @@ class Insight
   end
 
   def focused_song
+    stuff = []
     updated_repos.flat_map do |repo| 
       repo.recent_commit_time_ranges.map do |range|
-        p range.first, range.last
-        p songs = spotify_adapter.get_songs_after(range.first)["items"]
+        songs = spotify_adapter.get_songs_after(range.first)["items"]
         if song = songs.find {|song| song['played_at'] < range.last}
-          p "here"
-          return song
+          stuff << song
         end
       end
     end
+    stuff
   end
 
   def updated_repos
