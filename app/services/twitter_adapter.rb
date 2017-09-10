@@ -67,7 +67,7 @@ class TwitterAdapter
     }
   end
 
-  def aggregate_user_data
+  def aggregate_data_record
     profile_info = self.formatted_profile
     tweet_info = self.recent_tweet_counts
    
