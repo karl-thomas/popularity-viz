@@ -36,7 +36,7 @@ class GithubAdapter
     @profile ||= self.client.user(self.user)
   end 
 
-  def aggregrate_data_record
+  def aggregate_data_record
    profile_and_repos =  profile_data.merge(reduced_repo_data)
    profile_and_repos.merge(reduced_traffic_data)
   end

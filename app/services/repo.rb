@@ -35,7 +35,7 @@ class Repo < GithubAdapter
         commit[:commit][:author][:date]
       end
     end
-    .delete_if {|dates| dates.count < 2}
+    .delete_if { |dates| dates.count < 2 }
   end
 
   def recent_commit_dates
