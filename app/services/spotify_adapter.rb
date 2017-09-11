@@ -16,7 +16,7 @@ class SpotifyAdapter
     refresh_token
   end
   
-  def aggregate_data
+  def aggregate_data_record
     tracks = all_recent_tracks
     track_objs = find_tracks(tracks)
     averages = average_audio_features(track_objs)
@@ -39,6 +39,11 @@ class SpotifyAdapter
   def get_songs_after date
     date = date.to_i
     RSpotify.resolve_auth_request(self.username, "me/player/recently-played?after=#{date}&limit=50")
+  end
+
+  def get_songs_before date
+    date = date.to_i
+    RSpotify.resolve_auth_request(self.username, "me/player/recently-played?before=#{date}&limit=50")
   end
 
   def all_recent_tracks
