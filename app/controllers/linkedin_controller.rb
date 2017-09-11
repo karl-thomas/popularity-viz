@@ -1,14 +1,14 @@
-class LinkedinController < ApplicationController
-  before_action :set_linkedin_adapter
+# class LinkedinController < ApplicationController
+#   before_action :set_linkedin_adapter
   
-  def profile
-    @api_response = @linkedin_adapter.profile
-    render json: @api_response
-  end
+#   def profile
+#     @api_response = @linkedin_adapter.profile
+#     render json: @api_response
+#   end
 
-  private 
+#   private 
 
-    def set_linkedin_adapter
-      @linkedin_adapter = LinkedinAdapter.new
-    end
-end
+#     def set_linkedin_adapter
+#       @linkedin_adapter = LinkedinAdapter.new
+#     end
+# end
