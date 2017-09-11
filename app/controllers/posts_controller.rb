@@ -2,6 +2,7 @@ class PostsController < ApplicationController
 
   def index
     post = Post.first
-    render json: post.as_json
+    relevant_data = post.as_json.delete_if {|k| k == '_id'}
+    render json: relevant_data
   end
 end
