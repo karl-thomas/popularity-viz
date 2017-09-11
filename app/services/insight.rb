@@ -1,5 +1,5 @@
+# this class is for combining apis in interesting ways
 class Insight
-  #this will be databasified eventually
   attr_reader :spotify_adapter, :github_adapter 
 
   def initialize(args)
@@ -7,17 +7,32 @@ class Insight
     @spotify_adapter = args.fetch(:spotify)
   end
 
+  def total_insights
+    {
+      focused_song: focused_song_to_s
+    }
+  end
+
+  def focused_song_to_s
+    data = focused_song
+    "A song that helped me focus recently was #{data[:track]} by #{data[:artist]}"
+  end
+
   def focused_song
-    stuff = []
-    updated_repos.flat_map do |repo| 
-      repo.recent_commit_time_ranges.map do |range|
-        songs = spotify_adapter.get_songs_after(range.first)["items"]
-        if song = songs.find {|song| song['played_at'] < range.last}
-          stuff << song
-        end
+    repo = updated_repos.first 
+
+    repo.recent_commit_time_ranges.map do |range|
+      # range.last is the first commit of the day, range.first is the last
+      songs = spotify_adapter.get_songs_after(range.last)["items"]
+      if song = songs.find {|song| song['played_at'] < range.first}
+        song_hash = { 
+              track: song['track']['name'], 
+              artist: song['track']['artists'].first['name'],
+              played_at: song['played_at']
+          }
+        return song_hash
       end
     end
-    stuff
   end
 
   def updated_repos
