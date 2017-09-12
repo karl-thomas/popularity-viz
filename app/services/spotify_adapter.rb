@@ -73,7 +73,6 @@ class SpotifyAdapter
 
   def recent_saved_tracks
     self.user.saved_tracks # this populates tracks added at
-    write_user
     recent_tracks(self.user.tracks_added_at)
   end
   
@@ -166,11 +165,12 @@ private
  
   def load_user_auth
     user_preload = YAML.load_file('./user.yml')
-    @user = RSpotify::User.new(user_preload)
-  end
+    user_preload["email"] = ENV["SPOOFY_EMAIL"]
+    user_preload["credentials"]["token"] = ENV["SPOTIFY_TOKEN"]
+    user_preload["credentials"]["refresh_token"] = ENV["SPOTIFY_REFRESH_TOKEN"]
 
-  def write_user
-    File.write("./user.yml", self.user.to_hash.to_yaml)
+    p user_preload
+    @user = RSpotify::User.new(user_preload)
   end
 
   def reduce_important_features(aggregate, track)
