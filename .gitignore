@@ -17,7 +17,7 @@
 /tmp/*
 !/log/.keep
 !/tmp/.keep
-user.yml
+
 /node_modules
 /yarn-error.log
 thing.txt
