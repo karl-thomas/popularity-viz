@@ -158,7 +158,6 @@ test:
 production:
     clients:
         default:
-            database: auto_blog
             uri: <%= ENV["MONGODB_URI"] %>
         options:
             skip_version_check: true
