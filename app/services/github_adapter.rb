@@ -1,6 +1,3 @@
-require 'pry'
-require 'octokit'
-
 class GithubAdapter
   attr_reader :user, :client
 
