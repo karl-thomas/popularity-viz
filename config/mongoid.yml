@@ -157,6 +157,7 @@ test:
         max_pool_size: 1
 production:
     clients:
+        database: auto_blog
         default:
             uri: <%= ENV["MONGODB_URI"] %>
         options:
