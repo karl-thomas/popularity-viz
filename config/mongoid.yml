@@ -157,8 +157,8 @@ test:
         max_pool_size: 1
 production:
     clients:
-        database: auto_blog
         default:
+            database: auto_blog
             uri: <%= ENV["MONGODB_URI"] %>
         options:
             skip_version_check: true
