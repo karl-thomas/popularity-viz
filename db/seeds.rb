@@ -19,7 +19,6 @@ t_record = t.aggregate_data_record
 total_insights = i.total_insights
 
 post_hash = { github_record: g_record, spotify_record: s_record, twitter_record: t_record, insights: total_insights }
-binding.pry
 post = Post.new(post_hash)
 
 # just incase i need to do somehting in betwwen init and save

@@ -1,5 +1,5 @@
 class SpotifyRecord 
-  before_save :set_recent_saved_albums
+  # before_save :set_recent_saved_albums
  
   def set_recent_saved_albums
     old_record = SpotifyRecord.last || nil

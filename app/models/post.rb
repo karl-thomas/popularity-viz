@@ -7,8 +7,7 @@ class Post
   field :twitter_record, type: Hash
   field :insights, type: Hash
 
-
-  before_save :inspect_old_data, :assign_total_differences
-  
   attr_accessor :differences
+  
+  before_save :inspect_old_data, :assign_total_differences
 end
