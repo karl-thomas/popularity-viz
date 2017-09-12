@@ -2,7 +2,7 @@
 birthdate: 
 country: US
 display_name: 
-email: <%= ENV["SPOOFY_EMAIL"] %>
+email: '%{email}'
 followers:
   href: 
   total: 0
@@ -15,8 +15,8 @@ id: karl.thomas925
 type: user
 uri: spotify:user:karl.thomas925
 credentials:
-  token:  <%= ENV["SPOTIFY_TOKEN"] %> 
-  refresh_token: <%= ENV["SPOTIFY_REFRESH_TOKEN"] %>
+  token:  '%{token}' 
+  refresh_token: '%{refresh_token}'
 tracks_added_at:
   0qeGCfzkQfpt2JlHqxamOG: 2017-08-30 05:08:17.000000000 Z
   44wIEAIAv1N2VK3p6nSHj1: 2017-05-06 20:57:24.000000000 Z
