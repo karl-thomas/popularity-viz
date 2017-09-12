@@ -1,0 +1,40 @@
+---
+birthdate: 
+country: US
+display_name: 
+email: <%= ENV["SPOOFY_EMAIL"] %>
+followers:
+  href: 
+  total: 0
+images: []
+product: premium
+external_urls:
+  spotify: https://open.spotify.com/user/karl.thomas925
+href: https://api.spotify.com/v1/users/karl.thomas925
+id: karl.thomas925
+type: user
+uri: spotify:user:karl.thomas925
+credentials:
+  token:  <%= ENV["SPOTIFY_TOKEN"] %> 
+  refresh_token: <%= ENV["SPOTIFY_REFRESH_TOKEN"] %>
+tracks_added_at:
+  0qeGCfzkQfpt2JlHqxamOG: 2017-08-30 05:08:17.000000000 Z
+  44wIEAIAv1N2VK3p6nSHj1: 2017-05-06 20:57:24.000000000 Z
+  0o1WzHAdTdI0jpgghsOm2h: 2017-03-24 13:22:43.000000000 Z
+  7L4AhOuAGaV56tmVpR3RQx: 2017-03-24 13:22:43.000000000 Z
+  003Ufao43zAKOtUGadBtNT: 2017-03-24 13:22:43.000000000 Z
+  16CiZUohyBovSKRH1tCRtf: 2017-03-24 13:22:43.000000000 Z
+  7vorel5te92DArpAO5WZEQ: 2017-03-24 13:22:43.000000000 Z
+  05zD8Vy0XZ3kAvTXy6jrhq: 2017-03-24 13:22:43.000000000 Z
+  57xQRVkK1BB4JePQOqL6Xh: 2017-03-24 13:22:43.000000000 Z
+  0z5ZPs57J2KERwM1tBM2GF: 2017-03-11 16:12:06.000000000 Z
+  17it0vjFwi5ifTPMwYL6iy: 2016-12-31 15:51:02.000000000 Z
+  6NwbeybX6TDtXlpXvnUOZC: 2016-12-22 02:37:05.000000000 Z
+  2tmPUesfahXo2ZaLnFG3iP: 2016-09-19 21:32:09.000000000 Z
+  7g55puEpzTjA1UojwpQkF9: 2016-09-19 21:32:09.000000000 Z
+  2OTovEYN1lx57YfLEe4ylM: 2016-09-19 01:28:37.000000000 Z
+  0qHrE21zGV4DThyfx0HdFu: 2016-09-19 01:28:37.000000000 Z
+  4C0rGNpTIPTCVRiT4XKYMa: 2016-09-19 01:28:37.000000000 Z
+  7irbGDuFQ1kzimoztuDkRp: 2016-09-19 01:28:37.000000000 Z
+  17eJJpSWm9JWl4wYmbwixM: 2016-09-19 01:28:37.000000000 Z
+  25m01aAzJ7UODy7d6vJBNM: 2016-09-19 01:28:37.000000000 Z
