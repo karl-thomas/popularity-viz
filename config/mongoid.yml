@@ -159,4 +159,7 @@ production:
     clients:
         default:
             uri: <%= ENV["MONGODB_URI"] %>
+        options:
+            database: auto_blog
+            skip_version_check: true
         safe: true
