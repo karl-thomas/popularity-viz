@@ -3,6 +3,7 @@ class SpotifyAdapter
   attr_reader :user, :username, :profile, :two_weeks_ago
 
   IMPORTANT_FEATURES = ["acousticness", "danceability", "duration_ms", "energy", "instrumentalness", "speechiness", "tempo", "valence"]
+  BORING_GENRES = ['rock', 'metal', 'pop', 'garage rock', 'pop rock', 'hip hop', 'indie punk', 'indie rock', 'indie r&b', 'indie fol_k', 'rap', 'underground hip hop', 'new rave', 'modern rock', 'alternative hip hop', 'alternative rock', 'bass music', 'edm', 'alt-indie rock', 'indie garage rock']
   def initialize
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
     @username = ENV['SPOTIFY_USERNAME']
@@ -18,8 +19,10 @@ class SpotifyAdapter
     tracks = all_recent_tracks
     track_objs = find_tracks(tracks)
     averages = average_audio_features(track_objs)
-    # artists = recent_top_artists spotify currently not returning artists
-    genres = recent_genres(artists)
+    track_hashes = recently_played
+    recent_singers = artists(track_hashes)
+    # artists = recent_top_artists ===== spotify currently not returning artists, code is valid on my end
+    genres = recent_genres(recent_singers)
     fun_genres = filter_boring_genres(genres)
 
     {
@@ -36,7 +39,17 @@ class SpotifyAdapter
   end
 
   def recently_played
-    RSpotify.resolve_auth_request(self.username, "me/player/recently-played?limit=50")
+    @recently_played ||= RSpotify.resolve_auth_request(self.username, "me/player/recently-played?limit=50")
+  end
+
+  # expects tracks to be a hash, because recently_played is broke in the gem
+  def artists(tracks)
+    ids = tracks['items'].flat_map do |info| 
+      info['track']['album']['artists'].pluck('id')
+    end
+    uniq_ids = ids.uniq
+    # returns artists
+    RSpotify::Artist.find(uniq_ids)
   end
 
   def get_songs_after date
