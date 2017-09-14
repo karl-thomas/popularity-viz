@@ -1,7 +1,8 @@
 module TwitterCalcs
   def inspect_old_data
     #for when it is the first element
-    old_data = Post.last.twitter_record || self.twitter_record 
+    old_record = Post.last || self 
+    old_data = old_record.twitter_record
     # use each pair to check old data against new data
     @differences = old_data.map do |column_name, old_value| 
       p "mapping #{column_name} with value #{old_value}"
