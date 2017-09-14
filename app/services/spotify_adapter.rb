@@ -3,8 +3,7 @@ class SpotifyAdapter
   attr_reader :user, :username, :profile, :two_weeks_ago
 
   IMPORTANT_FEATURES = ["acousticness", "danceability", "duration_ms", "energy", "instrumentalness", "speechiness", "tempo", "valence"]
-  FUN_GENRES = ["alternative emo", "anti-folk", "brooklyn indie", "chamber pop", "chamber psych", "chillwave", "dance-punk", "deep australian indie", "escape room", "experimental rock", "folk punk", "freak folk", "garage psych", "indie psych-pop", "indie psych-rock", "indietronica", "lo-fi", "neo-psychedelic", "new americana", "noise pop", "nu gaze", "nu metal", "preverb", "punk blues", "slow core", "space rock", "stomp and holler", "stoner rock" ]
-  
+  BORING_GENRES = ['rock', 'metal', 'pop', 'garage rock', 'pop rock', 'hip hop', 'indie punk', 'indie rock', 'indie r&b', 'indie fol_k', 'rap', 'underground hip hop', 'new rave', 'modern rock', 'alternative hip hop', 'alternative rock', 'bass music', 'edm', 'alt-indie rock', 'indie garage rock']
   def initialize
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
     @username = ENV['SPOTIFY_USERNAME']
@@ -20,20 +19,40 @@ class SpotifyAdapter
     tracks = all_recent_tracks
     track_objs = find_tracks(tracks)
     averages = average_audio_features(track_objs)
-    artists = recent_top_artists
-    genres = recent_genres(artists)
+    recommendation = most_recommended_recommendation(tracks)
+    track_hashes = recently_played
+    recent_singers = artists(track_hashes)
+    # artists = recent_top_artists ===== spotify currently not returning artists, code is valid on my end
+    genres = recent_genres(recent_singers)
     fun_genres = filter_boring_genres(genres)
-
-    {
+    
+    @data_record = {
+      playlists: user.playlists.count,
       recent_playlists: recent_playlists.count,
       recently_added_tracks: tracks.count,
       most_occuring_feature: most_occuring_feature(averages),
       average_energy: averages["average_energy"],
-      top_track: { track: top_track.name, artist: top_track.artists[0].name },
+      # this is currently removed from the spotify api, but is still valid on my end.
+      # top_track: { track: top_track.name, artist: top_track.artists[0].name },
       recent_genres: genres.count,
       interesting_genre: fun_genres.sample,
-      saved_albums: saved_albums
+      saved_albums: saved_albums,
+      recommended_track: recommendation
     }
+  end
+
+  def recently_played
+    @recently_played ||= RSpotify.resolve_auth_request(self.username, "me/player/recently-played?limit=50")
+  end
+
+  # expects tracks to be a hash, because recently_played is broke in the gem
+  def artists(tracks)
+    ids = tracks['items'].flat_map do |info| 
+      info['track']['album']['artists'].pluck('id')
+    end
+    uniq_ids = ids.uniq
+    # returns artists
+    RSpotify::Artist.find(uniq_ids)
   end
 
   def get_songs_after date
@@ -68,7 +87,7 @@ class SpotifyAdapter
   end
 
   def filter_boring_genres(genres)
-    genres.select {|genre| FUN_GENRES.include?(genre)}
+    genres.select {|genre| !BORING_GENRES.include?(genre)}
   end
 
   def recent_saved_tracks
@@ -76,8 +95,19 @@ class SpotifyAdapter
     recent_tracks(self.user.tracks_added_at)
   end
   
+
   def most_recommended_recommendation(track_ids)
-    RSpotify::Recommendations.generate(limit: 1, seed_tracks: track_ids)
+    # only accepts 5 tracks
+    track_ids = track_ids[0..4]
+    api_result = RSpotify::Recommendations.generate(limit: 1, seed_tracks: track_ids)
+    # actually access the pnly track in the results.
+    recommendation = api_result.tracks.first
+    
+    {
+      track: recommendation.name,
+      artist: recommendation.artists.first.name,
+      genres: recommendation.artists.first.genres[0..3]
+    }
   end
 
   def owned_playlists_short
@@ -169,15 +199,27 @@ private
     user_preload["credentials"]["token"] = ENV["SPOTIFY_TOKEN"]
     user_preload["credentials"]["refresh_token"] = ENV["SPOTIFY_REFRESH_TOKEN"]
 
-    p user_preload
     @user = RSpotify::User.new(user_preload)
   end
 
+  # grab the audio features, for each of the important features add them up as an average
   def reduce_important_features(aggregate, track)
+    features = handle_audio_features(track)
+    return nil if features.nil?
+
     IMPORTANT_FEATURES.each do |feature|
-      value = track.audio_features.instance_variable_get("@#{feature}")
-      aggregate["average_#{feature}"] += value
+      value = features.send(feature)  
+      aggregate["average_#{feature}"] += value unless value.nil?
     end 
+  end
+
+  # the rescue is because not all songs will have audio features calculated, which is pretty rare
+  def handle_audio_features(track)
+    begin
+      track.audio_features
+    rescue  
+      nil
+    end
   end
 
   def skim_for_countable_averages(averages)
