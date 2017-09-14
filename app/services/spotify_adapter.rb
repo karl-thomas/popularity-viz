@@ -19,22 +19,25 @@ class SpotifyAdapter
     tracks = all_recent_tracks
     track_objs = find_tracks(tracks)
     averages = average_audio_features(track_objs)
+    recommendation = most_recommended_recommendation(tracks)
     track_hashes = recently_played
     recent_singers = artists(track_hashes)
     # artists = recent_top_artists ===== spotify currently not returning artists, code is valid on my end
     genres = recent_genres(recent_singers)
     fun_genres = filter_boring_genres(genres)
-
-    {
+    
+    @data_record = {
+      playlists: user.playlists.count,
       recent_playlists: recent_playlists.count,
       recently_added_tracks: tracks.count,
       most_occuring_feature: most_occuring_feature(averages),
       average_energy: averages["average_energy"],
-      # this is currently rmoved from the spotify api, but is still valid on my end.
+      # this is currently removed from the spotify api, but is still valid on my end.
       # top_track: { track: top_track.name, artist: top_track.artists[0].name },
       recent_genres: genres.count,
       interesting_genre: fun_genres.sample,
-      saved_albums: saved_albums
+      saved_albums: saved_albums,
+      recommended_track: recommendation
     }
   end
 
@@ -92,8 +95,19 @@ class SpotifyAdapter
     recent_tracks(self.user.tracks_added_at)
   end
   
+
   def most_recommended_recommendation(track_ids)
-    RSpotify::Recommendations.generate(limit: 1, seed_tracks: track_ids)
+    # only accepts 5 tracks
+    track_ids = track_ids[0..4]
+    api_result = RSpotify::Recommendations.generate(limit: 1, seed_tracks: track_ids)
+    # actually access the pnly track in the results.
+    recommendation = api_result.tracks.first
+    
+    {
+      track: recommendation.name,
+      artist: recommendation.artists.first.name,
+      genres: recommendation.artists.first.genres
+    }
   end
 
   def owned_playlists_short
@@ -185,7 +199,6 @@ private
     user_preload["credentials"]["token"] = ENV["SPOTIFY_TOKEN"]
     user_preload["credentials"]["refresh_token"] = ENV["SPOTIFY_REFRESH_TOKEN"]
 
-    p user_preload
     @user = RSpotify::User.new(user_preload)
   end
 
