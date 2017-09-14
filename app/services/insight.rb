@@ -15,6 +15,7 @@ class Insight
 
   def focused_song_to_s
     data = focused_song
+    return nil if !data || data[0].nil?
     "A song that helped me focus recently was #{data[:track]} by #{data[:artist]}"
   end
 
