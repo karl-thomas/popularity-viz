@@ -1,26 +1,34 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
-#   Character.create(name: 'Luke', movie: movies.first)
-
+logger = ActiveSupport::TaggedLogging.new(Logger.new(STDOUT))
+logger.info "initializing github adapter"
 g = GithubAdapter.new
+
+logger.info "initializing spotify adapter"
 s = SpotifyAdapter.new
+
+logger.info "initializing twitter adapter"
 t = TwitterAdapter.new
 
 insight_hash = {github: g, spotify: s, twitter: t}
+
+logger.info "initializing insights"
 i = Insight.new(insight_hash)
 
+logger.info "retrieving api data from github"
 g_record = g.aggregate_data_record
+
+logger.info "retrieving api data from spotify"
 s_record = s.aggregate_data_record
+
+logger.info "retrieving api data from twitter"
 t_record = t.aggregate_data_record
+
+logger.info "retrieving insights on api data"
 total_insights = i.total_insights
 
 post_hash = { github_record: g_record, spotify_record: s_record, twitter_record: t_record, insights: total_insights }
+logger.info "creating new post"
 post = Post.new(post_hash)
 
-# just incase i need to do somehting in betwwen init and save
 
+logger.info "saving post"
 post.save
