@@ -106,7 +106,7 @@ class SpotifyAdapter
     {
       track: recommendation.name,
       artist: recommendation.artists.first.name,
-      genres: recommendation.artists.first.genres
+      genres: recommendation.artists.first.genres[0..3]
     }
   end
 
