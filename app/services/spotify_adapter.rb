@@ -121,7 +121,6 @@ class SpotifyAdapter
 
   # access full playlist info
   def full_playlist(id)
-    p id
     RSpotify::Playlist.find(self.username, id)
   end
 
