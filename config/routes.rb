@@ -2,7 +2,8 @@ Rails.application.routes.draw do
 
   get 'posts', to: 'posts#index' 
 
-  # i may need these routes to get some aciliary data  
+  # i may need these routes to get some anciliary data  
+
   # root 'spotify#index'
   # get '/auth/spotify/callback', to: 'spotify#spotify'
   
