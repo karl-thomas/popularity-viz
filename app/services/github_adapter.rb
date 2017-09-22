@@ -7,21 +7,21 @@ class GithubAdapter
   end
 
   def application_client
-    if !self.client || self.client.client_id.nil?
+    if !client || client.client_id.nil?
       @client  = Octokit::Client.new \
         :client_id     => ENV['GITHUB_CLIENT_ID'],
         :client_secret => ENV['GITHUB_CLIENT_SECRET']
     end  
-    self.client.auto_paginate = true  
+    client.auto_paginate = true  
   end
 
   def personal_client
-    if !self.client || self.client.login.nil?
+    if !client || client.login.nil?
       @client = Octokit::Client.new \
         :login => ENV['GITHUB_USERNAME'],
         :password => ENV['GITHUB_PASSWORD']
     end
-    self.client.auto_paginate = true 
+    client.auto_paginate = true 
   end
 
   def two_weeks_ago
@@ -30,7 +30,7 @@ class GithubAdapter
 
   def profile
     personal_client
-    @profile ||= self.client.user(self.user)
+    @profile ||= client.user(user)
   end 
 
   def aggregate_data_record
@@ -45,10 +45,10 @@ class GithubAdapter
       gists: total_gists,
       followers: profile.followers,
       following: profile.following,
-      starred_repos: self.starred_repos.count, # the recent calc needs be done DB side
-      recent_projects: self.recent_updated_repos(owned_repos).count,
-      recent_gists: self.recent_gists.count,
-      recently_starred_gists: self.recent_starred_gists.count
+      starred_repos: starred_repos.count, # the recent calc needs be done DB side
+      recent_projects: recent_updated_repos(owned_repos).count,
+      recent_gists: recent_gists.count,
+      recently_starred_gists: recent_starred_gists.count
     }
   end
 
@@ -67,27 +67,27 @@ class GithubAdapter
   def owned_repos
     return @owned_repos if @owned_repos
     application_client
-    api_response = self.client.repos( self.user, affiliation: "owner" )
+    api_response = client.repos( user, affiliation: "owner" )
     @owned_repos = convert_to_repos(api_response)
   end
 
   def collaborated_repos
     return @collaborated_repos if @collaborated_repos
     application_client
-    api_response = self.client.repos( self.user, affiliation: "collaborator" )
+    api_response = client.repos( user, affiliation: "collaborator" )
     @collabor = convert_to_repos(api_response)
   end
 
   def organizations_repos
     return @organizations_repos if @organizations_repos
     application_client
-    api_response = self.client.repos( self.user, affiliation: "organization_member" )
+    api_response = client.repos( user, affiliation: "organization_member" )
     @organizations_repos = convert_to_repos(api_response)
   end
 
   def starred_repos
     application_client
-    api_response = self.client.starred(self.user)
+    api_response = client.starred(user)
     @starred_repos ||= convert_to_repos(api_response)
   end
 
@@ -97,7 +97,7 @@ class GithubAdapter
 
   def find_repo(id)
     personal_client
-    api_response = self.client.repository(id)
+    api_response = client.repository(id)
     Repo.new(api_response)
   end
 
@@ -109,18 +109,18 @@ class GithubAdapter
   # gists
   def recent_gists
     application_client
-    self.client.gists( self.user, since: two_weeks_ago )
+    client.gists( user, since: two_weeks_ago )
   end
 
   def recent_starred_gists
     personal_client
-    self.client.starred_gists( since: two_weeks_ago )
+    client.starred_gists( since: two_weeks_ago )
   end
   
   # recent project data --------------------------
   # this data is for only recently updated repos
   def collect_repo_data
-    recent_repos = self.recent_updated_repos(collaborated_repos)
+    recent_repos = recent_updated_repos(collaborated_repos)
     # @var ||= for repeat method calls
     @recent_repo_data ||= recent_repos.map {|repo| repo.dependent_repo_data}
   end
@@ -157,7 +157,7 @@ class GithubAdapter
   end
 
   def reduced_traffic_data
-    repos = self.owned_repos 
+    repos = owned_repos 
     starting_data = collect_traffic_data(repos)
     hottest_repo = most_viewed_repo(repos, starting_data)
 
