@@ -91,10 +91,25 @@ class GithubAdapter
     sawyer_resources.map { |resource| Repo.new(resource)}
   end
 
+  def find_repo(id)
+    personal_client
+    api_response = self.client.repository(id)
+    Repo.new(api_response)
+  end
+
   def recent_updated_repos(repos)
     repos.select { |repo| repo.recent? }
   end
 
+  def most_viewed_repo(repos, traffic_data = collect_traffic_data(repos))
+    # this uses the enumerator returned by each_with_index and gives it to max_by 
+    # so that it may easily find the traffic data for that repo and sum it together
+    repos.each_with_index.max_by do |repo, index|
+      traffic_data[index][:recent_clones] + 
+      traffic_data[index][:recent_views] + 
+      traffic_data[index][:recent_stargazers]
+    end
+  end
 
   # gists
   def recent_gists
@@ -108,6 +123,7 @@ class GithubAdapter
   end
   
   # recent project data --------------------------
+  # this data is for only recently updated repos
   def collect_repo_data
     recent_repos = self.recent_updated_repos(collaborated_repos)
     recent_repos.map {|repo| repo.dependent_repo_data}
@@ -128,17 +144,15 @@ class GithubAdapter
 
  
   # repo traffic, for all owned repos --------------
-
+  # this data is for all owned repos by the authorized user.
   def collect_traffic_data
     self.owned_repos.map {|repo| repo.traffic_data }
   end
 
   def reduced_traffic_data
     starting_data = collect_traffic_data
-
     starting_data.reduce(Hash.new(0)) do |aggregate, pairs|
       pairs.each do |key, value|
-        choose_hottest_repo(starting_data, aggregate, key, value)
         reduce_uniques(aggregate, key, value)
         reduce_traffic_keys(aggregate, key, value)
       end
@@ -149,18 +163,6 @@ class GithubAdapter
 
   private
 
-    def choose_hottest_repo(starting_data, aggregate, key, id )
-      if key == :repo_id
-        aggregate[:hottest_repo] = id if aggregate[:hottest_repo] == 0
-
-        new_repo = traffic_data_sift(starting_data, id)  
-        tracked_repo = traffic_data_sift(starting_data, aggregate[:hottest_repo])
-
-        if sum_of_traffic(new_repo) > sum_of_traffic(tracked_repo)
-          aggregate[:hottest_repo] = new_repo[:repo_id]
-        end
-      end
-    end
 
     def traffic_data_sift(traffic_data, id)
       traffic_data.find {|pairs| pairs[:repo_id] == id}
