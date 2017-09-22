@@ -35,7 +35,7 @@ class GithubAdapter
 
   def aggregate_data_record
    profile_and_repos =  profile_data.merge(reduced_repo_data)
-   profile_and_repos.merge(reduced_traffic_data)
+   aggregate_record = profile_and_repos.merge(reduced_traffic_data)
   end
 
   def profile_data
@@ -62,29 +62,33 @@ class GithubAdapter
     profile.public_repos + profile.total_private_repos
   end
 
-  # repo collections 
+  # repo collections ------------------------------------------
+  # guard statements to return instance variable because these may get called a few times
   def owned_repos
+    return @owned_repos if @owned_repos
     application_client
     api_response = self.client.repos( self.user, affiliation: "owner" )
-    convert_to_repos(api_response)
+    @owned_repos = convert_to_repos(api_response)
   end
 
   def collaborated_repos
+    return @collaborated_repos if @collaborated_repos
     application_client
     api_response = self.client.repos( self.user, affiliation: "collaborator" )
-    convert_to_repos(api_response)
+    @collabor = convert_to_repos(api_response)
   end
 
   def organizations_repos
+    return @organizations_repos if @organizations_repos
     application_client
     api_response = self.client.repos( self.user, affiliation: "organization_member" )
-    convert_to_repos(api_response)
+    @organizations_repos = convert_to_repos(api_response)
   end
 
   def starred_repos
     application_client
     api_response = self.client.starred(self.user)
-    convert_to_repos(api_response)
+    @starred_repos ||= convert_to_repos(api_response)
   end
 
   def convert_to_repos(sawyer_resources)
@@ -101,15 +105,6 @@ class GithubAdapter
     repos.select { |repo| repo.recent? }
   end
 
-  def most_viewed_repo(repos, traffic_data = collect_traffic_data(repos))
-    # this uses the enumerator returned by each_with_index and gives it to max_by 
-    # so that it may easily find the traffic data for that repo and sum it together
-    repos.each_with_index.max_by do |repo, index|
-      traffic_data[index][:recent_clones] + 
-      traffic_data[index][:recent_views] + 
-      traffic_data[index][:recent_stargazers]
-    end
-  end
 
   # gists
   def recent_gists
@@ -126,7 +121,8 @@ class GithubAdapter
   # this data is for only recently updated repos
   def collect_repo_data
     recent_repos = self.recent_updated_repos(collaborated_repos)
-    recent_repos.map {|repo| repo.dependent_repo_data}
+    # @var ||= for repeat method calls
+    @recent_repo_data ||= recent_repos.map {|repo| repo.dependent_repo_data}
   end
 
   def reduced_repo_data
@@ -145,24 +141,40 @@ class GithubAdapter
  
   # repo traffic, for all owned repos --------------
   # this data is for all owned repos by the authorized user.
-  def collect_traffic_data
-    self.owned_repos.map {|repo| repo.traffic_data }
+  def collect_traffic_data(repos)
+    # @var ||= for repeat method calls
+    @traffic_data ||= repos.map {|repo| repo.traffic_data }
+  end
+
+  def most_viewed_repo(repos, traffic_data = collect_traffic_data(repos))
+    # this uses the enumerator returned by each_with_index and gives it to max_by 
+    # so that it may easily find the traffic data for that repo and sum it together
+    repos.each_with_index.max_by do |repo, index|
+      traffic_data[index][:recent_clones] + 
+      traffic_data[index][:recent_views] + 
+      traffic_data[index][:recent_stargazers]
+    end
   end
 
   def reduced_traffic_data
-    starting_data = collect_traffic_data
-    starting_data.reduce(Hash.new(0)) do |aggregate, pairs|
+    repos = self.owned_repos 
+    starting_data = collect_traffic_data(repos)
+    hottest_repo = most_viewed_repo(repos, starting_data)
+
+    # melt all the traffic data of all repos into something digesable
+    reduced_data = starting_data.reduce(Hash.new(0)) do |aggregate, pairs|
       pairs.each do |key, value|
         reduce_uniques(aggregate, key, value)
         reduce_traffic_keys(aggregate, key, value)
       end
       aggregate
     end
+    # add the most viewed repo to the data
+    reduced_data.tap {|data| data[:most_viewed_repo] = hottest_repo}
   end
 
 
   private
-
 
     def traffic_data_sift(traffic_data, id)
       traffic_data.find {|pairs| pairs[:repo_id] == id}
@@ -180,13 +192,11 @@ class GithubAdapter
       end
     end
 
-
     def reduce_traffic_keys(aggregate, key, value) 
       if simple_traffic_reducers.include?(key)
         aggregate[key] += value
       end
     end
-
 
     def simple_traffic_reducers
       [:recent_clones, :recent_views, :recent_stargazers, :watchers]
