@@ -1,5 +1,5 @@
 class Repo < GithubAdapter
-  attr_reader :root, :owner, :id, :full_name, :two_weeks_ago, :watchers_count, :updated_at, :pushed_at
+  attr_reader :root, :owner, :id, :full_name, :two_weeks_ago, :watchers_count, :updated_at, :pushed_at, :traffic_data
 
   def initialize(sawyer_resource = {}) 
     application_client
@@ -11,9 +11,9 @@ class Repo < GithubAdapter
     @updated_at = root.updated_at
     @pushed_at = root.pushed_at
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
+    @traffic_data = TrafficData.new( root, application_client, personal_client) 
   end
 
-  # -- todo -- Pull requestin,
   def recent_pull_requests
     personal_client
     all_pulls = client.pull_requests(id, state: 'all', since: two_weeks_ago)
@@ -100,36 +100,52 @@ class Repo < GithubAdapter
     }
   end
 
-  def stargazers
-    application_client
-    client.stargazers(full_name, accept: 'application/vnd.github.v3.star+json', auto_traversal: true).pluck(:user).pluck(:login)
-  end
+  class TrafficData  
+    attr_reader :full_name, :root, :watchers_count, :application_client, :personal_client, :client
 
-  def recent_stargazers
-    stargazers.select { |stargazer| stargazer[:starred_at] > two_weeks_ago}
-  end
+    def initialize(root, application_client, personal_client)
+      @full_name = full_name
+      @application_client = application_client
+      @watchers_count = root.watchers_count || nil
+      @full_name = root.full_name || nil
+      @personal_client = personal_client
+    end
 
-  def recent_clones
-    personal_client
-    media_type = "application/vnd.github.spiderman-preview"
-    client.clones(full_name, per: "week", accept: media_type)
-  end
+    def stargazers
+      application_client.stargazers(full_name, accept: 'application/vnd.github.v3.star+json', auto_traversal: true).pluck(:user).pluck(:login)
+    end
 
-  def recent_views
-    personal_client
-    media_type = "application/vnd.github.spiderman-preview"      
-    client.views(full_name, per: "week", accept: media_type)
-  end
+    def recent_stargazers
+      stargazers.select { |stargazer| stargazer[:starred_at] > two_weeks_ago}
+    end
 
-  def traffic_data
-    views = recent_views
-    {
-      repo_id: id,
-      recent_views: views[:count],
-      recent_clones: recent_clones[:count],
-      unique_views: views[:uniques],
-      recent_stargazers: recent_stargazers.count,
-      watchers: watchers_count
-    }  
+    def recent_clones
+      media_type = "application/vnd.github.spiderman-preview"
+      personal_client.clones(full_name, per: "week", accept: media_type)
+    end
+
+    def recent_views
+      media_type = "application/vnd.github.spiderman-preview"      
+      personal_client.views(full_name, per: "week", accept: media_type)
+    end
+
+    def to_h
+      views = recent_views
+      @traffic_data ||= {
+        recent_views: views[:count],
+        recent_clones: recent_clones[:count],
+        unique_views: views[:uniques],
+        recent_stargazers: recent_stargazers.count,
+        watchers: watchers_count
+      }  
+    end
+
+    def sum_of_interactions
+      data_set = self.to_h
+      # countable sums
+      data_set[:recent_clones] + 
+      data_set[:recent_views] + 
+      data_set[:recent_stargazers]
+    end    
   end
 end
