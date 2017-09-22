@@ -13,6 +13,7 @@ class GithubAdapter
         :client_secret => ENV['GITHUB_CLIENT_SECRET']
     end  
     client.auto_paginate = true  
+    client
   end
 
   def personal_client
@@ -22,6 +23,7 @@ class GithubAdapter
         :password => ENV['GITHUB_PASSWORD']
     end
     client.auto_paginate = true 
+    client
   end
 
   def two_weeks_ago
@@ -143,7 +145,7 @@ class GithubAdapter
   # this data is for all owned repos by the authorized user.
   def collect_traffic_data(repos)
     # @var ||= for repeat method calls
-    @traffic_data ||= repos.map {|repo| repo.traffic_data }
+    traffic_data = repos.map {|repo| repo.traffic_data }
   end
 
   def most_viewed_repo(repos, traffic_data = collect_traffic_data(repos))
