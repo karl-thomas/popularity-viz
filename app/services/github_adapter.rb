@@ -149,7 +149,7 @@ class GithubAdapter
 
   def most_viewed_repo
     found_repo = self.owned_repos.max_by { |repo| repo.traffic_data.sum_of_interactions }
-    found_repo.lowdown_hash
+    found_repo.traffic_data.to_h
   end
 
   def reduced_traffic_data
