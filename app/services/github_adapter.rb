@@ -126,18 +126,26 @@ class GithubAdapter
     # @var ||= for repeat method calls
     @recent_repo_data ||= recent_repos.map {|repo| repo.dependent_repo_data}
   end
+  
+  def choose_most_used_language(recent_repo_data)
+    recent_repo_data.pluck(:most_used_lang).max_by do |lang, bytes|
+      bytes
+    end
+  end
 
   def reduced_repo_data
     repositories = collect_repo_data
-    reduced_data = repositories.reduce(Hash.new(0)) do |aggregate, pairs|
-      choose_recent_project(repositories, aggregate, pairs)
+    language = choose_most_used_language(repositories)
+
+    reduced_data = repositories.reduce(Hash.new(0)) do |aggregate, pairs|   
       pairs.each do |key, value|
+        choose_recent_project(repositories, aggregate, pairs)
         reduce_repo_keys(aggregate, key, value)
-        choose_hottest_language(aggregate, key, value)
       end
       aggregate
     end
-    truncate_most_used_lang(reduced_data)
+    # add the most used language to the data. 
+    reduced_data.tap { |data| data[:most_used_lang] = language }
   end
 
  
@@ -211,20 +219,4 @@ class GithubAdapter
       collected_repositories.find {|repo| repo[:repo].id == id}
     end
 
-    def truncate_most_used_lang(reduced_data)
-      reduced_data[:most_used_lang] = reduced_data[:most_used_lang][0]
-      reduced_data
-    end
-
-    def choose_hottest_language(aggregate, key, lang_array)
-      if key == :most_used_lang
-        if aggregate[key] == 0
-          aggregate[:most_used_lang] = lang_array
-        else
-          if aggregate[key][1] < lang_array[1]
-            aggregate[:most_used_lang] = lang_array
-          end
-        end
-      end
-    end
 end
