@@ -143,27 +143,19 @@ class GithubAdapter
  
   # repo traffic, for all owned repos --------------
   # this data is for all owned repos by the authorized user.
-  def collect_traffic_data(repos)
-    # @var ||= for repeat method calls
-    traffic_data = repos.map {|repo| repo.traffic_data }
+  def collect_traffic_data
+    traffic_data = self.owned_repos.map {|repo| repo.traffic_data.to_h }
   end
 
-  def most_viewed_repo(repos, traffic_data = collect_traffic_data(repos))
-    # this uses the enumerator returned by each_with_index and gives it to max_by 
-    # so that it may easily find the traffic data for that repo and sum it together
-    repos.each_with_index.max_by do |repo, index|
-      traffic_data[index][:recent_clones] + 
-      traffic_data[index][:recent_views] + 
-      traffic_data[index][:recent_stargazers]
-    end
+  def most_viewed_repo
+    found_repo = self.owned_repos.max_by { |repo| repo.traffic_data.sum_of_interactions }
+    found_repo.lowdown_hash
   end
 
   def reduced_traffic_data
-    repos = owned_repos 
-    starting_data = collect_traffic_data(repos)
-    hottest_repo = most_viewed_repo(repos, starting_data)
+    starting_data = collect_traffic_data
 
-    # melt all the traffic data of all repos into something digesable
+    # melt all the traffic data of all repos into something digestable
     reduced_data = starting_data.reduce(Hash.new(0)) do |aggregate, pairs|
       pairs.each do |key, value|
         reduce_uniques(aggregate, key, value)
@@ -172,20 +164,11 @@ class GithubAdapter
       aggregate
     end
     # add the most viewed repo to the data
-    reduced_data.tap {|data| data[:most_viewed_repo] = hottest_repo}
+    reduced_data.tap {|data| data[:most_viewed_repo] = most_viewed_repo}
   end
 
 
   private
-
-    def traffic_data_sift(traffic_data, id)
-      traffic_data.find {|pairs| pairs[:repo_id] == id}
-    end
-
-    def sum_of_traffic(sifted_traffic)
-      sifted_traffic[:recent_clones] + sifted_traffic[:recent_views] + sifted_traffic[:recent_stargazers]
-    end
-
     def reduce_uniques(aggregate, key, views)
       if key == :unique_views
         aggregate[key] = 1 if aggregate[key] == 0 || aggregate[key] == nil
@@ -234,7 +217,6 @@ class GithubAdapter
     end
 
     def choose_hottest_language(aggregate, key, lang_array)
-
       if key == :most_used_lang
         if aggregate[key] == 0
           aggregate[:most_used_lang] = lang_array
