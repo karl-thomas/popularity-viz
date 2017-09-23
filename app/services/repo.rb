@@ -14,6 +14,14 @@ class Repo < GithubAdapter
     @traffic_data = TrafficData.new( root, application_client, personal_client) 
   end
 
+  def lowdown_hash 
+    {
+      full_name: full_name,
+      language: most_used_lang,
+      recent: recent?
+    }.merge(traffic_data.to_h)
+  end
+
   def recent_pull_requests
     personal_client
     all_pulls = client.pull_requests(id, state: 'all', since: two_weeks_ago)
@@ -126,15 +134,19 @@ class Repo < GithubAdapter
 
     def recent_views
       media_type = "application/vnd.github.spiderman-preview"      
-      personal_client.views(full_name, per: "week", accept: media_type)
+      @recent_views ||= personal_client.views(full_name, per: "week", accept: media_type)
+      @recent_views[:count]
+    end
+
+    def unique_views
+      recent_views[:uniques]
     end
 
     def to_h
-      views = recent_views
       @traffic_data ||= {
-        recent_views: views[:count],
+        recent_views: recent_views,
         recent_clones: recent_clones[:count],
-        unique_views: views[:uniques],
+        unique_views: unique_views,
         recent_stargazers: recent_stargazers.count,
         watchers: watchers_count
       }  
@@ -142,7 +154,7 @@ class Repo < GithubAdapter
 
     def sum_of_interactions
       data_set = self.to_h
-      # countable sums
+      # countable values
       data_set[:recent_clones] + 
       data_set[:recent_views] + 
       data_set[:recent_stargazers]
