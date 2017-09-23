@@ -106,7 +106,7 @@ class Repo < GithubAdapter
   end
 
   class TrafficData  
-    attr_reader :repo, :application_client, :personal_client, :client, :two_weeks_ago
+    attr_reader :repo, :application_client, :personal_client, :two_weeks_ago
 
     def initialize(repo, application_client, personal_client)
       @repo = repo 
