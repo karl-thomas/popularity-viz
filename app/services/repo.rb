@@ -14,14 +14,6 @@ class Repo < GithubAdapter
     @traffic_data = TrafficData.new( root, application_client, personal_client) 
   end
 
-  def lowdown_hash 
-    {
-      full_name: full_name,
-      language: most_used_lang,
-      recent: recent?
-    }.merge(traffic_data.to_h)
-  end
-
   def recent_pull_requests
     personal_client
     all_pulls = client.pull_requests(id, state: 'all', since: two_weeks_ago)
@@ -109,18 +101,17 @@ class Repo < GithubAdapter
   end
 
   class TrafficData  
-    attr_reader :full_name, :root, :watchers_count, :application_client, :personal_client, :client
+    attr_reader :repo, :application_client, :personal_client, :client, :two_weeks_ago
 
-    def initialize(root, application_client, personal_client)
-      @full_name = full_name
+    def initialize(repo, application_client, personal_client)
+      @repo = repo 
       @application_client = application_client
-      @watchers_count = root.watchers_count || nil
-      @full_name = root.full_name || nil
       @personal_client = personal_client
+      @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
     end
 
     def stargazers
-      application_client.stargazers(full_name, accept: 'application/vnd.github.v3.star+json', auto_traversal: true).pluck(:user).pluck(:login)
+      application_client.stargazers(repo.full_name, accept: 'application/vnd.github.v3.star+json', auto_traversal: true).pluck(:user).pluck(:login)
     end
 
     def recent_stargazers
@@ -129,13 +120,12 @@ class Repo < GithubAdapter
 
     def recent_clones
       media_type = "application/vnd.github.spiderman-preview"
-      personal_client.clones(full_name, per: "week", accept: media_type)
+      personal_client.clones(repo.full_name, per: "week", accept: media_type)
     end
 
     def recent_views
       media_type = "application/vnd.github.spiderman-preview"      
-      @recent_views ||= personal_client.views(full_name, per: "week", accept: media_type)
-      @recent_views[:count]
+      @recent_views ||= personal_client.views(repo.full_name, per: "week", accept: media_type)
     end
 
     def unique_views
@@ -144,11 +134,14 @@ class Repo < GithubAdapter
 
     def to_h
       @traffic_data ||= {
-        recent_views: recent_views,
+        full_name: repo.full_name,
+        language: repo.language, 
+        recent: repo.recent?,
+        recent_views: recent_views[:count],
         recent_clones: recent_clones[:count],
         unique_views: unique_views,
         recent_stargazers: recent_stargazers.count,
-        watchers: watchers_count
+        watchers: repo.watchers_count
       }  
     end
 
