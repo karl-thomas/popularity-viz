@@ -1,8 +1,16 @@
 class PostsController < ApplicationController 
 
   def index
-    post = Post.first
-    relevant_data = post.as_json.delete_if {|k| k == '_id'}
+    posts = Post.all
+    
+    # convert posts to json
+    relevant_data = posts.map(&:to_json)
+    
+    render json: relevant_data
+  end
+
+  def show
+    post = Post.find(params[:id])
     render json: relevant_data
   end
 end
