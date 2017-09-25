@@ -9,6 +9,7 @@ module TwitterCalcs
       new_value = self.twitter_record[column_name.to_sym]
       assign_twitter_differences(column_name, old_value, new_value)
     end
+    assign_total_differences
   end
 
 
