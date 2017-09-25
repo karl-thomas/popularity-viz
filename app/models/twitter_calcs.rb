@@ -1,7 +1,10 @@
+# this module is for finding the recent happenings of the authorized twitter user
+  #- the reason for that is because twitter does not have timestamps on everything, 
+  #- so in order to find if a thing is recent or not, i need to see if existed in my database previously. 
 module TwitterCalcs
   def inspect_old_data
     #for when it is the first element
-    old_record = Post.last || self 
+    old_record = self.class.last || self 
     old_data = old_record.twitter_record
     # use each pair to check old data against new data
     @differences = old_data.map do |column_name, old_value| 

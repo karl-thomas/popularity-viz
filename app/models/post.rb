@@ -1,7 +1,8 @@
 class Post
-  include TwitterCalcs
+  include TwitterCalcs # ./twitter_calcs 
 
   include Mongoid::Document
+  include Mongoid::Timestamps
   field :spotify_record, type: Hash
   field :github_record, type: Hash
   field :twitter_record, type: Hash
