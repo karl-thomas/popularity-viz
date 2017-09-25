@@ -7,21 +7,23 @@ class GithubAdapter
   end
 
   def application_client
-    if !self.client || self.client.client_id.nil?
+    if !client || client.client_id.nil?
       @client  = Octokit::Client.new \
         :client_id     => ENV['GITHUB_CLIENT_ID'],
         :client_secret => ENV['GITHUB_CLIENT_SECRET']
     end  
-    self.client.auto_paginate = true  
+    client.auto_paginate = true  
+    client
   end
 
   def personal_client
-    if !self.client || self.client.login.nil?
+    if !client || client.login.nil?
       @client = Octokit::Client.new \
         :login => ENV['GITHUB_USERNAME'],
         :password => ENV['GITHUB_PASSWORD']
     end
-    self.client.auto_paginate = true 
+    client.auto_paginate = true 
+    client
   end
 
   def two_weeks_ago
@@ -30,12 +32,12 @@ class GithubAdapter
 
   def profile
     personal_client
-    @profile ||= self.client.user(self.user)
+    @profile ||= client.user(user)
   end 
 
   def aggregate_data_record
    profile_and_repos =  profile_data.merge(reduced_repo_data)
-   profile_and_repos.merge(reduced_traffic_data)
+   aggregate_record = profile_and_repos.merge(reduced_traffic_data)
   end
 
   def profile_data
@@ -45,10 +47,10 @@ class GithubAdapter
       gists: total_gists,
       followers: profile.followers,
       following: profile.following,
-      starred_repos: self.starred_repos.count, # the recent calc needs be done DB side
-      recent_projects: self.recent_updated_repos(owned_repos).count,
-      recent_gists: self.recent_gists.count,
-      recently_starred_gists: self.recent_starred_gists.count
+      starred_repos: starred_repos.count, # the recent calc needs be done DB side
+      recent_projects: recent_updated_repos(owned_repos).count,
+      recent_gists: recent_gists.count,
+      recently_starred_gists: recent_starred_gists.count
     }
   end
 
@@ -62,33 +64,43 @@ class GithubAdapter
     profile.public_repos + profile.total_private_repos
   end
 
-  # repo collections 
+  # repo collections ------------------------------------------
+  # guard statements to return instance variable because these may get called a few times
   def owned_repos
+    return @owned_repos if @owned_repos
     application_client
-    api_response = self.client.repos( self.user, affiliation: "owner" )
-    convert_to_repos(api_response)
+    api_response = client.repos( user, affiliation: "owner" )
+    @owned_repos = convert_to_repos(api_response)
   end
 
   def collaborated_repos
+    return @collaborated_repos if @collaborated_repos
     application_client
-    api_response = self.client.repos( self.user, affiliation: "collaborator" )
-    convert_to_repos(api_response)
+    api_response = client.repos( user, affiliation: "collaborator" )
+    @collabor = convert_to_repos(api_response)
   end
 
   def organizations_repos
+    return @organizations_repos if @organizations_repos
     application_client
-    api_response = self.client.repos( self.user, affiliation: "organization_member" )
-    convert_to_repos(api_response)
+    api_response = client.repos( user, affiliation: "organization_member" )
+    @organizations_repos = convert_to_repos(api_response)
   end
 
   def starred_repos
     application_client
-    api_response = self.client.starred(self.user)
-    convert_to_repos(api_response)
+    api_response = client.starred(user)
+    @starred_repos ||= convert_to_repos(api_response)
   end
 
   def convert_to_repos(sawyer_resources)
     sawyer_resources.map { |resource| Repo.new(resource)}
+  end
+
+  def find_repo(id)
+    personal_client
+    api_response = client.repository(id)
+    Repo.new(api_response)
   end
 
   def recent_updated_repos(repos)
@@ -99,77 +111,72 @@ class GithubAdapter
   # gists
   def recent_gists
     application_client
-    self.client.gists( self.user, since: two_weeks_ago )
+    client.gists( user, since: two_weeks_ago )
   end
 
   def recent_starred_gists
     personal_client
-    self.client.starred_gists( since: two_weeks_ago )
+    client.starred_gists( since: two_weeks_ago )
   end
   
   # recent project data --------------------------
+  # this data is for only recently updated repos
   def collect_repo_data
-    recent_repos = self.recent_updated_repos(collaborated_repos)
-    recent_repos.map {|repo| repo.dependent_repo_data}
+    recent_repos = recent_updated_repos(collaborated_repos)
+    # @var ||= for repeat method calls
+    @recent_repo_data ||= recent_repos.map {|repo| repo.dependent_repo_data}
+  end
+  
+  def choose_most_used_language(recent_repo_data)
+    recent_repo_data.pluck(:most_used_lang).max_by do |lang, bytes|
+      bytes
+    end
   end
 
   def reduced_repo_data
     repositories = collect_repo_data
-    reduced_data = repositories.reduce(Hash.new(0)) do |aggregate, pairs|
-      choose_recent_project(repositories, aggregate, pairs)
+    language = choose_most_used_language(repositories)
+
+    reduced_data = repositories.reduce(Hash.new(0)) do |aggregate, pairs|   
       pairs.each do |key, value|
+        choose_recent_project(repositories, aggregate, pairs)
         reduce_repo_keys(aggregate, key, value)
-        choose_hottest_language(aggregate, key, value)
       end
       aggregate
     end
-    truncate_most_used_lang(reduced_data)
+    # add the most used language to the data. 
+    reduced_data.tap { |data| data[:most_used_lang] = language }
   end
 
  
   # repo traffic, for all owned repos --------------
-
+  # this data is for all owned repos by the authorized user.
   def collect_traffic_data
-    self.owned_repos.map {|repo| repo.traffic_data }
+    traffic_data = self.owned_repos.map {|repo| repo.traffic_data.to_h }
+  end
+
+  def most_viewed_repo
+    found_repo = self.owned_repos.max_by { |repo| repo.traffic_data.sum_of_interactions }
+    found_repo.traffic_data.to_h
   end
 
   def reduced_traffic_data
     starting_data = collect_traffic_data
 
-    starting_data.reduce(Hash.new(0)) do |aggregate, pairs|
+    # melt all the traffic data of all repos into something digestable
+    reduced_data = starting_data.reduce(Hash.new(0)) do |aggregate, pairs|
       pairs.each do |key, value|
-        choose_hottest_repo(starting_data, aggregate, key, value)
         reduce_uniques(aggregate, key, value)
         reduce_traffic_keys(aggregate, key, value)
       end
       aggregate
     end
+    # add the most viewed repo to the data
+    reduced_data.tap {|data| data[:most_viewed_repo] = most_viewed_repo}
   end
 
 
   private
-
-    def choose_hottest_repo(starting_data, aggregate, key, id )
-      if key == :repo_id
-        aggregate[:hottest_repo] = id if aggregate[:hottest_repo] == 0
-
-        new_repo = traffic_data_sift(starting_data, id)  
-        tracked_repo = traffic_data_sift(starting_data, aggregate[:hottest_repo])
-
-        if sum_of_traffic(new_repo) > sum_of_traffic(tracked_repo)
-          aggregate[:hottest_repo] = new_repo[:repo_id]
-        end
-      end
-    end
-
-    def traffic_data_sift(traffic_data, id)
-      traffic_data.find {|pairs| pairs[:repo_id] == id}
-    end
-
-    def sum_of_traffic(sifted_traffic)
-      sifted_traffic[:recent_clones] + sifted_traffic[:recent_views] + sifted_traffic[:recent_stargazers]
-    end
-
     def reduce_uniques(aggregate, key, views)
       if key == :unique_views
         aggregate[key] = 1 if aggregate[key] == 0 || aggregate[key] == nil
@@ -178,13 +185,11 @@ class GithubAdapter
       end
     end
 
-
     def reduce_traffic_keys(aggregate, key, value) 
       if simple_traffic_reducers.include?(key)
         aggregate[key] += value
       end
     end
-
 
     def simple_traffic_reducers
       [:recent_clones, :recent_views, :recent_stargazers, :watchers]
@@ -214,21 +219,4 @@ class GithubAdapter
       collected_repositories.find {|repo| repo[:repo].id == id}
     end
 
-    def truncate_most_used_lang(reduced_data)
-      reduced_data[:most_used_lang] = reduced_data[:most_used_lang][0]
-      reduced_data
-    end
-
-    def choose_hottest_language(aggregate, key, lang_array)
-
-      if key == :most_used_lang
-        if aggregate[key] == 0
-          aggregate[:most_used_lang] = lang_array
-        else
-          if aggregate[key][1] < lang_array[1]
-            aggregate[:most_used_lang] = lang_array
-          end
-        end
-      end
-    end
 end
