@@ -126,7 +126,7 @@ class GithubAdapter
     # @var ||= for repeat method calls
     @recent_repo_data ||= recent_repos.map {|repo| repo.dependent_repo_data}
   end
-  
+
   def choose_most_used_language(recent_repo_data)
     recent_repo_data.pluck(:most_used_lang).max_by do |lang, bytes|
       bytes
