@@ -26,16 +26,22 @@ class RepoCollection < Array
     end
   end
 
+  def most_recent_project
+    self.max_by { |repo| repo.pushed_at }
+  end
+
   def reduced_repo_data
     reduced_data = recent_repo_data.reduce(Hash.new(0)) do |aggregate, pairs|   
       pairs.each do |key, value|
-        choose_recent_project(aggregate, pairs)
         reduce_repo_keys(aggregate, key, value)
       end
       aggregate
     end
     # add the most used language to the data. 
-    @reduced_data = reduced_data.tap { |data| data[:most_used_lang] = most_used_language}
+    @reduced_data = reduced_data.tap do |data| 
+      data[:most_used_lang] = most_used_language
+      data[:most_recent_project] = most_recent_project
+    end
   end
 
   # traffic data. 
@@ -85,16 +91,6 @@ class RepoCollection < Array
       end
     end
 
-    def choose_recent_project(aggregate, pairs)
-      tracked_repo = sift_repo_data(aggregate[:most_recent_project])
-      # p pairs[:repo].id
-      new_repo = sift_repo_data(pairs[:repo].id)
-      if aggregate[:most_recent_project] == 0 
-        aggregate[:most_recent_project] = pairs[:repo].id
-      elsif tracked_repo.pushed_at < new_repo.pushed_at
-        aggregate[:most_recent_project] = pairs[:repo].id
-      end
-    end
 
     def sift_repo_data(id)
       self.find {|repo| repo.id == id}
