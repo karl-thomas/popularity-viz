@@ -1,4 +1,4 @@
-class RepoCollection < Array 
+class RepoCollection
   
   SIMPLE_REPO_REDUCERS =[:recent_comments, :recent_deployments, :recent_commits, :recent_pull_requests, :branches]
   SIMPLE_TRAFFIC_REDUCERS = [:recent_clones, :recent_views, :recent_stargazers, :watchers]
@@ -6,13 +6,11 @@ class RepoCollection < Array
   attr_accessor :repos
 
   def initialize(repos)
-    super
     @repos = repos
   end
 
   def recent_repos
-    repos = self.select { |repo| repo.recent? }
-    RepoCollection.new(repos)
+    @recent_repos ||= repos.select { |repo| repo.recent? }
   end 
 
   def recent_repo_data
@@ -27,7 +25,7 @@ class RepoCollection < Array
   end
 
   def most_recent_project
-    self.max_by { |repo| repo.pushed_at }
+    self.repos.max_by { |repo| repo.pushed_at }
   end
 
   def reduced_repo_data
@@ -46,11 +44,11 @@ class RepoCollection < Array
 
   # traffic data. 
   def collect_traffic_data
-    traffic_data = self.map {|repo| repo.traffic_data.to_h }
+    traffic_data = self.repos.map {|repo| repo.traffic_data.to_h }
   end
 
   def most_viewed_repo
-    found_repo = self.max_by { |repo| repo.traffic_data.sum_of_interactions }
+    found_repo = self.repos.max_by { |repo| repo.traffic_data.sum_of_interactions }
     found_repo.traffic_data.to_h
   end
 
@@ -93,6 +91,6 @@ class RepoCollection < Array
 
 
     def sift_repo_data(id)
-      self.find {|repo| repo.id == id}
+      self.repos.find {|repo| repo.id == id}
     end
 end
