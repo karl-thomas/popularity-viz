@@ -52,7 +52,7 @@ class GithubAdapter
       followers: profile.followers,
       following: profile.following,
       starred_repos: starred_repos.count, # the recent calc needs be done DB side
-      recent_projects: owned_repos.recent_projects.count,
+      recent_projects: owned_repos.recent_repos.count,
       recent_gists: recent_gists.count,
       recently_starred_gists: recent_starred_gists.count
     }
