@@ -93,6 +93,10 @@ class Repo < GithubAdapter
     end
   end
   
+  # its not important to know everything about stargazers as of right now
+  def stargazers
+    @stargazers ||= client.stargazers(full_name).pluck(:login)
+  end
 
   def dependent_repo_data
     { 

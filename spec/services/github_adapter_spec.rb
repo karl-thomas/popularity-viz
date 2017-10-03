@@ -188,17 +188,6 @@ RSpec.describe GithubAdapter do
 
   describe "gist methods" do 
     let(:since) { "&since=#{two_weeks_ago}"}
-    before do
-      VCR.configure do |c|
-        @previous_allow_http_connections = c.allow_http_connections_when_no_cassette?
-        c.allow_http_connections_when_no_cassette = true
-      end
-    end
-    after do
-      VCR.configure do |c|
-        c.allow_http_connections_when_no_cassette = @previous_allow_http_connections
-      end
-    end
     describe "#recent_gists", :vcr do
       it "makes a request to the github api for recent gists" do
         adapter.recent_gists
