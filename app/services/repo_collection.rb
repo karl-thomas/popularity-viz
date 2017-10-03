@@ -9,6 +9,24 @@ class RepoCollection
     @repos = repos
   end
 
+  def count
+    self.repos.count
+  end
+  alias_method  :length, :count
+
+  def [](value)
+    begin
+      raise TypeError if !value.integer?
+    rescue
+      raise TypeError
+    end
+    self.repos[value]
+  end
+
+  def first
+    self[0]
+  end
+
   def recent_repos
     @recent_repos ||= repos.select { |repo| repo.recent? }
   end 

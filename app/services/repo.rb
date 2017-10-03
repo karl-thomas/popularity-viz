@@ -93,6 +93,7 @@ class Repo < GithubAdapter
     end
   end
   
+
   def dependent_repo_data
     { 
       repo: self,
