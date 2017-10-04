@@ -74,31 +74,27 @@ class GithubAdapter
     return @owned_repos if @owned_repos
     application_client
     api_response = client.repos( user, affiliation: "owner" )
-    @owned_repos = RepoCollection.new(convert_to_repos(api_response))
+    @owned_repos = RepoCollection.new(api_response)
   end
 
   def collaborated_repos
     return @collaborated_repos if @collaborated_repos
     application_client
     api_response = client.repos( user, affiliation: "collaborator" )
-    @collabor = RepoCollection.new(convert_to_repos(api_response))
+    @collabor = RepoCollection.new(api_response)
   end
 
   def organizations_repos
     return @organizations_repos if @organizations_repos
     application_client
     api_response = client.repos( user, affiliation: "organization_member" )
-    @organizations_repos = RepoCollection.new(convert_to_repos(api_response))
+    @organizations_repos = RepoCollection.new(api_response)
   end
 
   def starred_repos
     application_client
     api_response = client.starred(user)
-    @starred_repos ||= RepoCollection.new(convert_to_repos(api_response))
-  end
-
-  def convert_to_repos(sawyer_resources)
-    sawyer_resources.map { |resource| Repo.new(resource)}
+    @starred_repos ||= RepoCollection.new(api_response)
   end
 
   def find_repo(id)

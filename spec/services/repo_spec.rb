@@ -1,3 +1,24 @@
+require 'rails_helper'
+
+Rspec.describe Repo do
+  describe "on initialization" do
+    
+  end
+  describe "#convert_to_repos" do
+    before(:each) do
+      repos = adapter.client.repos(github_login)
+      @converted_repos = adapter.convert_to_repos(repos)
+    end
+
+    it "returns an array", :vcr do
+      expect(@converted_repos).to be_an_instance_of Array
+    end
+
+    it "converts an array of sawyers resource to an array of repo objects", :vcr do
+      expect(@converted_repos.first).to be_an_instance_of Repo
+    end
+  end
+end
 # --------- TO BE MOVED TO REPO(COLLECTION) CLASS SPECS --------
   # describe "#reduce_repo_data" do
   #   it "returns a hash of reduced information from collect_repo_data", :vcr do
