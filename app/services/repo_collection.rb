@@ -15,7 +15,7 @@ class RepoCollection
     raise NoReposError.new("Failed to pass in an Array to #{self}") if unchecked_repos.class != Array
     klass = unchecked_repos.first.class 
     if klass != Repo &&  klass == Sawyer::Resource 
-      return convert_to_repos(sawyer_resources)
+      return convert_to_repos(unchecked_repos)
     elsif klass != Repo && klass != Sawyer::Resource 
       raise NoReposError.new("Repos in collection must be type of Repo OR Sawyer::Resource") 
     end
