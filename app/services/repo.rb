@@ -10,8 +10,11 @@ class Repo < GithubAdapter
     @watchers_count = root.watchers_count || nil
     @updated_at = root.updated_at
     @pushed_at = root.pushed_at
-    @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
     @traffic_data = TrafficData.new( self, application_client, personal_client) 
+  end
+
+  def two_weeks_ago
+    2.weeks.ago.strftime("%Y-%m-%d")
   end
 
   def recent_pull_requests
@@ -42,9 +45,6 @@ class Repo < GithubAdapter
     recent_commits.group_by { |commit| group_by_day(commit) }
   end
 
-  def group_by_day commit
-    commit[:commit][:author][:date].to_date.to_s  
-  end
 
   def recent_commits
     application_client
@@ -162,5 +162,10 @@ class Repo < GithubAdapter
       data_set[:recent_views] + 
       data_set[:recent_stargazers]
     end    
+  end
+  
+  private
+  def group_by_day commit
+    commit[:commit][:author][:date].to_date.to_s  
   end
 end

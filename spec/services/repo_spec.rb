@@ -1,25 +1,148 @@
 require 'rails_helper'
 
-Rspec.describe Repo do
-  describe "on initialization" do
-    
+RSpec.describe Repo, :vcr do
+  let(:sawyer_resource) { GithubAdapter.new.client.repos(github_login).first}
+  let(:repo) { Repo.new(sawyer_resource) }
+  describe "on initialization", :vcr do
+
+    #  @root = sawyer_resource
+    # @owner = root.owner
+    # @id = root.id || nil
+    # @full_name = root.full_name || nil
+    # @watchers_count = root.watchers_count || nil
+    # @updated_at = root.updated_at
+    # @pushed_at = root.pushed_at
+    # @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
+    # @traffic_data = TrafficData.new( self, application_client, personal_client)
+    it "has a root, the Sawer::Resource" do
+      expect(repo.root).to be_an_instance_of Sawyer::Resource
+    end
+
+    describe "id" do 
+      it "is assigned a id from the resource" do
+        expect(repo.id).to eq sawyer_resource.id
+      end
+
+      it "is an integer" do
+        expect(repo.id).to be_an_instance_of Integer
+      end
+    end
+
+    describe "full_name" do 
+      it "is assigned a full_name from the resource" do
+        expect(repo.full_name).to eq sawyer_resource.full_name
+      end
+
+      it "is an String" do
+        expect(repo.full_name).to be_an_instance_of String
+      end
+    end
+
+    describe "watchers_count" do 
+      it "is assigned a watchers_count from the resource" do
+        expect(repo.watchers_count).to eq sawyer_resource.watchers_count
+      end
+
+      it "is an integer" do
+        expect(repo.watchers_count).to be_an_instance_of Integer
+      end
+    end 
+
+    describe "updated_at" do 
+      it "is assigned a updated_at from the resource" do
+        expect(repo.updated_at).to eq sawyer_resource.updated_at
+      end
+
+      it "is a Time Object" do
+        expect(repo.updated_at).to be_an_instance_of Time
+      end
+    end 
+
+    describe "pushed_at" do 
+      it "is assigned a pushed_at from the resource" do
+        expect(repo.pushed_at).to eq sawyer_resource.pushed_at
+      end
+
+      it "is a Time Object" do
+        expect(repo.pushed_at).to be_an_instance_of Time
+      end
+    end
+  end 
+  describe "#recent_pull_requests" do
+
   end
-  describe "#convert_to_repos" do
-    before(:each) do
-      repos = adapter.client.repos(github_login)
-      @converted_repos = adapter.convert_to_repos(repos)
-    end
 
-    it "returns an array", :vcr do
-      expect(@converted_repos).to be_an_instance_of Array
-    end
+  describe "#collaborators" do
 
-    it "converts an array of sawyers resource to an array of repo objects", :vcr do
-      expect(@converted_repos.first).to be_an_instance_of Repo
-    end
+  end
+
+  describe "#recent?" do
+
+  end
+
+  describe "#recent_commits" do
+
+  end
+
+  describe "#recent_commit_dates" do
+
+  end
+
+  describe "#recent_commit_time_ranges" do
+
+  end
+
+  describe "#all_commit_comments" do
+
+  end
+
+  describe "#recent_commit_comments" do
+
+  end
+
+  describe "#deployments" do
+
+  end
+
+  describe "#recent_deployments" do
+
+  end
+
+  describe "#branches" do
+
+  end
+
+  describe "#languages" do
+
+  end
+
+  describe "#top_language" do
+
+  end
+
+  describe "#stargazers" do
+
+  end
+
+  describe "#dependent_repo_data" do
+
   end
 end
 # --------- TO BE MOVED TO REPO(COLLECTION) CLASS SPECS --------
+    # describe "#convert_to_repos" do
+  #   before(:each) do
+  #     repos = adapter.client.repos(github_login)
+  #     @converted_repos = adapter.convert_to_repos(repos)
+  #   end
+
+  #   it "returns an array", :vcr do
+  #     expect(@converted_repos).to be_an_instance_of Array
+  #   end
+
+  #   it "converts an array of sawyers resource to an array of repo objects", :vcr do
+  #     expect(@converted_repos.first).to be_an_instance_of Repo
+  #   end
+  # end
   # describe "#reduce_repo_data" do
   #   it "returns a hash of reduced information from collect_repo_data", :vcr do
   #     result = adapter.reduced_repo_data
