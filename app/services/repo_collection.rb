@@ -1,4 +1,5 @@
 class RepoCollection
+  class NoReposError < StandardError; end
   
   SIMPLE_REPO_REDUCERS =[:recent_comments, :recent_deployments, :recent_commits, :recent_pull_requests, :branches]
   SIMPLE_TRAFFIC_REDUCERS = [:recent_clones, :recent_views, :recent_stargazers, :watchers]
@@ -6,7 +7,23 @@ class RepoCollection
   attr_accessor :repos
 
   def initialize(repos)
-    @repos = repos
+    raise NoReposError if repos.nil?
+    @repos = assign_repos(repos)
+  end
+
+  def assign_repos(unchecked_repos)
+    raise NoReposError.new("Failed to pass in an Array to #{self}") if unchecked_repos.class != Array
+    klass = unchecked_repos.first.class 
+    if klass != Repo &&  klass == Sawyer::Resource 
+      return convert_to_repos(sawyer_resources)
+    elsif klass != Repo && klass != Sawyer::Resource 
+      raise NoReposError.new("Repos in collection must be type of Repo OR Sawyer::Resource") 
+    end
+    repos
+  end
+
+  def convert_to_repos(sawyer_resources)
+    sawyer_resources.map {|repo| Repo.new(repo)}
   end
 
   def count
