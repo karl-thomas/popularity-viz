@@ -1,7 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe Repo, :vcr do
-  let(:sawyer_resource) { GithubAdapter.new.client.repos(github_login).first}
+  let(:adapter) {GithubAdapter.new}
+  let(:sawyer_resource) { adapter.client.repos(github_login).first}
   let(:repo) { Repo.new(sawyer_resource) }
   describe "on initialization", :vcr do
 
@@ -68,8 +69,23 @@ RSpec.describe Repo, :vcr do
       end
     end
   end 
-  describe "#recent_pull_requests" do
 
+  describe "pull request behaviour" do
+    describe "#recent_pull_requests" do
+      it "returns an array" do
+        expect(repo.recent_pull_requests).to be_an_instance_of Array
+      end
+
+      context "when there are recent_pull_requests" do
+        it "pull requests will be within two weeks old" do
+          pull_requests = repo.recent_pull_requests
+          if pull_requests.empty?
+            created_at = pull_requests.first[:created_at]
+            expect(created_at).to be < two_weeks_ago
+          end
+        end
+      end
+    end
   end
 
   describe "#collaborators" do
