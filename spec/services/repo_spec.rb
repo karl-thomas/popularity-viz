@@ -88,28 +88,77 @@ RSpec.describe Repo, :vcr do
     end
   end
 
-  describe "#collaborators" do
+  describe "#collaborators", :vcr do
+    it "returns an array of strings" do
+      expect(repo.collaborators.first).to be_an_instance_of String
+    end
 
+    it "the strings represent someone who is collaborating on that repo" do
+      collaborator = repo.collaborators.first
+      repos = adapter.client.repos(collaborator, affiliation: 'collaborator').pluck(:full_name)
+      expect(repos).to include repo.full_name
+    end
   end
 
   describe "#recent?" do
+    let(:repo) { adapter.owned_repos.repos.find { |r| r.recent? } }
+    it "determines of the repo has been updated in the past 2 weeks" do
+      expect(repo.pushed_at).to be > two_weeks_ago
+    end
 
+    it "returns a boolean value" do
+      expect(repo.recent?).to be(true).or(false)
+    end
   end
 
   describe "#recent_commits" do
+    it "makes a request to the github api for recent commits" do
+      repo.recent_commits
+      request_uri = "/repos/#{repo.full_name}/commits?author&#{auth_client_params}&per_page=100" + since
+      assert_requested :get, github_url(request_uri)
+    end
 
+    it "returns an array of sawyer::resources" do
+      expect(repo.recent_commits.first).to be_an_instance_of Sawyer::Resource
+    end
+
+    it "returns commits within the past two weeks" do
+      commit = repo.recent_commits.first
+      expect(commit[:commit][:author][:date]).to be >  two_weeks_ago
+    end
   end
 
   describe "#recent_commit_dates" do
+    let(:commits) { repo.recent_commit_dates}
+    it "returns a hash of commits grouped by dates" do
+      date = commits.keys.first
+      expect(Date.parse(date)).to be_truthy
+    end
 
+    it "returns a hash of a date pointing to an array" do
+      expect(commits.values.first).to be_an_instance_of Array
+    end
   end
 
   describe "#recent_commit_time_ranges" do
+    it "returns a nested array" do
+      expect(repo.recent_commit_time_ranges).to be_an_instance_of Array
+      expect(repo.recent_commit_time_ranges.first).to be_an_instance_of Array
+    end
 
+    it "groups times of the same date in an array together" do
+      times = repo.recent_commit_time_ranges
+      expect(times[0].strftime('%D')).to eq times[1].strftime('%D')
+    end
   end
 
   describe "#all_commit_comments" do
-
+    it "makes a request to the github api for all commits" do
+      # *********-------========= HEY PUT STUFF HERE///
+    end
+    it "returns an array of sawyer_resources" do
+      expect(repos.all_commit_comments.first).to be_an_instance_of Sawyer::Resource
+    end
   end
 
   describe "#recent_commit_comments" do
