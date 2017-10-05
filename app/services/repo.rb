@@ -75,10 +75,6 @@ class Repo < GithubAdapter
     all_deployments.select { |deployments| deployments[:created_at] > two_weeks_ago }
   end
 
-  def branches
-    application_client
-    client.branches(full_name)
-  end
 
   def languages
     application_client
@@ -106,7 +102,6 @@ class Repo < GithubAdapter
       recent_commits: recent_commits.count,
       recent_comments: recent_commit_comments.count,
       recent_deployments: recent_deployments.count,
-      branches: branches.count,
       most_used_lang: top_language
     }
   end
