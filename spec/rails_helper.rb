@@ -204,3 +204,7 @@ def basic_auth_client(login = test_github_login, password = test_github_password
 
   client
 end
+
+def since
+  "&since=#{two_weeks_ago}"
+end

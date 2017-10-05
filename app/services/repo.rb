@@ -1,8 +1,9 @@
 class Repo < GithubAdapter
-  attr_reader :root, :owner, :id, :full_name, :two_weeks_ago, :watchers_count, :updated_at, :pushed_at, :traffic_data
+  attr_reader :root, :owner, :id, :full_name, :two_weeks_ago, :watchers_count, :updated_at, :pushed_at, :traffic_data, :user
 
   def initialize(sawyer_resource = {}) 
     application_client
+    @user = ENV['GITHUB_USERNAME']
     @root = sawyer_resource
     @owner = root.owner
     @id = root.id || nil
@@ -48,7 +49,7 @@ class Repo < GithubAdapter
 
   def recent_commits
     application_client
-    client.commits_since(full_name, two_weeks_ago, author: user)
+    client.commits(full_name, author: user, since: two_weeks_ago)
   end
 
   def all_commit_comments
