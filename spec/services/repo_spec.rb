@@ -219,15 +219,49 @@ RSpec.describe Repo, :vcr do
   end
 
   describe "#languages" do
+    let(:languages) { repos.languages }
+    it "makes a request to the github api for all commits" do
+      repo.all_commit_comments
+      request_uri = "/repos/#{repo.full_name}/languages?#{auth_client_params}&per_page=100"
+      assert_requested :get, github_url(request_uri)
+    end
 
+    it "returns a hash" do
+      expect(languages).to be_an_instance_of Hash
+    end
+
+    it "returns a hash with values that represent the bytes of a language" do
+      expect(language.values).to be_an_instance_of Integer
+    end
   end
 
   describe "#top_language" do
+    it "returns an array " do
+      Repo.any_instance.stub(:languages).and_return({'Ruby' => 0, "Java" => 400})
+      expect(repo.top_language).to be_an_instance_of 
+    end
 
+    it "returns the language as a string in its first language" do
+      Repo.any_instance.stub(:languages).and_return({'Ruby' => 0, "Java" => 400})
+      expect(repo.top_language.first).to eq 'Java'
+    end
+
+    it "returns the bytes as the second index of its array " do
+      Repo.any_instance.stub(:languages).and_return({'Ruby' => 0, "Java" => 400})
+      expect(repo.top_language[1]).to eq 400
+    end
   end
 
   describe "#stargazers" do
+    (:stargazers) { repo.stargazer }
+    it "makes a request to the github api for all stargazers" do
+      request_uri = "/repos/#{repo.full_name}/languages?#{auth_client_params}&per_page=100"
+      assert_requested :get, github_url(request_uri)
+    end
 
+    it "returns an array of strings" do
+      expect(stargazers.first).to be_an_instance_of String
+    end
   end
 
   describe "#dependent_repo_data" do
