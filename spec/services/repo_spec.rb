@@ -62,7 +62,7 @@ RSpec.describe Repo, :vcr do
 
     describe "traffic data" do
       it "is an instance of Repo::TrafficData" do
-        expect(repo.traffic).to be_an_instance_of Repo::TrafficData
+        expect(repo.traffic_data).to be_an_instance_of Repo::TrafficData
       end
 
       it "is assigned the repo to keep track of" do
@@ -218,19 +218,19 @@ RSpec.describe Repo, :vcr do
   end
 
   describe "#languages" do
-    let(:languages) { repos.languages }
+    let(:languages) { repo.languages }
     it "makes a request to the github api for all languages" do
       repo.all_commit_comments
       request_uri = "/repos/#{repo.full_name}/languages?#{auth_client_params}&per_page=100"
       assert_requested :get, github_url(request_uri)
     end
 
-    it "returns a hash" do
-      expect(languages).to be_an_instance_of Hash
+    it "returns a Sawyer::Resource" do
+      expect(languages).to be_an_instance_of Sawyer::Resource
     end
 
     it "returns a hash with values that represent the bytes of a language" do
-      expect(language.values).to be_an_instance_of Integer
+      expect(languages.values).to be_an_instance_of Integer
     end
   end
 
