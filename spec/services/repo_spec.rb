@@ -220,7 +220,7 @@ RSpec.describe Repo, :vcr do
 
   describe "#languages" do
     let(:languages) { repos.languages }
-    it "makes a request to the github api for all commits" do
+    it "makes a request to the github api for all languages" do
       repo.all_commit_comments
       request_uri = "/repos/#{repo.full_name}/languages?#{auth_client_params}&per_page=100"
       assert_requested :get, github_url(request_uri)
