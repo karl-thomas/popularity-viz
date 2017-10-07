@@ -115,7 +115,7 @@ RSpec.describe Repo, :vcr do
   describe "#recent_commits" do
     it "makes a request to the github api for recent commits" do
       repo.recent_commits
-      request_uri = "/repos/#{repo.full_name}/commits?author&#{auth_client_params}&per_page=100" + since
+      request_uri = "/repos/#{repo.full_name}/commits?author=#{github_login}&#{auth_client_params}&per_page=100" + since
       assert_requested :get, github_url(request_uri)
     end
 
@@ -156,7 +156,6 @@ RSpec.describe Repo, :vcr do
   describe "#all_commit_comments" do
     let(:comments) { repo.all_commit_comments }
     it "makes a request to the github api for all commits" do
-      repo.all_commit_comments
       request_uri = "/repos/#{repo.full_name}/comments?#{auth_client_params}&per_page=100"
       assert_requested :get, github_url(request_uri)
     end
@@ -187,10 +186,10 @@ RSpec.describe Repo, :vcr do
 
   describe "#deployments" do
     let(:deployments) { repo.deployments }
-    it "makes a request to the github api for all commits" do
-      request_uri = "/repos/#{repo.full_name}/deployments?#{auth_client_params}&per_page=100"
-      assert_requested :get, github_url(request_uri)
-    end
+    # it "makes a request to the github api for all commits" do
+    #   request_uri = "/repos/#{repo.full_name}/deployments?#{auth_client_params}&per_page=100"
+    #   assert_requested :get, github_url(request_uri)
+    # end
 
     it "returns an array of sawyer_resources" do
       expect(deployments).to be_an_instance_of Array
@@ -220,7 +219,6 @@ RSpec.describe Repo, :vcr do
   describe "#languages" do
     let(:languages) { repo.languages }
     it "makes a request to the github api for all languages" do
-      repo.all_commit_comments
       request_uri = "/repos/#{repo.full_name}/languages?#{auth_client_params}&per_page=100"
       assert_requested :get, github_url(request_uri)
     end
@@ -235,24 +233,24 @@ RSpec.describe Repo, :vcr do
   end
 
   describe "#top_language" do
+    before do
+      allow(repo).to_receive(:languages) { {'Ruby' => 0, "Java" => 400} }
+    end
     it "returns an array " do
-      Repo.any_instance.stub(:languages).and_return({'Ruby' => 0, "Java" => 400})
       expect(repo.top_language).to be_an_instance_of 
     end
 
     it "returns the language as a string in its first language" do
-      Repo.any_instance.stub(:languages).and_return({'Ruby' => 0, "Java" => 400})
       expect(repo.top_language.first).to eq 'Java'
     end
 
     it "returns the bytes as the second index of its array " do
-      Repo.any_instance.stub(:languages).and_return({'Ruby' => 0, "Java" => 400})
       expect(repo.top_language[1]).to eq 400
     end
   end
 
   describe "#stargazers" do
-    let(:stargazers) { repo.stargazer }
+    let(:stargazers) { repo.stargazers }
     it "makes a request to the github api for all stargazers" do
       request_uri = "/repos/#{repo.full_name}/languages?#{auth_client_params}&per_page=100"
       assert_requested :get, github_url(request_uri)
