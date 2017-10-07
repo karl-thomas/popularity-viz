@@ -156,6 +156,7 @@ RSpec.describe Repo, :vcr do
   describe "#all_commit_comments" do
     let(:comments) { repo.all_commit_comments }
     it "makes a request to the github api for all commits" do
+      repo.all_commit_comments
       request_uri = "/repos/#{repo.full_name}/comments?#{auth_client_params}&per_page=100"
       assert_requested :get, github_url(request_uri)
     end
@@ -186,10 +187,11 @@ RSpec.describe Repo, :vcr do
 
   describe "#deployments" do
     let(:deployments) { repo.deployments }
-    # it "makes a request to the github api for all commits" do
-    #   request_uri = "/repos/#{repo.full_name}/deployments?#{auth_client_params}&per_page=100"
-    #   assert_requested :get, github_url(request_uri)
-    # end
+    it "makes a request to the github api for all deployments" do
+      repo.deployments
+      request_uri = "/repos/#{repo.full_name}/deployments?#{auth_client_params}"
+      assert_requested :get, github_url(request_uri)
+    end
 
     it "returns an array of sawyer_resources" do
       expect(deployments).to be_an_instance_of Array
@@ -210,7 +212,7 @@ RSpec.describe Repo, :vcr do
       end
     context "when there are no recent deployments" do
       it "returns an empty array" do
-        Repo.any_instance.stub(:deployments).and_return([])
+        allow(repo).to receive(:deployments) { [] }
         expect(deployments.empty?).to eq true
       end
     end
@@ -219,6 +221,7 @@ RSpec.describe Repo, :vcr do
   describe "#languages" do
     let(:languages) { repo.languages }
     it "makes a request to the github api for all languages" do
+      repo.languages
       request_uri = "/repos/#{repo.full_name}/languages?#{auth_client_params}&per_page=100"
       assert_requested :get, github_url(request_uri)
     end
@@ -228,16 +231,17 @@ RSpec.describe Repo, :vcr do
     end
 
     it "returns a hash with values that represent the bytes of a language" do
-      expect(languages.values).to be_an_instance_of Integer
+      # sawyer::resources does not have a .values even tho it is similar to a hash. 
+      expect(languages.to_a[0][1]).to be_an_instance_of Integer
     end
   end
 
   describe "#top_language" do
     before do
-      allow(repo).to_receive(:languages) { {'Ruby' => 0, "Java" => 400} }
+      allow(repo).to receive(:languages) { {'Ruby' => 0, "Java" => 400} }
     end
     it "returns an array " do
-      expect(repo.top_language).to be_an_instance_of 
+      expect(repo.top_language).to be_an_instance_of Array
     end
 
     it "returns the language as a string in its first language" do
@@ -252,12 +256,16 @@ RSpec.describe Repo, :vcr do
   describe "#stargazers" do
     let(:stargazers) { repo.stargazers }
     it "makes a request to the github api for all stargazers" do
-      request_uri = "/repos/#{repo.full_name}/languages?#{auth_client_params}&per_page=100"
+      repo.stargazers
+      request_uri = "/repos/#{repo.full_name}/stargazers?per_page=100"
       assert_requested :get, github_url(request_uri)
     end
 
     it "returns an array of strings" do
-      expect(stargazers.first).to be_an_instance_of String
+      expect(stargazers).to be_an_instance_of Array
+      if !stargazers.blank?
+        expect(stargazers.first).to be_an_instance_of String
+      end
     end
   end
 
