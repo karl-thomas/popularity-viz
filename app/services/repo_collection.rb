@@ -7,7 +7,7 @@ class RepoCollection
   attr_accessor :repos
 
   def initialize(repos)
-    raise NoReposError if repos.nil?
+    raise NoReposError if repos.nil? || repos.blank?
     @repos = assign_repos(repos)
   end
 
