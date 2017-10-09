@@ -19,7 +19,7 @@ class RepoCollection
     elsif klass != Repo && klass != Sawyer::Resource 
       raise NoReposError.new("Repos in collection must be type of Repo OR Sawyer::Resource") 
     end
-    repos
+    unchecked_repos
   end
 
   def convert_to_repos(sawyer_resources)
