@@ -96,7 +96,7 @@ class Repo < GithubAdapter
   end
 
   def dependent_repo_data
-    { 
+    @dependent_repo_data ||= { 
       recent_pull_requests: recent_pull_requests.count,
       recent_commits: recent_commits.count,
       recent_comments: recent_commit_comments.count,
