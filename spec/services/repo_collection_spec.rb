@@ -2,6 +2,125 @@ require 'rails_helper'
 
 
 Rspec.describe RepoCollection, :vcr do
+  repo_data = GithubAdapter.new.owned_repos
+  let(:collection) {RepoCollection.new(repo_data)}
+  describe "on initialization" do
+    it "is assigned an array of repos" do
+      expect(collection.repos.first).to be_an_instance_of Repo
+    end
+
+    it "raises an error if the arguments is an empty array" do
+      expect{ RepoCollection.new }.to raise RepoCollection::NoReposError
+    end
+  end
+
+  describe "#assign_repos" do
+    context "when passed repo objs in an array" do
+      it "returns an unaltered array" do
+        assignments = collection.assign_repos(repo_data)
+        expect(assignments).to eq repo_data
+      end
+    end
+
+    context "when passed sawyer objs in an array" do
+      it "returns an array of repo obj" do
+        github_data = GithubAdapter.new.client.repos(github_login, affiliation: 'owner')
+        assignments = collection.assign_repos(github_data)
+        expect(assignments.first).to be_an_instance_of Repo
+      end
+    end
+
+    context "when the array passed in does not contain sawyer objs or repo objs" do
+      it "throws an error" do
+        expect{ collection.assign_repos([0,0,0]) }.to raise RepoCollection::NoReposError
+      end
+    end
+  end
+
+  describe "#convert_to_repos" do
+    it "converts an array of sawyer::resource to repo objs" do
+      github_data = GithubAdapter.new.client.repos(github_login, affiliation: 'owner')
+      expect(collection.convert_to_repos(github_data).first).to be_an_instance_of Repo
+    end
+
+    it "returns an array" do
+      github_data = GithubAdapter.new.client.repos(github_login, affiliation: 'owner')
+      expect(collection.convert_to_repos).to be_an_instance_of Array
+    end
+  end
+
+  describe "#count" do
+    it "returns an integer" do
+      expect(collection.count).to be_an_instance_of Integer
+    end
+
+    it "returns the count of repos in it's state" do
+      expect(collection.count).to eq collection.repos.count
+    end
+
+    it "has an alias called #length" do
+      expect(collection.count).to eq collection.length
+    end
+  end
+
+  describe "#[]" do
+    it "returns a repo obj at a certain index" do
+      expect(collection[0]).to be_an_instance_of Repo
+    end
+
+    it "returns a repo for its state" do
+      expect(collection.repos).to include collection[0]
+    end
+  end
+
+  describe "#first" do
+    it "returns an instance of repo" do
+      expect(collection.first).to be_an_instance_of Repo
+    end
+
+    it "returns the first repo from its state" do
+      expect(collection.first).to eq collection.repos[0]
+    end
+  end
+
+  describe "#recent_repos" do
+    it "returns an instance of Array " do
+      expect(collection.recent_repos).to be_an_instance_of Array
+    end
+
+    it "only returns repos that have been updated recently" do
+    end   
+    expect(collection.recent_repos.first.recent?).to eq true
+  end
+
+  describe "#recent_repo_data" do
+
+  end
+
+  describe "#most_used_language" do
+
+  end
+
+  describe "#most_recent_project" do
+
+  end
+
+  describe "#reduced_repo_data" do
+
+  end
+
+  describe "#collect_traffic_data" do
+
+  end
+
+  describe "#most_viewed_repo" do
+
+  end
+
+  describe "#reduced_traffic_data" do
+
+  end
+
 # --------- TO BE MOVED TO REPO(COLLECTION) CLASS SPECS --------
     # describe "#convert_to_repos" do
   #   before(:each) do
