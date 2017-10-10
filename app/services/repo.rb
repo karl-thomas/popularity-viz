@@ -1,8 +1,9 @@
 class Repo < GithubAdapter
-  attr_reader :root, :owner, :id, :full_name, :two_weeks_ago, :watchers_count, :updated_at, :pushed_at, :traffic_data
+  attr_reader :root, :owner, :id, :full_name, :two_weeks_ago, :watchers_count, :updated_at, :pushed_at, :traffic_data, :user
 
   def initialize(sawyer_resource = {}) 
     application_client
+    @user = ENV['GITHUB_USERNAME']
     @root = sawyer_resource
     @owner = root.owner
     @id = root.id || nil
@@ -10,8 +11,11 @@ class Repo < GithubAdapter
     @watchers_count = root.watchers_count || nil
     @updated_at = root.updated_at
     @pushed_at = root.pushed_at
-    @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
     @traffic_data = TrafficData.new( self, application_client, personal_client) 
+  end
+
+  def two_weeks_ago
+    2.weeks.ago.strftime("%Y-%m-%d")
   end
 
   def recent_pull_requests
@@ -42,13 +46,10 @@ class Repo < GithubAdapter
     recent_commits.group_by { |commit| group_by_day(commit) }
   end
 
-  def group_by_day commit
-    commit[:commit][:author][:date].to_date.to_s  
-  end
 
   def recent_commits
     application_client
-    client.commits_since(full_name, two_weeks_ago, author: user)
+    client.commits(full_name, author: user, since: two_weeks_ago)
   end
 
   def all_commit_comments
@@ -74,10 +75,6 @@ class Repo < GithubAdapter
     all_deployments.select { |deployments| deployments[:created_at] > two_weeks_ago }
   end
 
-  def branches
-    application_client
-    client.branches(full_name)
-  end
 
   def languages
     application_client
@@ -93,14 +90,17 @@ class Repo < GithubAdapter
     end
   end
   
+  # its not important to know everything about stargazers as of right now
+  def stargazers
+    @stargazers ||= client.stargazers(full_name).pluck(:login)
+  end
+
   def dependent_repo_data
-    { 
-      repo: self,
+    @dependent_repo_data ||= { 
       recent_pull_requests: recent_pull_requests.count,
       recent_commits: recent_commits.count,
       recent_comments: recent_commit_comments.count,
       recent_deployments: recent_deployments.count,
-      branches: branches.count,
       most_used_lang: top_language
     }
   end
@@ -157,5 +157,10 @@ class Repo < GithubAdapter
       data_set[:recent_views] + 
       data_set[:recent_stargazers]
     end    
+  end
+  
+  private
+  def group_by_day commit
+    commit[:commit][:author][:date].to_date.to_s  
   end
 end

@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
 
-  get 'posts', to: 'posts#index' 
-
+  get '/posts', to: 'posts#index' 
+  get '/posts/:id', to: 'posts#show'
   # i may need these routes to get some anciliary data  
 
   # root 'spotify#index'
