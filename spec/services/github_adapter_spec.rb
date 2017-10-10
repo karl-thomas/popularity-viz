@@ -103,20 +103,6 @@ RSpec.describe GithubAdapter do
     end
   end
 
-  describe "#find_repo", :vcr do
-    before do
-      sawyer_resources = adapter.client.repos( adapter.user, affiliation: "owner" )
-      @repos = adapter.convert_to_repos(sawyer_resources)
-    end
-
-    it "returns an array" do
-      expect(@repos).to be_an_instance_of Array
-    end
-
-    it "returns an array of repo objects" do
-      expect(@repos.first).to be_an_instance_of Repo
-    end
-  end
 
   describe "#owned_repos" do
     before(:each) do

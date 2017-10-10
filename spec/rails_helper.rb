@@ -205,6 +205,11 @@ def basic_auth_client(login = test_github_login, password = test_github_password
   client
 end
 
+def time_stubs
+  a = [[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3], [4, 4, 4, 4]]
+  a.map {|row| row.map {|time| time.days.ago } }
+end
+
 def since
   "&since=#{two_weeks_ago}"
 end
