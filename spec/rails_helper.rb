@@ -1,4 +1,5 @@
 # This file is copied to spec/ when you run 'rails generate rspec:install'
+require 'pry-rails'
 ENV["RAILS_ENV"] ||= 'test'
 require 'spec_helper'
 require File.expand_path("../../config/environment", __FILE__)
@@ -16,16 +17,16 @@ Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
 
 # Checks for pending migrations before tests are run.
 # If you are not using ActiveRecord, you can remove this line.
-ActiveRecord::Migration.maintain_test_schema!
+# ActiveRecord::Migration.maintain_test_schema!
 
 RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_path = "#{::Rails.root}/spec/fixtures"
+  
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
   # instead of true.
-  config.use_transactional_fixtures = true
+  
 
   # RSpec Rails can automatically mix in different behaviours to your tests
   # based on their file location, for example enabling you to call `get` and
@@ -79,6 +80,13 @@ VCR.configure do |c|
 
   c.ignore_request do |request|
     !!request.headers['X-Vcr-Test-Repo-Setup']
+  end
+
+  c.ignore_request do |request|
+    query = URI(request.uri).query
+    if query
+      (query).include?('since')
+    end
   end
 
   c.default_cassette_options = {
@@ -195,4 +203,13 @@ def basic_auth_client(login = test_github_login, password = test_github_password
   client.password = test_github_password
 
   client
+end
+
+def time_stubs
+  a = [[1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3], [4, 4, 4, 4]]
+  a.map {|row| row.map {|time| time.days.ago } }
+end
+
+def since
+  "&since=#{two_weeks_ago}"
 end
