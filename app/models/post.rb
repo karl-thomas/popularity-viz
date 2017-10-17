@@ -37,23 +37,4 @@ class Post
     json_post
   end
 
-  def testing
-    arr = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,11,1,1,1,1,1,1111,1,11,1,1,11,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-     Benchmark.bm(202) do |x| 
-
-       x.report('brackets') do
-        max = 0
-         for i in arr 
-           i += 200
-         end
-         p max
-       end
-       
-       x.report('.map') do
-         arr.map! { |e| e += 200}
-         arr.max
-       end
-       
-     end
- end
 end

@@ -40,7 +40,8 @@ module Insight
     repo.recent_commit_time_ranges.map do |range|
       # range.last is the first commit of the day, range.first is the last
       songs = SpotifyAdapter.new.get_songs_after(range.last)["items"]
-      if song = songs.find {|song| song['played_at'] < range.first}
+      range_string = nice_date(range.first)
+      if song = songs.find {|song| nice_date(Date::parse(song['played_at'])) == range_string}
         song_hash = { 
               track: song['track']['name'], 
               artist: song['track']['artists'].first['name'],
@@ -53,6 +54,12 @@ module Insight
 
   def updated_repos
     adapter = GithubAdapter.new
-    @repos ||= adapter.recent_updated_repos(adapter.owned_repos)
+    @repos ||= adapter.owned_repos.recent_repos
+  end
+
+  private 
+
+  def nice_date(date_obj)
+    "#{date_obj.day} #{date_obj.month} #{date_obj.year}"
   end
 end

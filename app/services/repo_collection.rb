@@ -60,7 +60,7 @@ class RepoCollection
   end
 
   def most_recent_project
-    self.repos.max_by { |repo| repo.pushed_at }
+    self.repos.max_by { |repo| repo.pushed_at }.dependent_repo_data
   end
 
   def reduced_repo_data
