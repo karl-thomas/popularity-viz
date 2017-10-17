@@ -6,8 +6,9 @@ This is the back end and data aggregation of an Automatic Blog. A program that w
 This project is using 
 * Ruby 2.4.1
 * Ruby on Rails 5.1.2
-* Mongo 2.4.3, [Installation with rails](https://gorails.com/guides/setting-up-rails-4-with-mongodb-and-mongoid)
+* Postgresql 9.6.2
 
-Why Mongo? I only have one table with a huge amount of data on it, and it will be very simple to add more data streams to my project with mongo as this project develops.
+"Why postgres? this seems like a Document model database deal."
+I started with MongoDB but Postgresqls JSONB storage is nearly as fast and I get to keep working in relational database. 
 
 To work on this project you'll need access keys to Spotify, Github, and Twitter as of right now. 
