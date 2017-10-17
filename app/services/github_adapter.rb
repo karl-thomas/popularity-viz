@@ -41,7 +41,7 @@ class GithubAdapter
     traffic_data = self.owned_repos.reduced_traffic_data
 
     profile_and_repos =  profile_data.merge(dependent_repo_data)
-    aggregate_record = profile_and_repos.merge(reduced_traffic_data)
+    aggregate_record = profile_and_repos.merge(traffic_data)
   end
 
   def profile_data
