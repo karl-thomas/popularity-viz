@@ -1,16 +1,6 @@
-require 'benchmark'
-class Post
+class Post < ActiveRecord::Base
   include TwitterCalcs # ./twitter_calcs 
   include Insight # ./insight
-
-  include Mongoid::Document
-  include Mongoid::Timestamps
-  field :spotify_record, type: Hash
-  field :github_record, type: Hash
-  field :twitter_record, type: Hash
-  field :total_interactions, type: Integer
-  field :insights, type: Hash
-  field :title, type: String
 
   attr_accessor :differences
   

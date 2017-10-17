@@ -3,13 +3,13 @@ module Insight
 
   # this will be a random process with hopes of making an interesting title. 
   def set_title
-    self.title = "#{self.github_record[:most_used_lang][0]}, #{self.spotify_record[:interesting_genre]}, and the #{self.github_record[:recent_commits]} commits"
+    self.title = "#{self.github_record['most_used_lang'][0]}, #{self.spotify_record['interesting_genre']}, and the #{self.github_record['recent_commits']} commits"
     self.save
   end
 
   def add_total_interactions
     github_keys = self.github_record.select { |k,v| k.to_s.include?('recent')}
-    github_keys[:most_recent_project] = 0  # this in a non-countable value
+    github_keys['most_recent_project'] = 0  # this in a non-countable value
     spotify_keys = self.spotify_record.select { |k,v| k.to_s.include?('recent')}
     twitter_keys = self.twitter_record.select { |k,v| k.to_s.include?('recent')}
 
@@ -28,9 +28,9 @@ module Insight
   def focused_song_to_s
     data = focused_song
     if !data || data[0].nil?
-        self.github_record[:focused_song] = nil
+    nil
     else
-      self.github_record[:focused_song] = "A song that helped me focus recently was #{data[:track]} by #{data[:artist]}"
+    "A song that helped me focus recently was #{data[:track]} by #{data[:artist]}"
     end
   end
 

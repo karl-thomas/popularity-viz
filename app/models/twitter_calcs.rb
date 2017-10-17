@@ -12,12 +12,12 @@ module TwitterCalcs
 
   def inspect_old_data
     #for when it is the first element
-    old_record = last_post
+    old_record = last_post || self
     old_data = old_record.twitter_record
     # use each pair to check old data against new data
     @differences = old_data.map do |column_name, old_value| 
       p "mapping #{column_name} with value #{old_value}"
-      new_value = self.twitter_record[column_name.to_sym]
+      new_value = self.twitter_record[column_name]
       assign_twitter_differences(column_name, old_value, new_value)
     end
     assign_total_differences
@@ -59,32 +59,33 @@ module TwitterCalcs
   end
 
   def compare_friends_count(old_value)
-    if old_value != self.twitter_record[:friends_count]
-      self.twitter_record['recent_friends'] = difference(old_value, self.twitter_record[:friends_count])
+    if old_value != self.twitter_record['friends_count']
+      self.twitter_record['recent_friends'] = difference(old_value, self.twitter_record['friends_count'])
     else
       nil
     end
   end
 
   def compare_followers_count(old_value)
-    if old_value != self.twitter_record[:followers_count]
-      self.twitter_record['recent_followers'] = difference(old_value,self.twitter_record[:followers_count])
+    p self.twitter_record['followers_count']
+    if old_value != self.twitter_record['followers_count']
+      self.twitter_record['recent_followers'] = difference(old_value,self.twitter_record['followers_count'])
     else
       nil
     end
   end
 
   def compare_favorites_count(old_value)
-    if old_value != self.twitter_record[:favorites_count]
-      self.twitter_record['recent_favorites'] = difference(old_value,self.twitter_record[:favorites_count])
+    if old_value != self.twitter_record['favorites_count']
+      self.twitter_record['recent_favorites'] = difference(old_value,self.twitter_record['favorites_count'])
     else
       nil
     end
   end
 
   def compare_lists_count(old_value)
-    if old_value != self.twitter_record[:listed_count]
-      self.twitter_record['recent_lists ']= difference(old_value,self.twitter_record[:listed_count])
+    if old_value != self.twitter_record['listed_count']
+      self.twitter_record['recent_lists ']= difference(old_value, self.twitter_record['listed_count'])
     else
       nil
     end
