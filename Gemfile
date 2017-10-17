@@ -10,8 +10,8 @@ ruby '2.4.1'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'nio4r', '2.1.0'
 gem 'rails', '~> 5.1.2'
-# Use sqlite3 as the database for Active Record
-gem "mongoid" #, git: 'git://github.com/mongoid/mongoid.git'
+# Use pg as the database for Active Record
+gem 'pg'
 # Use Puma as the app server
 gem 'puma', '~> 3.7'
 # load the environment variables
