@@ -18,6 +18,13 @@ class TwitterAdapter
     self.client.user(self.user_name)
   end
 
+  def aggregate_data_record
+    profile_info = self.formatted_profile
+    tweet_info = self.recent_tweet_counts
+   
+    profile_info.merge(tweet_info)
+  end
+
   def recent_tweets
     query = "from:#{self.user_name} since:#{@date_two_weeks_ago}"
     self.client.search(query).take(100).collect.to_a
@@ -67,11 +74,5 @@ class TwitterAdapter
     }
   end
 
-  def aggregate_data_record
-    profile_info = self.formatted_profile
-    tweet_info = self.recent_tweet_counts
-   
-    profile_info.merge(tweet_info)
-  end
 
 end
