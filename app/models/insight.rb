@@ -8,14 +8,13 @@ module Insight
   end
 
   def add_total_interactions
-    github_keys = self.github_record.select { |k,v| k.to_s.include?('recent')}
-    github_keys['most_recent_project'] = 0  # this in a non-countable value
     spotify_keys = self.spotify_record.select { |k,v| k.to_s.include?('recent')}
     twitter_keys = self.twitter_record.select { |k,v| k.to_s.include?('recent')}
 
     # merge them all together and add them. 
-    total = github_keys.merge(twitter_keys).merge(spotify_keys).values.reduce(:+)
-    self.total_interactions = total
+    total = twitter_keys.merge(spotify_keys).values.reduce(:+) + self.github_record['total_recent_data_count']
+
+    self.total_interactions = total 
   end
 
   def set_insights
