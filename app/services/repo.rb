@@ -36,7 +36,7 @@ class Repo < GithubAdapter
   def recent_commits
     application_client
     api_response = client.commits(full_name, author: user, since: two_weeks_ago)
-    CommitCollection.new(api_response)
+    Commits.new(api_response)
   end
 
   def all_commit_comments
@@ -167,7 +167,7 @@ class Repo < GithubAdapter
     def recent_commit_time_ranges
       recent_commit_dates.map do |day, commits|
         commits.map do |commit| 
-          commit[:commit][:author][:date]
+          commit[:date]
         end
       end
       .delete_if { |dates| dates.count < 2 }
@@ -178,7 +178,7 @@ class Repo < GithubAdapter
     end
 
     def count_per_day
-      group_per_day.map {|date, commits| { date => {commits: commits.count} } }
+      group_per_day.map {|date, commits| [ date, {commits: commits.count } ] }.to_h
     end
 
     private
@@ -192,7 +192,8 @@ class Repo < GithubAdapter
       end
     end
   end
-
-
-
 end
+
+
+
+
