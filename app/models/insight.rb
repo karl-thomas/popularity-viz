@@ -36,7 +36,7 @@ module Insight
   def focused_song
     repo = updated_repos.first 
 
-    repo.recent_commit_time_ranges.map do |range|
+    repo.recent_commits.recent_commit_time_ranges.map do |range|
       # range.last is the first commit of the day, range.first is the last
       songs = SpotifyAdapter.new.get_songs_after(range.last)["items"]
       range_string = nice_date(range.first)
