@@ -33,23 +33,10 @@ class Repo < GithubAdapter
     updated_at > two_weeks_ago || pushed_at > two_weeks_ago
   end
 
-  def recent_commit_time_ranges
-    recent_commit_dates.map do |day, commits|
-      commits.map do |commit| 
-        commit[:commit][:author][:date]
-      end
-    end
-    .delete_if { |dates| dates.count < 2 }
-  end
-
-  def recent_commit_dates
-    recent_commits.group_by { |commit| group_by_day(commit) }
-  end
-
-
   def recent_commits
     application_client
-    client.commits(full_name, author: user, since: two_weeks_ago)
+    api_response = client.commits(full_name, author: user, since: two_weeks_ago)
+    CommitCollection.new(api_response)
   end
 
   def all_commit_comments
@@ -158,9 +145,53 @@ class Repo < GithubAdapter
       data_set[:recent_stargazers]
     end    
   end
-  
-  private
-  def group_by_day commit
-    commit[:commit][:author][:date].to_date.to_s  
+
+  class CommitCollection 
+    attr_reader :commits
+    def initialize(commits)
+      @commits = sanitize_commits(commits)
+    end
+
+    def count
+      commits.count
+    end
+
+    def first
+      commits[0]
+    end
+
+    def messages
+      commits.map {|commit| commit[:message] }
+    end
+    
+    def recent_commit_time_ranges
+      recent_commit_dates.map do |day, commits|
+        commits.map do |commit| 
+          commit[:commit][:author][:date]
+        end
+      end
+      .delete_if { |dates| dates.count < 2 }
+    end
+
+    def group_per_day
+      commits.group_by { |commit| commit[:date] }
+    end
+
+    # def count_per_day
+    #   group_per_day = 
+    # end
+    private
+    def sanitize_commits(commits)
+      commits.map do |c| 
+        {
+          message: c.commit.message, 
+          author: c.author.login, 
+          date: c.commit.author.date.to_date.to_s
+        }
+      end
+    end
   end
+
+
+
 end
