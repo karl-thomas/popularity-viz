@@ -163,7 +163,7 @@ class Repo < GithubAdapter
     def messages
       commits.map {|commit| commit[:message] }
     end
-    
+
     def recent_commit_time_ranges
       recent_commit_dates.map do |day, commits|
         commits.map do |commit| 
@@ -177,9 +177,10 @@ class Repo < GithubAdapter
       commits.group_by { |commit| commit[:date] }
     end
 
-    # def count_per_day
-    #   group_per_day = 
-    # end
+    def count_per_day
+      group_per_day.map {|date, commits| { date => {commits: commits.count} } }
+    end
+
     private
     def sanitize_commits(commits)
       commits.map do |c| 
