@@ -47,4 +47,29 @@ RSpec.describe Repo::Commits do
       expect(collection.count_per_day.values.first[:commits]).to be_an_instance_of Integer
     end
   end
+
+  describe "#recent_commit_dates" do 
+    it "returns a hash of commits grouped by dates" do
+      commits = collection.recent_commit_dates
+      date = commits.keys.first
+      expect(Date.parse(date)).to be_truthy
+    end
+
+    it "returns a hash of a date pointing to an array" do
+      expect(commits.values.first).to be_an_instance_of Array
+    end
+  end
+
+  describe "#recent_commit_time_ranges" do
+    #  the commented out tests need to be stubbed. 
+    it "returns a nested array" do
+      expect(collection.recent_commit_time_ranges).to be_an_instance_of Array
+      # expect(repo.recent_commit_time_ranges.first).to be_an_instance_of Array
+    end
+
+    # it "groups times of the same date in an array together" do
+    #   times = repo.recent_commit_time_ranges
+    #   expect(times[0][0].strftime('%D')).to eq times[0][1].strftime('%D')
+    # end
+  end
 end
