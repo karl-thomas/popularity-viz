@@ -73,8 +73,8 @@ RSpec.describe Repo, :vcr do
 
   describe "pull request behaviour" do
     describe "#recent_pull_requests" do
-      it "returns an array" do
-        expect(repo.recent_pull_requests).to be_an_instance_of Array
+      it "returns an PullRequests Obj" do
+        expect(repo.recent_pull_requests).to be_an_instance_of Repo::PullRequests
       end
 
       context "when there are recent_pull_requests" do

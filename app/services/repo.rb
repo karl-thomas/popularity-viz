@@ -19,9 +19,13 @@ class Repo < GithubAdapter
   end
 
   def recent_pull_requests
+    self.pull_requests.recent_pulls
+  end
+
+  def pull_requests
     personal_client
     all_pulls = client.pull_requests(id, state: 'all', since: two_weeks_ago)
-    all_pulls.select { |pull| pull[:created_at] > two_weeks_ago }
+    PullRequests.new(all_pulls)
   end
 
   def collaborators
@@ -80,6 +84,12 @@ class Repo < GithubAdapter
   # its not important to know everything about stargazers as of right now
   def stargazers
     @stargazers ||= client.stargazers(full_name).pluck(:login)
+  end
+
+  def total_counts_by_date
+    commits = recent_commits.count_per_day
+    pullies = recent_pull_requests.date_grouped_data
+    pullies.merge(commits) {|date,pulls,commits,| commits.merge(pulls)}
   end
 
   def dependent_repo_data
@@ -146,7 +156,62 @@ class Repo < GithubAdapter
     end    
   end
 
-  class CommitCollection 
+  class PullRequests
+    attr_reader :pulls
+    def initialize(pulls)
+      @pulls = create_pulls(pulls)
+    end
+
+    def date_grouped_data
+      count_for_closed.merge(count_for_created_at) {|date, closed, created| closed.merge(created) }
+    end
+
+    def recent_pulls
+      recent_pulls =  pulls.select {|pr| pr.recently_created || pr.recently_closed }
+      PullRequests.new(recent_pulls)
+    end
+
+    def closed_pulls
+      pulls.select &:closed?
+    end
+
+    def grouped_per_closed
+      closed_pulls.group_by {|pull| pull.closed_at.to_date.to_s}
+    end
+
+    def count_for_closed
+       grouped_per_closed.map {|date, pulls| [date, {closed_pull_request: pulls.count}] }.to_h
+    end
+
+    def grouped_per_created_at
+      pulls.group_by {|pull| pull.created_at.to_date.to_s}
+    end
+
+    def count_for_created_at
+      grouped_per_created_at.map {|date, pulls| [date, {opened_pull_request: pulls.count}] }.to_h
+    end
+
+    Pull = Struct.new(:state, :title, :body, :created_at, :closed_at) do
+      def closed?
+        state == "closed"
+      end
+
+      def recently_created
+        created_at > 2.weeks.ago
+      end
+
+      def recently_closed
+        closed_at > 2.weeks.ago
+      end
+    end
+
+    private
+    def create_pulls pulls
+      pulls.map {|pull| Pull.new(pull.state, pull.title, pull.body, pull.created_at, pull.closed_at)}
+    end
+  end
+
+  class Commits
     attr_reader :commits
     def initialize(commits)
       @commits = sanitize_commits(commits)
