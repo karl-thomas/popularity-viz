@@ -119,13 +119,13 @@ RSpec.describe Repo, :vcr do
       assert_requested :get, github_url(request_uri)
     end
 
-    it "returns an array of sawyer::resources" do
-      expect(repo.recent_commits.first).to be_an_instance_of Sawyer::Resource
+    it "returns a Commits obj" do
+      expect(repo.recent_commits.first).to be_an_instance_of Repo::Commits
     end
 
     it "returns commits within the past two weeks" do
       commit = repo.recent_commits.first
-      expect(commit[:commit][:author][:date]).to be >  two_weeks_ago
+      expect(commit[:date]).to be > two_weeks_ago
     end
   end
 
