@@ -156,8 +156,8 @@ class Repo < GithubAdapter
   end
 
   class PullRequests
-    attr_reader :pulls, :client
-    def initialize(pulls, client)
+    attr_reader :pulls
+    def initialize(pulls)
       @pulls = create_pulls(pulls)
       @since = 2.weeks.ago.iso8601
     end
@@ -197,7 +197,7 @@ class Repo < GithubAdapter
 
     class Pull  
       attr_reader :repo, :number, :state, :title, :body, :created_at, :closed_pulls
-      def initialize(pull, client)
+      def initialize(pull)
         @repo = pull.head.repo.full_name
         @number  = pull.number
         @state = pull.state
@@ -205,7 +205,6 @@ class Repo < GithubAdapter
         @body = pull.body
         @created_at = pull.created_at
         @closed_at = pull.closed_at
-      
       end
 
       def closed?
