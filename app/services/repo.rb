@@ -94,8 +94,7 @@ class Repo < GithubAdapter
 
   def dependent_repo_data
     @dependent_repo_data ||= { 
-      recent_pull_requests: recent_pull_requests.count,
-      recent_commits: recent_commits.count,
+      count_by_date: total_counts_by_date,
       recent_comments: recent_commit_comments.count,
       recent_deployments: recent_deployments.count,
       most_used_lang: top_language
@@ -157,9 +156,14 @@ class Repo < GithubAdapter
   end
 
   class PullRequests
-    attr_reader :pulls
-    def initialize(pulls)
+    attr_reader :pulls, :client
+    def initialize(pulls, client)
       @pulls = create_pulls(pulls)
+      @since = 2.weeks.ago.iso8601
+    end
+
+    def create_pulls(pulls)
+      pulls.map {|pull| Pull.new( pull, client)}
     end
 
     def date_grouped_data
@@ -191,7 +195,19 @@ class Repo < GithubAdapter
       grouped_per_created_at.map {|date, pulls| [date, {opened_pull_request: pulls.count}] }.to_h
     end
 
-    Pull = Struct.new(:state, :title, :body, :created_at, :closed_at) do
+    class Pull  
+      attr_reader :repo, :number, :state, :title, :body, :created_at, :closed_pulls
+      def initialize(pull, client)
+        @repo = pull.head.repo.full_name
+        @number  = pull.number
+        @state = pull.state
+        @title = pull.title
+        @body = pull.body
+        @created_at = pull.created_at
+        @closed_at = pull.closed_at
+      
+      end
+
       def closed?
         state == "closed"
       end
@@ -203,11 +219,6 @@ class Repo < GithubAdapter
       def recently_closed
         closed_at > 2.weeks.ago
       end
-    end
-
-    private
-    def create_pulls pulls
-      pulls.map {|pull| Pull.new(pull.state, pull.title, pull.body, pull.created_at, pull.closed_at)}
     end
   end
 
