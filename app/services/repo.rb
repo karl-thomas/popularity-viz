@@ -18,14 +18,14 @@ class Repo < GithubAdapter
     2.weeks.ago.strftime("%Y-%m-%d")
   end
 
-  def recent_pull_requests
-    self.pull_requests.recent_pulls
-  end
-
   def pull_requests
     personal_client
     all_pulls = client.pull_requests(id, state: 'all', since: two_weeks_ago)
     PullRequests.new(all_pulls)
+  end
+
+  def recent_pull_requests
+    pull_requests.recent_pulls
   end
 
   def collaborators
@@ -44,7 +44,7 @@ class Repo < GithubAdapter
   end
 
   def all_commit_comments
-    application_client
+    oauth_client
     client.list_commit_comments(full_name)
   end
 
@@ -56,8 +56,8 @@ class Repo < GithubAdapter
   end
 
   def deployments
-    application_client
-    client.deployments(full_name)
+   oauth_client
+   client.deployments(full_name)
   end
 
   def recent_deployments
@@ -126,7 +126,7 @@ class Repo < GithubAdapter
 
     def recent_views
       media_type = "application/vnd.github.spiderman-preview"      
-      @recent_views ||= personal_client.views(repo.full_name, per: "week", accept: media_type)
+      @recent_views ||= personal_client.views(repo.full_name, per: "day", accept: media_type)
     end
 
     def unique_views
@@ -156,23 +156,46 @@ class Repo < GithubAdapter
   end
 
   class PullRequests
-    attr_reader :pulls
-    def initialize(pulls)
-      @pulls = create_pulls(pulls)
-      @since = 2.weeks.ago.iso8601
+    attr_accessor :pulls
+    def initialize(pulls = [])
+      if !pulls.blank?
+        @pulls = create_pulls(pulls)
+        @since = 2.weeks.ago.iso8601
+      end
+    end
+
+    def oauth_client
+      @client  = Octokit::Client.new \
+        :access_token    => ENV['GITHUB_TOKEN']
+      @client.auto_paginate = true  
+      @client
+    end
+   
+    def comments
+      oauth_client.issues_comments(pulls[0].repo, since: @since).select {|c| c.author_association == "OWNER"}
+    end
+
+    def comments_by_date
+      comments.group_by { |comment| comment.created_at.to_date.to_s}
+    end
+
+    def count_of_comments_by_date
+      comments_by_date.map { |date, comments| [date, {pr_comments: comments.count} ]}.to_h
     end
 
     def create_pulls(pulls)
-      pulls.map {|pull| Pull.new( pull, client)}
+      pulls.map {|pull| Pull.new( pull, oauth_client)}
     end
 
     def date_grouped_data
-      count_for_closed.merge(count_for_created_at) {|date, closed, created| closed.merge(created) }
+      count_for_closed
+        .merge(count_for_created_at) {|date, closed, created| closed.merge(created) }
+        .merge(count_of_comments_by_date) {|date, pulls, comments| pulls.merge(comments) }
     end
 
     def recent_pulls
-      recent_pulls =  pulls.select {|pr| pr.recently_created || pr.recently_closed }
-      PullRequests.new(recent_pulls)
+      @pulls = pulls.select {|pr| pr.recently_created || pr.recently_closed }
+      self
     end
 
     def closed_pulls
@@ -196,16 +219,20 @@ class Repo < GithubAdapter
     end
 
     class Pull  
-      attr_reader :repo, :number, :state, :title, :body, :created_at, :closed_pulls
-      def initialize(pull)
-        @repo = pull.head.repo.full_name
-        @number  = pull.number
-        @state = pull.state
-        @title = pull.title
-        @body = pull.body
-        @created_at = pull.created_at
-        @closed_at = pull.closed_at
+      attr_reader :repo, :number, :state, :title, :body, :created_at, :closed_at
+      def initialize(pull, client)
+        if !pull.blank? && !client.nil?
+          @repo = pull.head.repo.full_name
+          @number  = pull.number
+          @state = pull.state
+          @title = pull.title
+          @body = pull.body
+          @created_at = pull.created_at
+          @closed_at = pull.closed_at
+          @client = client
+        end
       end
+
 
       def closed?
         state == "closed"
