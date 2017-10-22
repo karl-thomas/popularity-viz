@@ -43,30 +43,6 @@ class Repo < GithubAdapter
     Commits.new(api_response)
   end
 
-  def all_commit_comments
-    oauth_client
-    client.list_commit_comments(full_name)
-  end
-
-  def recent_commit_comments
-    application_client
-    comments = all_commit_comments
-    return [] if comments.empty?
-    comments.select { |comment| comment[:created_at] > two_weeks_ago }
-  end
-
-  def deployments
-   oauth_client
-   client.deployments(full_name)
-  end
-
-  def recent_deployments
-    all_deployments = deployments
-    return [] if all_deployments.empty?
-    all_deployments.select { |deployments| deployments[:created_at] > two_weeks_ago }
-  end
-
-
   def languages
     application_client
     client.languages(full_name)
@@ -88,15 +64,16 @@ class Repo < GithubAdapter
 
   def total_counts_by_date
     commits = recent_commits.count_per_day
-    pullies = recent_pull_requests.date_grouped_data
-    pullies.merge(commits) {|date,pulls,commits,| commits.merge(pulls)}
+    pulls = recent_pull_requests.date_grouped_data
+    traffic = traffic_data.date_grouped_data
+    pulls
+      .merge(commits) {|date,pulls,commits,| commits.merge(pulls) }
+      .merge(traffic) {|date, data, traffic| data.merge(traffic)  }
   end
 
   def dependent_repo_data
     @dependent_repo_data ||= { 
-      count_by_date: total_counts_by_date,
-      recent_comments: recent_commit_comments.count,
-      recent_deployments: recent_deployments.count,
+      counts_by_date: total_counts_by_date,
       most_used_lang: top_language
     }
   end
@@ -119,14 +96,26 @@ class Repo < GithubAdapter
       stargazers.select { |stargazer| stargazer[:starred_at] > two_weeks_ago}
     end
 
+    def date_grouped_data
+      count_of_views_per_day.merge(count_of_clones_per_day) {|date, views, clones| views.merge(clones)}
+    end
+
     def recent_clones
       media_type = "application/vnd.github.spiderman-preview"
       personal_client.clones(repo.full_name, per: "week", accept: media_type)
     end
 
+    def count_of_clones_per_day
+      recent_clones[:clones].map {|view| [view[:timestamp].to_date.to_s, {clones: view[:count]}]}.to_h
+    end
+
     def recent_views
       media_type = "application/vnd.github.spiderman-preview"      
       @recent_views ||= personal_client.views(repo.full_name, per: "day", accept: media_type)
+    end
+
+    def count_of_views_per_day
+      recent_views[:views].map {|view| [view[:timestamp].to_date.to_s, {unique_views: view[:uniques]}]}.to_h
     end
 
     def unique_views
@@ -140,7 +129,6 @@ class Repo < GithubAdapter
         recent: repo.recent?,
         recent_views: recent_views[:count],
         recent_clones: recent_clones[:count],
-        unique_views: unique_views,
         recent_stargazers: recent_stargazers.count,
         watchers: repo.watchers_count
       }  
@@ -232,7 +220,6 @@ class Repo < GithubAdapter
           @client = client
         end
       end
-
 
       def closed?
         state == "closed"
