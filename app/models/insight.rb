@@ -3,7 +3,7 @@ module Insight
 
   # this will be a random process with hopes of making an interesting title. 
   def set_title
-    self.title = "#{self.github_record['most_used_lang'][0]}, #{self.spotify_record['interesting_genre']}, and the #{self.github_record['recent_commits']} commits"
+    self.title = "#{self.github_record['most_used_lang'][0]}, #{self.spotify_record['interesting_genre']}, and the #{self.github_record['most_recent_project']['name']}"
     self.save
   end
 
