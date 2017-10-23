@@ -39,19 +39,12 @@ class GithubAdapter
 
   def aggregate_data_record
     return @aggregate_data_record if @aggregate_data_record
-    repo_data = traffic_data.merge(dependent_repo_data)
     data_hash = profile_data.merge(repo_data)
-    data_hash = total_data_count(data_hash)
-    data_hash = total_recent_data_count(data_hash)
     @aggregate_data_record ||= data_hash
   end
 
-  def dependent_repo_data 
+  def repo_data 
     @dependent_repo_data ||= self.collaborated_repos.reduced_repo_data
-  end
-
-  def traffic_data
-    @traffic_data ||= self.owned_repos.reduced_traffic_data
   end
 
   def profile_data
@@ -125,24 +118,4 @@ class GithubAdapter
     client.starred_gists( since: two_weeks_ago )
   end
   
-  def total_recent_data_count(data_hash)
-    klone = data_hash.dup
-    # ignore repeat or invalid values
-    klone[:most_recent_project] = 0
-    count = klone.select{|k,v| k.to_s.include?('recent')}.values.reduce(:+)
-    data_hash.tap {|h| h[:total_recent_data_count] = count}
-  end
-
-  def total_data_count(data_hash)
-    klone = data_hash.dup
-    # ignore repeat or invalid values 
-    klone[:username] = 0
-    klone[:most_recent_project] = 0
-    klone[:most_viewed_repo]=0
-    klone[:most_used_lang]= 0
-    klone[:unique_views] = 0
-    klone[:recent_projects] = 0
-    count = klone.values.reduce(:+)
-    data_hash.tap {|h| h[:total_data_count] = count}
-  end
 end
