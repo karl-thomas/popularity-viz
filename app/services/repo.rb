@@ -70,9 +70,9 @@ class Repo < GithubAdapter
       .merge(commits) {|date,pulls,commits,| commits.merge(pulls) }
       .merge(traffic) {|date, data, traffic| data.merge(traffic)  }
   end
-
+  
   def dependent_repo_data
-    @dependent_repo_data ||= { 
+    { 
       counts_by_date: total_counts_by_date,
       most_used_lang: top_language
     }
