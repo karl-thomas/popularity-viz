@@ -7,32 +7,9 @@ module Insight
     self.save
   end
 
-  def add_total_interactions
-    spotify_keys = self.spotify_record.select { |k,v| k.to_s.include?('recent')}
-    twitter_keys = self.twitter_record.select { |k,v| k.to_s.include?('recent')}
 
-    # merge them all together and add them. 
-    total = twitter_keys.merge(spotify_keys).values.reduce(:+) + self.github_record['total_recent_data_count']
-
-    self.total_interactions = total 
-  end
-
-  def set_insights
-    self.insights = {
-      focused_song: focused_song_to_s
-    }
-    self.save
-  end
-
-  def focused_song_to_s
-    data = focused_song
-    if !data || data[0].nil?
-    nil
-    else
-    "A song that helped me focus recently was #{data[:track]} by #{data[:artist]}"
-    end
-  end
-
+  # this will be a feature to return a song played while i was working
+  # currently it does not work, as i am rewrting the github code.
   def focused_song
     repo = updated_repos.first 
 
@@ -50,6 +27,23 @@ module Insight
       end
     end
   end
+  
+  def set_insights
+    self.insights = {
+      focused_song: focused_song_to_s
+    }
+    self.save
+  end
+
+  def focused_song_to_s
+    data = focused_song
+    if !data || data[0].nil?
+    nil
+    else
+    "A song that helped me focus recently was #{data[:track]} by #{data[:artist]}"
+    end
+  end
+
 
   def updated_repos
     adapter = GithubAdapter.new
