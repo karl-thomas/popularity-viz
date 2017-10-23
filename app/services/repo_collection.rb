@@ -61,10 +61,9 @@ class RepoCollection
     repo = self.repos.max_by { |repo| repo.pushed_at }
 
     { 
-      name: repo.full_name,
+      name: repo.full_name.partition("/")[2],
       recent_commits: repo.recent_commits.count,
       counts_by_date: repo.total_counts_by_date
-
     }
   end
 
