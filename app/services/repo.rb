@@ -70,7 +70,7 @@ class Repo < GithubAdapter
       .merge(commits) {|date,pulls,commits,| commits.merge(pulls) }
       .merge(traffic) {|date, data, traffic| data.merge(traffic)  }
   end
-  
+
   def dependent_repo_data
     { 
       counts_by_date: total_counts_by_date,
@@ -254,7 +254,7 @@ class Repo < GithubAdapter
     end
 
     def recent_commit_time_ranges
-      recent_commit_dates.map do |day, commits|
+      group_per_day.map do |day, commits|
         commits.map do |commit| 
           commit[:date]
         end
