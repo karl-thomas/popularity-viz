@@ -21,7 +21,7 @@ class Repo < GithubAdapter
   def pull_requests
     personal_client
     all_pulls = client.pull_requests(id, state: 'all', since: two_weeks_ago)
-    PullRequests.new(all_pulls)
+    PullRequests.new(all_pulls, full_name)
   end
 
   def recent_pull_requests
@@ -67,8 +67,9 @@ class Repo < GithubAdapter
     pulls = recent_pull_requests.date_grouped_data
     traffic = traffic_data.date_grouped_data
     pulls
-      .merge(commits) {|date,pulls,commits,| commits.merge(pulls) }
+      .merge(commits) {|date, pulls, commits| commits.merge(pulls) }
       .merge(traffic) {|date, data, traffic| data.merge(traffic)  }
+      .delete_if {|date, h| date < 2.weeks.ago}
   end
 
   def dependent_repo_data
@@ -144,12 +145,12 @@ class Repo < GithubAdapter
   end
 
   class PullRequests
-    attr_accessor :pulls
-    def initialize(pulls = [])
-      if !pulls.blank?
+    attr_accessor :pulls, :repo
+    def initialize(pulls = [], repo = '')
+      
         @pulls = create_pulls(pulls)
         @since = 2.weeks.ago.iso8601
-      end
+        @repo = repo
     end
 
     def oauth_client
@@ -160,7 +161,7 @@ class Repo < GithubAdapter
     end
    
     def comments
-      oauth_client.issues_comments(pulls[0].repo, since: @since).select {|c| c.author_association == "OWNER"}
+      oauth_client.issues_comments(repo, since: @since).select {|c| c.author_association == "OWNER"}
     end
 
     def comments_by_date
@@ -172,7 +173,7 @@ class Repo < GithubAdapter
     end
 
     def create_pulls(pulls)
-      pulls.map {|pull| Pull.new( pull, oauth_client)}
+      pulls.map {|pull| Pull.new( pull, oauth_client)} || []
     end
 
     def date_grouped_data
@@ -212,11 +213,11 @@ class Repo < GithubAdapter
         if !pull.blank? && !client.nil?
           @repo = pull.head.repo.full_name
           @number  = pull.number
-          @state = pull.state
+          @state = pull.state || ''
           @title = pull.title
           @body = pull.body
-          @created_at = pull.created_at
-          @closed_at = pull.closed_at
+          @created_at = pull.created_at || 2.years.ago
+          @closed_at = pull.closed_at || 2.years.ago
           @client = client
         end
       end

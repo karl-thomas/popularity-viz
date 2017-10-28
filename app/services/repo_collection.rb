@@ -47,7 +47,7 @@ class RepoCollection
 
   def recent_repo_data
     # @var ||= for repeat method calls
-    @recent_repo_data ||= recent_repos.map {|repo| repo.dependent_repo_data}
+    @recent_repo_data ||= recent_repos.map { |repo| repo.dependent_repo_data} 
   end
 
   def most_used_language
