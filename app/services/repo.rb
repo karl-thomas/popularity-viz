@@ -161,9 +161,9 @@ class Repo < GithubAdapter
     end
    
     def comments
-      oauth_client.issues_comments(repo, since: @since).select {|c| c.author_association == "OWNER"}
+      oauth_client.issues_comments(repo, since: since).select {|c| c.author_association == "OWNER"}
     end
-
+       
     def comments_by_date
       comments.group_by { |comment| comment.created_at.to_date.to_s}
     end
@@ -183,12 +183,12 @@ class Repo < GithubAdapter
     end
 
     def recent_pulls
-      @pulls = pulls.select {|pr| pr.recently_created || pr.recently_closed }
+      @pulls = pulls.select(&:recent?)
       self
     end
 
     def closed_pulls
-      pulls.select &:closed?
+      pulls.select(&:closed?)
     end
 
     def grouped_per_closed
@@ -220,6 +220,10 @@ class Repo < GithubAdapter
           @closed_at = pull.closed_at || 2.years.ago
           @client = client
         end
+      end
+
+      def recent?
+        recently_created? || recently_closed?
       end
 
       def closed?
