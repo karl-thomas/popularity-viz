@@ -102,7 +102,7 @@ RSpec.describe Repo, :vcr do
   end
 
   describe "#recent?" do
-    let(:repo) { adapter.owned_repos.repos.find { |r| r.recent? } }
+    let(:repo) { adapter.owned_repos.first }
     it "determines of the repo has been updated in the past 2 weeks" do
       expect(repo.pushed_at).to be > two_weeks_ago
     end
@@ -120,77 +120,12 @@ RSpec.describe Repo, :vcr do
     end
 
     it "returns a Commits obj" do
-      expect(repo.recent_commits.first).to be_an_instance_of Repo::Commits
+      expect(repo.recent_commits).to be_an_instance_of Repo::Commits
     end
 
     it "returns commits within the past two weeks" do
       commit = repo.recent_commits.first
       expect(commit[:date]).to be > two_weeks_ago
-    end
-  end
-
-  describe "#all_commit_comments" do
-    let(:comments) { repo.all_commit_comments }
-    it "makes a request to the github api for all commits" do
-      repo.all_commit_comments
-      request_uri = "/repos/#{repo.full_name}/comments?#{auth_client_params}&per_page=100"
-      assert_requested :get, github_url(request_uri)
-    end
-
-    it "returns an array of sawyer_resources" do
-      expect(comments).to be_an_instance_of Array
-      if !comments.empty?
-        expect(comments.first).to be_an_instance_of Sawyer::Resource
-      end
-    end
-  end
-
-  describe "#recent_commit_comments" do
-    let(:comments) { repo.recent_commit_comments }
-    context "when there are recent comments" do
-      it "returns an array of sawyer_resources" do
-        if !comments.empty?
-          expect(comments.first).to be_an_instance_of Sawyer::Resource
-        end
-      end
-    end
-    context "when there are no recent comments" do
-      it "returns an array" do
-        expect(comments).to be_an_instance_of Array
-      end
-    end
-  end
-
-  describe "#deployments" do
-    let(:deployments) { repo.deployments }
-    it "makes a request to the github api for all deployments" do
-      repo.deployments
-      request_uri = "/repos/#{repo.full_name}/deployments?#{auth_client_params}"
-      assert_requested :get, github_url(request_uri)
-    end
-
-    it "returns an array of sawyer_resources" do
-      expect(deployments).to be_an_instance_of Array
-      if !deployments.empty?
-        expect(deployments.first).to be_an_instance_of Sawyer::Resource
-      end
-    end
-  end
-
-  describe "#recent_deployments" do
-    let(:deployments) { repo.recent_deployments }
-      context "when there are recent deployments" do
-        it "returns an array of sawyer_resources" do
-          if !deployments.empty?
-            expect(deployments.first).to be_an_instance_of Sawyer::Resource
-          end
-        end
-      end
-    context "when there are no recent deployments" do
-      it "returns an empty array" do
-        allow(repo).to receive(:deployments) { [] }
-        expect(deployments.empty?).to eq true
-      end
     end
   end
 
