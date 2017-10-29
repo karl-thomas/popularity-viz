@@ -145,7 +145,7 @@ class Repo < GithubAdapter
   end
 
   class PullRequests
-    attr_accessor :pulls, :repo
+    attr_accessor :pulls, :repo, :since
     def initialize(pulls = [], repo = '')
       
         @pulls = create_pulls(pulls)
@@ -226,11 +226,11 @@ class Repo < GithubAdapter
         state == "closed"
       end
 
-      def recently_created
+      def recently_created?
         created_at > 2.weeks.ago
       end
 
-      def recently_closed
+      def recently_closed?
         closed_at > 2.weeks.ago
       end
     end
