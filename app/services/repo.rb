@@ -163,7 +163,7 @@ class Repo < GithubAdapter
     def comments
       oauth_client.issues_comments(repo, since: since).select {|c| c.author_association == "OWNER"}
     end
-       
+
     def comments_by_date
       comments.group_by { |comment| comment.created_at.to_date.to_s}
     end
