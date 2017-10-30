@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe Rails::PullRequests do 
   let(:repo) {GithubAdapter.new.owned_repos.recent_repos.first}
   let(:pulls) { repo.pull_requests}
-  describe "on initialization" do
+  describe "on initialization", :vcr do
     it "is assigned a collection if pull_requests" do
       expect(pulls.pulls).to be_an_instance_of Array
     end
@@ -17,7 +17,7 @@ RSpec.describe Rails::PullRequests do
     end
   end
 
-  describe "oauth_client" do
+  describe "oauth_client", :vcr do
     it "returns a oath github client" do
       expect(pulls.oauth_client).to be_an_instance_of Octokit::Client
     end
@@ -27,7 +27,7 @@ RSpec.describe Rails::PullRequests do
     end
   end
 
-  describe "comments" do
+  describe "comments", :vcr do
     it "makes an api request to github for issue comments" do
       pulls.comments
       request_uri = "/repos/#{repo.full_name}/commits?author=#{github_login}&#{auth_client_params}&per_page=100" + since
@@ -39,63 +39,106 @@ RSpec.describe Rails::PullRequests do
     end
   end
 
-  describe "comments_by_date" do
+  describe "comments_by_date", :vcr do
     before do
       @groups = pulls.comments_by_date
     end
+
     it "returns a hash" do
       expect(@groups).to be_an_instance_of Hash
     end
+
     it "the keys are an acceptable date" do
       key = @groups.keys.first
       expect(Date.parse(key)).to_not be nil
     end
 
+  end
+
+  describe "count_of_comments_by_date", :vcr do
+    before do
+      @groups = pulls.count_of_comments_by_date
+    end
+    
+    it "returns a hash" do
+      expect(@groups).to be_an_instance_of Hash
+    end
+
+    it "the keys are an acceptable date" do
+      key = @groups.keys.first
+      expect(Date.parse(key)).to_not be nil
+    end
 
   end
 
-  describe "count_of_comments_by_date" do
-
-  end
-
-  describe "create_pulls" do
+  describe "create_pulls", :vcr do
     it "returns an array of pull object" do
       api_response = repo.client.pull_requests(repo.id, state: 'all', since: two_weeks_ago)
       expect(pulls.create_pulls.first).to be_an_instance_of Repo::PullRequests::Pull
     end
   end
 
-  describe "date_grouped_data" do
+  describe "date_grouped_data", :vcr do
+    it "returns a merged hash of pull request data" do
+      expect(pulls.date_grouped_data).to be_an_instance_of Hash
+    end
 
+    it "has a parsable date as keys" do
+      key = pulls.date_grouped_data.keys.first
+      expect(Date.parse(key)).to_not be nil
+    end
   end
 
-  describe "recent_pulls" do
+  describe "recent_pulls", :vcr do
+    it "returns a pull request object" do
+      expect(pulls.recent_pulls).to be_an_instance_of Repo::PullRequests
+    end
 
+    it "only has pulls within the last two weeks" do
+      expect(pulls.recent_pulls.pulls.first.recent?).to be(true)
+    end
   end
 
-  describe "closed_pulls" do
-
+  describe "closed_pulls", :vcr do
+    it "returns an array of pull request" do
+      expect(pulls.closed_pulls.first).to be_an_instance_of Repo::PullRequests::pulls
+    end
   end
 
-  describe "grouped_per_closed" do
+  describe "grouped_per_closed", :vcr do
     it "returns a hash" do
       expect(pulls.grouped_per_closed).to be_an_instance_of Hash
     end
+
+    it "has a parsable date as keys" do
+      key = pulls.grouped_per_closed.keys.first
+      expect(Date.parse(key)).to_not be nil
+    end
+
   end
 
-  describe "count_for_closed" do
+  describe "count_for_closed", :vcr do
+    it "returns a condensed hash" do
+      expect(pulls.count_for_closed).to be_an_instance_of Hash
+    end
 
   end
 
-  describe "grouped_per_created_at" do
+  describe "grouped_per_created_at", :vcr do
      it "returns a hash" do
       expect(pulls.grouped_per_created_at).to be_an_instance_of Hash
     end
+
+    it "has keys parsable as a date" do
+      key = pulls.grouped_per_created_at.keys.first
+      expect(Date.parse(key)).to_not be nil
+    end
   end
 
-  describe "count_for_created_at" do
-
-
+  describe "count_for_created_at", :vcr do
+    it "returns a condensed hash" do
+      expect(pulls.count_for_created_at).to be_an_instance_of Hash
+    end
   end
 
 end
