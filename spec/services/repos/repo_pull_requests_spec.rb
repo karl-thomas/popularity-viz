@@ -28,12 +28,6 @@ RSpec.describe Repo::PullRequests do
   end
 
   describe "comments", :vcr do
-    it "makes an api request to github for issue comments" do
-      pulls.comments
-      request_uri = "/repos/#{repo.full_name}/issues/comments?per_page=100&since=#{2.weeks.ago.iso8601}"
-      assert_requested :get, github_url(request_uri)
-    end
-
     it "return an array of sawyer::resource" do
       expect(pulls.comments.first).to be_an_instance_of Sawyer::Resource
     end
