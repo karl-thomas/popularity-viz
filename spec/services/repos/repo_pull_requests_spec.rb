@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Rails::PullRequests do 
+RSpec.describe Repo::PullRequests do 
   let(:repo) {GithubAdapter.new.owned_repos.recent_repos.first}
   let(:pulls) { repo.pull_requests}
   describe "on initialization", :vcr do
@@ -9,7 +9,7 @@ RSpec.describe Rails::PullRequests do
     end
 
     it "assigns a date to compare old pulls against" do
-      expect(pulls.since).to be_an_instance_of Integer
+      expect(Date.parse(pulls.since)).not_to be nil
     end
 
     it "is assinged the name of the repo it came from. " do
@@ -30,7 +30,7 @@ RSpec.describe Rails::PullRequests do
   describe "comments", :vcr do
     it "makes an api request to github for issue comments" do
       pulls.comments
-      request_uri = "/repos/#{repo.full_name}/commits?author=#{github_login}&#{auth_client_params}&per_page=100" + since
+      request_uri = "/repos/#{repo.full_name}/issues/comments?per_page=100&since=#{2.weeks.ago.iso8601}"
       assert_requested :get, github_url(request_uri)
     end
 
@@ -74,7 +74,7 @@ RSpec.describe Rails::PullRequests do
   describe "create_pulls", :vcr do
     it "returns an array of pull object" do
       api_response = repo.client.pull_requests(repo.id, state: 'all', since: two_weeks_ago)
-      expect(pulls.create_pulls.first).to be_an_instance_of Repo::PullRequests::Pull
+      expect(pulls.create_pulls(api_response).first).to be_an_instance_of Repo::PullRequests::Pull
     end
   end
 
@@ -101,7 +101,7 @@ RSpec.describe Rails::PullRequests do
 
   describe "closed_pulls", :vcr do
     it "returns an array of pull request" do
-      expect(pulls.closed_pulls.first).to be_an_instance_of Repo::PullRequests::pulls
+      expect(pulls.closed_pulls.first).to be_an_instance_of Repo::PullRequests::Pull
     end
   end
 
