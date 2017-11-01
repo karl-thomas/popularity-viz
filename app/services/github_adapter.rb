@@ -1,4 +1,5 @@
 class GithubAdapter
+
   attr_reader :user, :client
 
   def initialize
@@ -15,6 +16,7 @@ class GithubAdapter
     client.auto_paginate = true  
     client
   end
+
 
   def personal_client
     if !client || client.login.nil?
@@ -36,16 +38,17 @@ class GithubAdapter
   end 
 
   def aggregate_data_record
-    # collect repo data.
-    dependent_repo_data = self.collaborated_repos.reduced_repo_data
-    traffic_data = self.owned_repos.reduced_traffic_data
+    return @aggregate_data_record if @aggregate_data_record
+    data_hash = profile_data.merge(repo_data)
+    @aggregate_data_record ||= data_hash
+  end
 
-    profile_and_repos =  profile_data.merge(dependent_repo_data)
-    aggregate_record = profile_and_repos.merge(traffic_data)
+  def repo_data 
+    @dependent_repo_data ||= self.collaborated_repos.reduced_repo_data
   end
 
   def profile_data
-    {
+    @profile_data ||= {
       username: profile.login,
       repos: total_repos,
       gists: total_gists,
@@ -114,5 +117,5 @@ class GithubAdapter
     personal_client
     client.starred_gists( since: two_weeks_ago )
   end
-
+  
 end

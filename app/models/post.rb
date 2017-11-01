@@ -4,8 +4,8 @@ class Post < ActiveRecord::Base
 
   attr_accessor :differences
   
-  before_create :inspect_old_data, :add_total_interactions
-  after_create :set_title, :set_insights 
+  before_create :inspect_old_data
+  after_create :set_title
 
   def self.cards
     self.all.map(&:card)
