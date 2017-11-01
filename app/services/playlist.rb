@@ -5,7 +5,6 @@ class SpotifyAdapter
     def initialize(id)
       super()
       @id = id
-      tracks
     end
 
     def tracks
@@ -13,8 +12,9 @@ class SpotifyAdapter
     end
 
     def recent?
+      return @recent if @recent
       tracks
-      @recent ||= full.tracks_added_at.any? {|track, added_at| added_at > 2.weeks.ago}
+      @recent = full.tracks_added_at.any? {|track, added_at| added_at > 2.weeks.ago}
     end
 
     def full
