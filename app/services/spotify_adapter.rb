@@ -1,9 +1,12 @@
 class SpotifyAdapter
+  autoload :PlaylistCollection, 'playlist_collection'
+  autoload :Playlist, 'playlist'
   
   attr_reader :user, :username, :profile, :two_weeks_ago
 
   IMPORTANT_FEATURES = ["acousticness", "danceability", "duration_ms", "energy", "instrumentalness", "speechiness", "tempo", "valence"]
   BORING_GENRES = ['rock', 'metal', 'pop', 'garage rock', 'pop rock', 'hip hop', 'indie punk', 'indie rock', 'indie r&b', 'indie fol_k', 'rap', 'underground hip hop', 'new rave', 'modern rock', 'alternative hip hop', 'alternative rock', 'bass music', 'edm', 'alt-indie rock', 'indie garage rock']
+  
   def initialize
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
     @username = ENV['SPOTIFY_USERNAME']
@@ -111,8 +114,9 @@ class SpotifyAdapter
     }
   end
 
-  def owned_playlists_short
-    self.profile.playlists.select { |playlist| playlist.owner.id == self.username }
+  def owned_playlists
+	  playlists = self.profile.playlists.select { |playlist| playlist.owner.id == self.username }
+    PlaylistCollection.new(playlists)
   end
 
   # for some reason you cant see track info from user.playlists, so you have to go find the playlists individually. 
@@ -244,5 +248,5 @@ private
     json = JSON.parse(response)
     self.user.credentials['token'] = json['access_token']
   end
-
+  
 end
