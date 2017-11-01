@@ -23,7 +23,6 @@ module TwitterCalcs
     assign_total_differences
   end
 
-
   def assign_total_differences
     valid_differences = filter_twitter_differences(self.differences)
     valid_differences = sub_differences(valid_differences)
