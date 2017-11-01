@@ -73,8 +73,8 @@ RSpec.describe Repo, :vcr do
 
   describe "pull request behaviour" do
     describe "#recent_pull_requests" do
-      it "returns an array" do
-        expect(repo.recent_pull_requests).to be_an_instance_of Array
+      it "returns an PullRequests Obj" do
+        expect(repo.recent_pull_requests).to be_an_instance_of Repo::PullRequests
       end
 
       context "when there are recent_pull_requests" do
@@ -102,7 +102,7 @@ RSpec.describe Repo, :vcr do
   end
 
   describe "#recent?" do
-    let(:repo) { adapter.owned_repos.repos.find { |r| r.recent? } }
+    let(:repo) { adapter.owned_repos.first }
     it "determines of the repo has been updated in the past 2 weeks" do
       expect(repo.pushed_at).to be > two_weeks_ago
     end
@@ -119,103 +119,13 @@ RSpec.describe Repo, :vcr do
       assert_requested :get, github_url(request_uri)
     end
 
-    it "returns an array of sawyer::resources" do
-      expect(repo.recent_commits.first).to be_an_instance_of Sawyer::Resource
+    it "returns a Commits obj" do
+      expect(repo.recent_commits).to be_an_instance_of Repo::Commits
     end
 
     it "returns commits within the past two weeks" do
       commit = repo.recent_commits.first
-      expect(commit[:commit][:author][:date]).to be >  two_weeks_ago
-    end
-  end
-
-  describe "#recent_commit_dates" do
-    let(:commits) { repo.recent_commit_dates}
-    it "returns a hash of commits grouped by dates" do
-      date = commits.keys.first
-      expect(Date.parse(date)).to be_truthy
-    end
-
-    it "returns a hash of a date pointing to an array" do
-      expect(commits.values.first).to be_an_instance_of Array
-    end
-  end
-
-  describe "#recent_commit_time_ranges" do
-    #  the commented out tests need to be stubbed. 
-    it "returns a nested array" do
-      expect(repo.recent_commit_time_ranges).to be_an_instance_of Array
-      # expect(repo.recent_commit_time_ranges.first).to be_an_instance_of Array
-    end
-
-    # it "groups times of the same date in an array together" do
-    #   times = repo.recent_commit_time_ranges
-    #   expect(times[0][0].strftime('%D')).to eq times[0][1].strftime('%D')
-    # end
-  end
-
-  describe "#all_commit_comments" do
-    let(:comments) { repo.all_commit_comments }
-    it "makes a request to the github api for all commits" do
-      repo.all_commit_comments
-      request_uri = "/repos/#{repo.full_name}/comments?#{auth_client_params}&per_page=100"
-      assert_requested :get, github_url(request_uri)
-    end
-
-    it "returns an array of sawyer_resources" do
-      expect(comments).to be_an_instance_of Array
-      if !comments.empty?
-        expect(comments.first).to be_an_instance_of Sawyer::Resource
-      end
-    end
-  end
-
-  describe "#recent_commit_comments" do
-    let(:comments) { repo.recent_commit_comments }
-    context "when there are recent comments" do
-      it "returns an array of sawyer_resources" do
-        if !comments.empty?
-          expect(comments.first).to be_an_instance_of Sawyer::Resource
-        end
-      end
-    end
-    context "when there are no recent comments" do
-      it "returns an array" do
-        expect(comments).to be_an_instance_of Array
-      end
-    end
-  end
-
-  describe "#deployments" do
-    let(:deployments) { repo.deployments }
-    it "makes a request to the github api for all deployments" do
-      repo.deployments
-      request_uri = "/repos/#{repo.full_name}/deployments?#{auth_client_params}"
-      assert_requested :get, github_url(request_uri)
-    end
-
-    it "returns an array of sawyer_resources" do
-      expect(deployments).to be_an_instance_of Array
-      if !deployments.empty?
-        expect(deployments.first).to be_an_instance_of Sawyer::Resource
-      end
-    end
-  end
-
-  describe "#recent_deployments" do
-    let(:deployments) { repo.recent_deployments }
-      context "when there are recent deployments" do
-        it "returns an array of sawyer_resources" do
-          if !deployments.empty?
-            expect(deployments.first).to be_an_instance_of Sawyer::Resource
-          end
-        end
-      end
-    context "when there are no recent deployments" do
-      it "returns an empty array" do
-        allow(repo).to receive(:deployments) { [] }
-        expect(deployments.empty?).to eq true
-      end
+      expect(commit[:date]).to be > two_weeks_ago
     end
   end
 
