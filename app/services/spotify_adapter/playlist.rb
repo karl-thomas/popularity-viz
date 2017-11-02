@@ -1,10 +1,17 @@
 class SpotifyAdapter
   class Playlist < SpotifyAdapter
-    attr_reader :id, :username
-
-    def initialize(id)
+    
+    attr_reader :id, :username, :custom
+    attr_accessor :id
+   
+    def initialize(ids, custom = false)
+      @custom = custom
       super()
-      @id = id
+      if custom
+        @tracks = ids 
+      else
+        @id = ids
+      end
     end
 
     def create_tracks
@@ -13,7 +20,7 @@ class SpotifyAdapter
 
     # you need to call #tracks in order for tracks_added_at to update
     def tracks
-      full.tracks
+      full.tracks if !custom
       @tracks ||= create_tracks
     end
 

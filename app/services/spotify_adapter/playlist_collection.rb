@@ -10,7 +10,7 @@ class SpotifyAdapter
     end
 
     def all_recent_tracks
-      playlists.flat_map {|playlist| playlist.recent_tracks }
+      @all_recent_tracks ||= playlists.flat_map {|playlist| playlist.recent_tracks }
     end
 
     def group_tracks_by_date
@@ -27,12 +27,4 @@ class SpotifyAdapter
   end
 
 end
-
-
-# def recently_added_tracks
-#     arr = recent_playlists.flat_map {|playlist| recent_tracks(playlist) }
-#     arr.reduce { |agg, value| agg.merge(value) }
-#   end
-
-
 
