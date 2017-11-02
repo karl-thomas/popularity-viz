@@ -1,25 +1,28 @@
 class SpotifyAdapter
+  autoload :Track, 'spotify_adapter/track'
+  autoload :PlaylistCollection, 'spotify_adapter/playlist_collection'
+  autoload :Playlist, 'spotify_adapter/playlist'
   
   attr_reader :user, :username, :profile, :two_weeks_ago
 
   IMPORTANT_FEATURES = ["acousticness", "danceability", "duration_ms", "energy", "instrumentalness", "speechiness", "tempo", "valence"]
   BORING_GENRES = ['rock', 'metal', 'pop', 'garage rock', 'pop rock', 'hip hop', 'indie punk', 'indie rock', 'indie r&b', 'indie fol_k', 'rap', 'underground hip hop', 'new rave', 'modern rock', 'alternative hip hop', 'alternative rock', 'bass music', 'edm', 'alt-indie rock', 'indie garage rock']
+  
   def initialize
     @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
     @username = ENV['SPOTIFY_USERNAME']
-
-    RSpotify.authenticate(ENV["SPOTIFY_CLIENT_ID"], ENV["SPOTIFY_CLIENT_SECRET"])
-    
+    authenticate
     load_profile
     load_user_auth
     refresh_token
   end
   
+  def authenticate
+     RSpotify.authenticate(ENV["SPOTIFY_CLIENT_ID"], ENV["SPOTIFY_CLIENT_SECRET"])
+  end
+
   def aggregate_data_record
-    tracks = all_recent_tracks
-    track_objs = find_tracks(tracks)
-    averages = average_audio_features(track_objs)
-    recommendation = most_recommended_recommendation(tracks)
+    averages = average_audio_features
     track_hashes = recently_played
     recent_singers = artists(track_hashes)
     # artists = recent_top_artists ===== spotify currently not returning artists, code is valid on my end
@@ -27,27 +30,22 @@ class SpotifyAdapter
     fun_genres = filter_boring_genres(genres)
     
     @data_record = {
-      playlists: user.playlists.count,
-      recent_playlists: recent_playlists.count,
-      recently_added_tracks: tracks.count,
+      counts_by_date: total_count_data,
       most_occuring_feature: most_occuring_feature(averages),
       average_energy: averages["average_energy"],
-      # this is currently removed from the spotify api, but is still valid on my end.
-      # top_track: { track: top_track.name, artist: top_track.artists[0].name },
       recent_genres: genres.count,
       interesting_genre: fun_genres.sample,
-      saved_albums: saved_albums,
       recommended_track: recommendation
     }
   end
 
   def recently_played
-    @recently_played ||= RSpotify.resolve_auth_request(self.username, "me/player/recently-played?limit=50")
+    @recently_played ||= RSpotify.resolve_auth_request(self.username, "me/player/recently-played?limit=50")["items"]
   end
 
   # expects tracks to be a hash, because recently_played is broke in the gem
   def artists(tracks)
-    ids = tracks['items'].flat_map do |info| 
+    ids = tracks.flat_map do |info| 
       info['track']['album']['artists'].pluck('id')
     end
     uniq_ids = ids.uniq
@@ -65,14 +63,8 @@ class SpotifyAdapter
     RSpotify.resolve_auth_request(self.username, "me/player/recently-played?before=#{date}&limit=50")
   end
 
-  def all_recent_tracks
-    pl_tracks = recently_added_track_ids
-    tracks = pl_tracks.concat(recent_saved_tracks)
-    tracks.reject { |t| t.nil? }
-  end
-
   def saved_albums
-    self.user.saved_albums.count
+    self.user.saved_albums
   end
 
   def top_track
@@ -91,19 +83,12 @@ class SpotifyAdapter
     genres.select {|genre| !BORING_GENRES.include?(genre)}
   end
 
-  def recent_saved_tracks
-    self.user.saved_tracks # this populates tracks added at
-    recent_tracks(self.user.tracks_added_at)
-  end
-  
-
-  def most_recommended_recommendation(track_ids)
-    # only accepts 5 tracks
-    track_ids = track_ids[0..4]
+  def recommendation
+    # only accepts 5 tracksq
+    track_ids = recently_played.map {|t| t["track"]["id"]}[0..4]
     api_result = RSpotify::Recommendations.generate(limit: 1, seed_tracks: track_ids)
-    # actually access the pnly track in the results.
+    # actually access the 0nly track in the results.
     recommendation = api_result.tracks.first
-    
     {
       track: recommendation.name,
       artist: recommendation.artists.first.name,
@@ -111,50 +96,41 @@ class SpotifyAdapter
     }
   end
 
-  def owned_playlists_short
-    self.profile.playlists.select { |playlist| playlist.owner.id == self.username }
-  end
-
-  # for some reason you cant see track info from user.playlists, so you have to go find the playlists individually. 
-  def playlist_ids(playlists)
-    playlists.map { |playlist| playlist.id }
-  end
-
-  # access full playlist info
-  def full_playlist(id)
-    RSpotify::Playlist.find(self.username, id)
-  end
-
-  def owned_playlists_full
-    incomplete_playlists = self.owned_playlists_short 
-    array_of_ids = playlist_ids(incomplete_playlists)
-    array_of_ids.map { |id| self.full_playlist(id) }
-  end
-
-  def recent_playlists 
-    playlists = self.owned_playlists_full
-    @recent_playlists ||= playlists.select { |playlist| recently_updated?(playlist) }
-  end
-
-  def recently_updated?(playlist)
-    playlist.tracks_added_at.any? { |track, added_at| added_at > two_weeks_ago }
+  def owned_playlists
+	  playlists = self.profile.playlists.select { |playlist| playlist.owner.id == self.username }
+    PlaylistCollection.new(playlists)
   end
 
 
+  def total_count_data
+    owned_playlists.count_of_tracks_by_date
+      .merge(count_of_saved_tracks) {|date, a, s| a.merge(s)}
+  end
+
+  # ------- saved tracks methods ----------------------------
   def recent_tracks(entity)
-    if entity.class == Hash
-      entity.keys.select {|key| entity[key] > two_weeks_ago}
-    else
-      entity.tracks_added_at.map { |id, time| id if time > two_weeks_ago }
-    end
+    entity.map { |id,date| [date, id] if date > two_weeks_ago }.compact.to_h  
   end
 
-  def recently_added_track_ids
-    recent_playlists.flat_map {|playlist| recent_tracks(playlist) }
+  def group_tracks_by_date(track_hashes)
+    track_hashes.group_by {|date, id| date.to_date.to_s }
   end
 
-  def track(id)
-    RSpotify::Track.find(id)
+  def recently_saved_tracks
+    user.saved_tracks
+    recent_tracks(user.tracks_added_at)
+  end
+
+  def count_of_saved_tracks
+    groups = group_tracks_by_date recently_saved_tracks
+    groups.map {|date, tracks| [ date, {saved_tracks: tracks.count } ] }.to_h 
+  end
+ # ------- not sure where to place --------------------------
+
+  def all_recent_tracks
+    pl_tracks = owned_playlists.all_recent_tracks.map {|track| [track.added_at,track.id]}.to_h
+    tracks = pl_tracks.merge(recently_saved_tracks)
+    tracks.map {|date,id| Track.new(id, date) }
   end
 
   def find_tracks(array_of_ids)
@@ -162,10 +138,10 @@ class SpotifyAdapter
     RSpotify::Track.find(ids)
   end
 
-  # tracks_objs = find_tracks(recently_added_track_ids)
-  def average_audio_features(track_objs)
+  def average_audio_features
     if !@averages
-      sum = sum_of_audio_features(track_objs)
+      tracks = all_recent_tracks
+      sum = sum_of_audio_features(tracks)
       @averages ||= sum.tap do |sum|
         sum.each do |key,val|
           sum[key] = (val/10).floor(2)
@@ -205,7 +181,7 @@ private
 
   # grab the audio features, for each of the important features add them up as an average
   def reduce_important_features(aggregate, track)
-    features = handle_audio_features(track)
+    features = track.audio_features
     return nil if features.nil?
 
     IMPORTANT_FEATURES.each do |feature|
@@ -215,13 +191,7 @@ private
   end
 
   # the rescue is because not all songs will have audio features calculated, which is pretty rare
-  def handle_audio_features(track)
-    begin
-      track.audio_features
-    rescue  
-      nil
-    end
-  end
+
 
   def skim_for_countable_averages(averages)
     countables = ["average_acousticness", "average_danceability", "average_instrumentalness", "average_speechiness"]
@@ -244,5 +214,5 @@ private
     json = JSON.parse(response)
     self.user.credentials['token'] = json['access_token']
   end
-
+  
 end
