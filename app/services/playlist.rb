@@ -11,6 +11,7 @@ class SpotifyAdapter
       @tracks ||= full.tracks
     end
 
+    # you need to call #tracks in order for tracks_added_at to update
     def recent?
       return @recent if @recent
       tracks
@@ -22,10 +23,12 @@ class SpotifyAdapter
     end
 
     def recent_tracks
-      @recent_tracks ||= 
+      tracks
+      @recent_tracks = 
       full.tracks_added_at
-        .map { |id,date| [date, id] if date > 2.weeks.ago }.compact.to_h
-        .reduce { |agg, value| agg.merge(value) }
+        .map { |id,date| [date, id] if date > 2.weeks.ago }
+        .compact
+        .to_h
     end
     
   end
