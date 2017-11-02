@@ -21,4 +21,21 @@ RSpec.describe SpotifyAdapter do
     end
   end
 
+  describe "#recently_played" do
+    it "returns a collection of tracks from the spotify api" do
+      expect(adapter.recently_played.first).to be_an_instance_of Hash
+    end
+
+    it "each track has a valid id" do
+      expect(adapter.recently_played.first["id"]).not_to be nil
+    end
+  end
+
+  describe "#recommendation" do
+    it "returns a has of song information" do
+      expect(adapter.recommendation[:track]).not_to be nil
+    end
+  end
+
+
 end
