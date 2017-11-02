@@ -7,7 +7,7 @@ RSpec.describe Repo::PullRequests::Pull do
   describe "on initialization", :vcr do
     describe "repo" do
       it "is readable" do
-        expect(pull.repo).not_to raise_error
+        expect(pull.repo).to_not raise_error
       end
 
       it "returns an instance of string" do
@@ -17,7 +17,7 @@ RSpec.describe Repo::PullRequests::Pull do
 
     describe "number " do
       it "is readable" do
-        expect(pull.number ).not_to raise_error
+        expect(pull.number ).to_not raise_error
       end
 
       it "returns an instance of integer" do
@@ -27,7 +27,7 @@ RSpec.describe Repo::PullRequests::Pull do
 
     describe "state" do
       it "is readable" do
-        expect(pull.state).not_to raise_error
+        expect(pull.state).to_not raise_error
       end
       it "returns an instance of string" do
         expect(pull.state).to be_an_instance_of String
@@ -36,7 +36,7 @@ RSpec.describe Repo::PullRequests::Pull do
 
     describe "title" do
       it "is readable" do
-        expect(pull.title).not_to raise_error
+        expect(pull.title).to_not raise_error
       end
 
       it "returns an instance of string" do
@@ -46,7 +46,7 @@ RSpec.describe Repo::PullRequests::Pull do
 
     describe "body" do
       it "is readable" do
-        expect(pull.body).not_to raise_error
+        expect(pull.body).to_not raise_error
       end
 
       it "returns an instance of string" do
@@ -56,7 +56,7 @@ RSpec.describe Repo::PullRequests::Pull do
 
     describe "created_at" do
       it "is readable" do
-        expect(pull.created_at).not_to raise_error
+        expect(pull.created_at).to_not raise_error
       end
 
       it "returns an instance of Date" do
@@ -66,7 +66,7 @@ RSpec.describe Repo::PullRequests::Pull do
 
     describe "closed_at" do
       it "is readable" do
-        expect(pull.closed_at).not_to raise_error
+        expect(pull.closed_at).to_not raise_error
       end
 
       it "returns an instance of date" do
@@ -76,7 +76,7 @@ RSpec.describe Repo::PullRequests::Pull do
 
     describe "client" do
       it "is readable" do
-        expect(pull.client).not_to raise_error
+        expect(pull.client).to_not raise_error
       end
 
       it "returns an instance of Octokit::Client" do

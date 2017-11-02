@@ -179,7 +179,7 @@ def github_url(url)
   uri = Addressable::URI.parse(url)
   uri.path.gsub!("v3//", "v3/")
 
-  uri.to_s
+  
 end
 
 def two_weeks_ago
