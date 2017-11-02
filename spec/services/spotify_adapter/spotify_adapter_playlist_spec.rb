@@ -57,4 +57,10 @@ RSpec.describe SpotifyAdapter::Playlist do
     end
   end
 
+  describe "#create_tracks", :vcr do
+    it "returns a collection of track Objs" do
+      playlist.full.tracks
+      expect(playlist.create_tracks.first).to be_an_instance_of SpotifyAdapter::Track
+    end
+  end
 end
