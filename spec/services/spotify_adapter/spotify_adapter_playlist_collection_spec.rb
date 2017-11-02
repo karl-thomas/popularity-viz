@@ -14,8 +14,8 @@ RSpec.describe SpotifyAdapter::PlaylistCollection do
   end
 
   describe "#all_recent_tracks", :vcr do
-    it "returns an hash" do
-      expect(collection.all_recent_tracks).to be_an_instance_of Hash
+    it "returns an Array" do
+      expect(collection.all_recent_tracks).to be_an_instance_of Array
     end
 
     it "has keys of a valid date" do
