@@ -1,6 +1,7 @@
 class SpotifyAdapter
-  autoload :PlaylistCollection, 'playlist_collection'
-  autoload :Playlist, 'playlist'
+  autoload :Track, 'spotify_adapter/track'
+  autoload :PlaylistCollection, 'spotify_adapter/playlist_collection'
+  autoload :Playlist, 'spotify_adapter/playlist'
   
   attr_reader :user, :username, :profile, :two_weeks_ago
 
@@ -94,19 +95,12 @@ class SpotifyAdapter
     genres.select {|genre| !BORING_GENRES.include?(genre)}
   end
 
-  def recent_saved_tracks
-    self.user.saved_tracks # this populates tracks added at
-    recent_tracks(self.user.tracks_added_at)
-  end
-  
-
   def most_recommended_recommendation(track_ids)
     # only accepts 5 tracks
     track_ids = track_ids[0..4]
     api_result = RSpotify::Recommendations.generate(limit: 1, seed_tracks: track_ids)
-    # actually access the pnly track in the results.
+    # actually access the 0nly track in the results.
     recommendation = api_result.tracks.first
-    
     {
       track: recommendation.name,
       artist: recommendation.artists.first.name,
@@ -129,35 +123,42 @@ class SpotifyAdapter
     RSpotify::Playlist.find(self.username, id)
   end
 
-  def owned_playlists_full
-    incomplete_playlists = self.owned_playlists_short 
-    array_of_ids = playlist_ids(incomplete_playlists)
-    array_of_ids.map { |id| self.full_playlist(id) }
-  end
-
   def recent_playlists 
-    playlists = self.owned_playlists_full
-    @recent_playlists ||= playlists.select { |playlist| recently_updated?(playlist) }
+    playlists = owned_playlists.recent_playlists
   end
 
   def recently_updated?(playlist)
     playlist.tracks_added_at.any? { |track, added_at| added_at > two_weeks_ago }
   end
-
+  # ------- new changes----------------------------
+  # currently keeping track of 
+    # added tracks, 
+  def total_count_data
+    count_of_added_tracks
+      .merge(count_of_saved_tracks) {|date, a, s| a.merge(s)}
+  end
 
   def recent_tracks(entity)
-    if entity.class == Hash
-      entity.keys.select {|key| entity[key] > two_weeks_ago}
-    else
-      entity.tracks_added_at.map { |id, time| id if time > two_weeks_ago }
-    end
+    recent_tracks_from_hash(entity)
   end
 
-  def recently_added_track_ids
-    recent_playlists.flat_map {|playlist| recent_tracks(playlist) }
+  def group_tracks_by_date(track_hashes)
+    track_hashes.group_by {|date, id| date.to_date.to_s }
   end
 
-  def track(id)
+  def recently_saved_tracks
+    user.saved_tracks
+    recent_tracks(self.user.tracks_added_at)
+  end
+
+  def count_of_saved_tracks
+    groups = group_tracks_by_date recently_saved_tracks
+    groups.map {|date, tracks| [ date, {saved_tracks: tracks.count } ] }.to_h 
+  end
+
+
+ # -----------------------------------------------------------
+  def full_track(id)
     RSpotify::Track.find(id)
   end
 
@@ -193,6 +194,9 @@ class SpotifyAdapter
   end
 
 private
+  def recent_tracks_from_hash(entity)
+    entity.map { |id,date| [date, id] if date > two_weeks_ago }.compact.to_h    
+  end
 
   def load_profile
     @profile = RSpotify::User.find(ENV['SPOTIFY_USERNAME'])
