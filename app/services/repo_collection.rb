@@ -63,7 +63,8 @@ class RepoCollection
     { 
       name: repo.full_name.partition("/")[2],
       recent_commits: repo.recent_commits.count,
-      counts_by_date: repo.total_counts_by_date
+      counts_by_date: repo.total_counts_by_date,
+      url: repo.root.html_url
     }
   end
 
