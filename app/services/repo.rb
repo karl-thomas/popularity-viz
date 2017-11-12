@@ -131,7 +131,7 @@ class Repo < GithubAdapter
         uniques: unique_views,
         recent_views: recent_views[:count],
         recent_clones: recent_clones[:count],
-        recent_stargazers: recent_stargazers.count,        
+        recent_stargazers: recent_stargazers.count,       
         url: repo.root.html_url
       }  
     end
