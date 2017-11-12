@@ -8,7 +8,7 @@ class RepoCollection
     @repos = assign_repos(repos)
   end
 
-  def assign_repos(unchecked_repos)
+  def assign_repos(unchecked_repos) #<Repo || Sawyer::Resource>
     raise NoReposError.new("Failed to pass in an Array to #{self}") if unchecked_repos.class != Array
     klass = unchecked_repos.first.class 
     if klass != Repo &&  klass == Sawyer::Resource 
