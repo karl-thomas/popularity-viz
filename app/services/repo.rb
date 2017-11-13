@@ -125,7 +125,7 @@ class Repo < GithubAdapter
 
     def to_h
       @traffic_data ||= {
-        full_name: repo.full_name,
+        name: repo.root.name,
         language: repo.top_language[0], 
         recent: repo.recent?,
         uniques: unique_views,
