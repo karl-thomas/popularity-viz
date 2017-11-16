@@ -106,7 +106,6 @@ class GithubAdapter
     Repo.new(api_response)
   end
 
-
   # gists
   def recent_gists
     application_client
