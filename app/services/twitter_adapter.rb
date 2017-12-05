@@ -21,13 +21,20 @@ class TwitterAdapter
   def aggregate_data_record
     profile_info = self.formatted_profile
     tweet_info = self.recent_tweet_counts
-   
     profile_info.merge(tweet_info)
   end
 
   def recent_tweets
     query = "from:#{self.user_name} since:#{@date_two_weeks_ago}"
     self.client.search(query).take(100).collect.to_a
+  end
+
+  def tweets_grouped_per_closed
+    recent_tweets.group_by { |tweet| tweet.created_at.to_date.to_s}
+  end
+
+  def tweets_count_for_closed
+    tweets_grouped_per_closed.map {|date, tweets| [date, {closed_pull_request: pulls.count}] }.to_h
   end
 
   def recent_replies
@@ -54,7 +61,6 @@ class TwitterAdapter
 
   def formatted_profile
     profile = self.retrieve_profile
-
     {   
       screen_name: profile.screen_name,
       description: profile.description,
