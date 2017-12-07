@@ -1,6 +1,7 @@
 require 'twitter'
 
 class TwitterAdapter
+  autoload :TweetCollection, "twitter_adapter/tweet_collection"
 
   attr_reader :client, :user_name
   def initialize
@@ -26,15 +27,8 @@ class TwitterAdapter
 
   def recent_tweets
     query = "from:#{self.user_name} since:#{@date_two_weeks_ago}"
-    self.client.search(query).take(100).collect.to_a
-  end
-
-  def tweets_grouped
-    recent_tweets.group_by { |tweet| tweet.created_at.to_date.to_s}
-  end
-
-  def tweets_count
-    tweets_grouped_per_closed.map {|date, tweets| [date, {tweets_written: tweets.count}] }.to_h
+    api_response = self.client.search(query).take(100).collect.to_a
+    TweetCollection.new(api_response)
   end
 
   def recent_replies
