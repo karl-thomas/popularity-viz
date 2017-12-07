@@ -29,12 +29,12 @@ class TwitterAdapter
     self.client.search(query).take(100).collect.to_a
   end
 
-  def tweets_grouped_per_closed
+  def tweets_grouped
     recent_tweets.group_by { |tweet| tweet.created_at.to_date.to_s}
   end
 
-  def tweets_count_for_closed
-    tweets_grouped_per_closed.map {|date, tweets| [date, {closed_pull_request: pulls.count}] }.to_h
+  def tweets_count
+    tweets_grouped_per_closed.map {|date, tweets| [date, {tweets_written: tweets.count}] }.to_h
   end
 
   def recent_replies
