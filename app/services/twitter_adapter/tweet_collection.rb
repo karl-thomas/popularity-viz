@@ -1,6 +1,6 @@
 class TweetCollection
   attr_reader :tweets, :mode
-  COUNT_KEYS = {tweets: :tweets_written, replies: :replies_to_me}
+  COUNT_KEYS = {tweets: :tweets_written, replies: :replies_to_me, mentions: :mentions}
 
   def initialize(api_response_full_of_tweets, mode)
     @tweets = api_response_full_of_tweets
