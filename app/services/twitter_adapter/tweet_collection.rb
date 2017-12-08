@@ -1,7 +1,10 @@
 class TweetCollection
-  attr_accessor :tweets
-  def initialize(api_response_full_of_tweets)
+  attr_reader :tweets, :mode
+  COUNT_KEYS = {tweets: :tweets_written, replies: :replies_to_me}
+
+  def initialize(api_response_full_of_tweets, mode)
     @tweets = api_response_full_of_tweets
+    @mode = mode
   end
 
    def grouped_by_date
@@ -9,6 +12,6 @@ class TweetCollection
   end
 
   def count_by_date
-    grouped_by_date.map {|date, tweets| [date, {tweets_written: tweets.count}] }.to_h
+    grouped_by_date.map {|date, tweets| [date, {self.class::COUNT_KEYS[mode] => tweets.count}] }.to_h
   end
 end
