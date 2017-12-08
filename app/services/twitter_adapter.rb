@@ -25,6 +25,12 @@ class TwitterAdapter
     profile_info.merge(tweet_info)
   end
 
+  def counts_by_date
+    recent_tweets.count_by_date
+    .merge(recent_replies.count_by_date)
+    .merge(recent_mentions.count_by_date)
+  end
+
   def recent_tweets
     query = "from:#{self.user_name} since:#{@date_two_weeks_ago}"
     api_response = self.client.search(query).take(100).collect.to_a
@@ -39,7 +45,8 @@ class TwitterAdapter
 
   def recent_mentions
     query = "@#{self.user_name} since:#{@date_two_weeks_ago}"
-    self.client.search(query).take(100).collect.to_a
+     api_response = self.client.search(query).take(100).collect.to_a
+     TweetCollection.new(api_response, :mentions)
   end
 
   def retrieve_followers(new_followers = 100)
