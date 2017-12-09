@@ -63,7 +63,7 @@ class TwitterAdapter
 
   def formatted_profile
     profile = self.retrieve_profile
-    {   
+    { counts_by_date: counts_by_date,
       screen_name: profile.screen_name,
       description: profile.description,
       followers_count: profile.followers_count,
