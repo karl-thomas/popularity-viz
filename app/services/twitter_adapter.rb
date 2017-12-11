@@ -20,9 +20,7 @@ class TwitterAdapter
   end
 
   def aggregate_data_record
-    profile_info = self.formatted_profile
-    tweet_info = self.recent_tweet_counts
-    profile_info.merge(tweet_info)
+    self.formatted_profile
   end
 
   def counts_by_date
@@ -63,7 +61,8 @@ class TwitterAdapter
 
   def formatted_profile
     profile = self.retrieve_profile
-    { counts_by_date: counts_by_date,
+    { 
+      counts_by_date: counts_by_date,
       screen_name: profile.screen_name,
       description: profile.description,
       followers_count: profile.followers_count,
@@ -73,14 +72,4 @@ class TwitterAdapter
       listed_count: profile.listed_count,
     }
   end
-
-  def recent_tweet_counts
-    {
-      recent_tweets: self.recent_tweets.count,
-      recent_mentions: self.recent_mentions.count,
-      recent_replies: self.recent_replies.count
-    }
-  end
-
-
 end
