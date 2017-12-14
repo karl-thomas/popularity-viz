@@ -7,7 +7,7 @@ class TweetCollection
     @mode = mode
   end
 
-   def grouped_by_date
+  def grouped_by_date
     tweets.group_by { |tweet| tweet.created_at.to_date.to_s}
   end
 
