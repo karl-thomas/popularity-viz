@@ -3,7 +3,7 @@ require 'twitter'
 class TwitterAdapter
   autoload :TweetCollection, "twitter_adapter/tweet_collection"
 
-  attr_reader :client, :user_name
+  attr_reader :client, :user_name, :two_weeks_ago
   def initialize
     @user_name = ENV['TWITTER_USER']
     @client = Twitter::REST::Client.new do |config|
@@ -12,7 +12,7 @@ class TwitterAdapter
       config.access_token        = ENV['TWITTER_TOKEN']
       config.access_token_secret = ENV['TWITTER_TOKEN_SECRET']
     end
-    @date_two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
+    @two_weeks_ago = 2.weeks.ago.strftime("%Y-%m-%d")
   end
 
   def retrieve_profile
@@ -30,23 +30,24 @@ class TwitterAdapter
   end
 
   def recent_tweets
-    query = "from:#{self.user_name} since:#{@date_two_weeks_ago}"
+    query = "from:#{self.user_name} since:#{@two_weeks_ago}"
     api_response = self.client.search(query).take(100).collect.to_a
     TweetCollection.new(api_response, :tweets)
   end
 
   def recent_replies
-    query = "to:#{self.user_name} since:#{@date_two_weeks_ago}"
+    query = "to:#{self.user_name} since:#{@two_weeks_ago}"
     api_response = self.client.search(query).take(100).collect.to_a
     TweetCollection.new(api_response, :replies)
   end
 
   def recent_mentions
-    query = "@#{self.user_name} since:#{@date_two_weeks_ago}"
+    query = "@#{self.user_name} since:#{@two_weeks_ago}"
      api_response = self.client.search(query).take(100).collect.to_a
      TweetCollection.new(api_response, :mentions)
   end
 
+  
   # def retrieve_followers(new_followers = 100)
   #   self.client.followers(self.user_name, skip_status: 't').take(new_followers)
   # end
