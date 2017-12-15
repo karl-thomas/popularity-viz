@@ -11,18 +11,27 @@ RSpec.describe TwitterAdapter do
       it "is the env key for twitter users" do
         expect(adapter.user).to eq twitter_user
       end
-
     end
 
     describe "#client" do
       it "exists" do
-        expect(adapter.user).not_to raise_error
+        expect(adapter.client).not_to raise_error
       end
+
+      it "returns an instance of Twitter::REST::Client" do
+        expect(adapter.client).to be_an_instance_of Twitter::REST::Client
+      end
+
+
     end
 
     describe "#two_weeks_ago" do
       it "exists" do
-        expect(adapter.user).not_to raise_error
+        expect(adapter.two_weeks_ago).not_to raise_error
+      end
+
+      it "returns a string of a date"
+        expect(Date.parse(adapter.two_weeks_ago)).not_to raise_error
       end
     end
   end
