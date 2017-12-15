@@ -37,8 +37,20 @@ RSpec.describe TwitterAdapter do
   end
 
   describe "#retrieve_profile", :vcr do
+    it "returns a Twitter::User object" do
+      expect(adapter.retrieve_profile).to be_an_instance_of Twitter::User
+    end
+
+    it "should return the twitter user from the ENV" do
+
+    end
+    
+    it "makes a request to the twitter api" do
+
+    end
 
   end
+
 
   describe "#aggregate_data_record", :vcr do
 
@@ -49,14 +61,23 @@ RSpec.describe TwitterAdapter do
   end
 
   describe "#recent_tweets", :vcr do
+    it "makes a request to the twitter api" do
+      
+    end
 
   end
 
   describe "#recent_replies", :vcr do
+    it "makes a request to the twitter api" do
+      
+    end
 
   end
 
   describe "#recent_mentions", :vcr do
+    it "makes a request to the twitter api" do
+      
+    end
 
   end
 
