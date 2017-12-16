@@ -21,8 +21,6 @@ RSpec.describe TwitterAdapter do
       it "returns an instance of Twitter::REST::Client" do
         expect(adapter.client).to be_an_instance_of Twitter::REST::Client
       end
-
-
     end
 
     describe "#two_weeks_ago" do
@@ -42,17 +40,21 @@ RSpec.describe TwitterAdapter do
     end
 
     it "should return the twitter user from the ENV" do
-
+      expect(adapter.retrieve_profile.username).to eq twitter_user
     end
     
     it "makes a request to the twitter api" do
-
+      adapter.retrieve_profile
+      assert_requested :get, ''
     end
 
   end
 
 
   describe "#aggregate_data_record", :vcr do
+    it "returns a hash of all api-important data" do
+      expect(adapter.aggregate_data_record).to be_an_instance_of Hash
+    end
 
   end
 
@@ -61,24 +63,36 @@ RSpec.describe TwitterAdapter do
   end
 
   describe "#recent_tweets", :vcr do
+    let(:collection) { adapter.recent_tweets }
+    it "returns a tweet collection obj" do
+
+    end
+
     it "makes a request to the twitter api" do
       
     end
-
   end
 
   describe "#recent_replies", :vcr do
+    let(:collection) { adapter.recent_replies }
     it "makes a request to the twitter api" do
       
     end
 
+    it "returns a tweet collection obj" do
+
+    end
   end
 
   describe "#recent_mentions", :vcr do
+    let(:collection) { adapter.recent_mentions }
     it "makes a request to the twitter api" do
       
     end
 
+    it "returns a tweet collection obj" do
+
+    end
   end
 
   describe "#formatted_profile", :vcr do
