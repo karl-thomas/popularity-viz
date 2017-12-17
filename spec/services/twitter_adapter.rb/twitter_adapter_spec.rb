@@ -65,33 +65,33 @@ RSpec.describe TwitterAdapter do
   describe "#recent_tweets", :vcr do
     let(:collection) { adapter.recent_tweets }
     it "returns a tweet collection obj" do
-
+      expect(collection).to be_an_instance_of TwitterAdapter::TweetCollection
     end
 
     it "makes a request to the twitter api" do
-      
+      assert_requested :get, ''
     end
   end
 
   describe "#recent_replies", :vcr do
     let(:collection) { adapter.recent_replies }
     it "makes a request to the twitter api" do
-      
+      assert_requested :get, ''
     end
 
     it "returns a tweet collection obj" do
-
+      expect(collection).to be_an_instance_of TwitterAdapter::TweetCollection
     end
   end
 
   describe "#recent_mentions", :vcr do
     let(:collection) { adapter.recent_mentions }
     it "makes a request to the twitter api" do
-      
+      assert_requested :get, ''
     end
 
     it "returns a tweet collection obj" do
-
+      expect(collection).to be_an_instance_of TwitterAdapter::TweetCollection
     end
   end
 
