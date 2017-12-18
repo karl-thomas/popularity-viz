@@ -59,6 +59,19 @@ RSpec.describe TwitterAdapter do
   end
 
   describe "#counts_by_date", :vcr do
+    before do
+      allow_any_instance_of(TwitterAdapter)
+        .to_recieve(:counts_by_date)
+        .and_return({"2017-12-12" => {tweet_count: 1}})
+    end
+
+    it "returns a hash" do
+      expect(adapter.counts_by_date).to be_an_instance_of Hash
+    end
+
+    it "has valid date keys" do
+      expect(adapter.counts_by_date.first)
+    end
 
   end
 
@@ -96,6 +109,8 @@ RSpec.describe TwitterAdapter do
   end
 
   describe "#formatted_profile", :vcr do
-
+    it "returns a hash" do
+      expect(adapter.formatted_profile).to be_an_instance_of Hash
+    end
   end  
 end
