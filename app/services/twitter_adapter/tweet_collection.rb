@@ -7,6 +7,14 @@ class TweetCollection
     @mode = mode
   end
 
+  def retweets
+    tweets.select { |t| t.retweet? }
+  end
+
+  def any_retweets?
+    tweets.any? { |t| t.retweet? }
+  end
+
   def grouped_by_date
     tweets.group_by { |tweet| tweet.created_at.to_date.to_s}
   end
