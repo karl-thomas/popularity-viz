@@ -55,7 +55,6 @@ RSpec.describe TwitterAdapter do
     it "returns a hash of all api-important data" do
       expect(adapter.aggregate_data_record).to be_an_instance_of Hash
     end
-
   end
 
   describe "#counts_by_date", :vcr do
@@ -70,9 +69,8 @@ RSpec.describe TwitterAdapter do
     end
 
     it "has valid date keys" do
-      expect(adapter.counts_by_date.first)
+      expect(Date.parse(adapter.counts_by_date.keys.first)).not_to raise_error
     end
-
   end
 
   describe "#recent_tweets", :vcr do
