@@ -1,10 +1,7 @@
 class Post < ActiveRecord::Base
-  include TwitterCalcs # ./twitter_calcs 
   include Insight # ./insight
 
   attr_accessor :differences
-  
-  before_create :inspect_old_data
   after_create :set_title
 
   def self.cards

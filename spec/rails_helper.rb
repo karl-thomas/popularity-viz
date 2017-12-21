@@ -111,6 +111,26 @@ def github_login
   ENV.fetch 'GITHUB_USERNAME', 'api-padawan'
 end
 
+def twitter_token
+  ENV.fetch 'TWITTER_TOKEN', "nope"
+end
+
+def twitter_token_secret
+  ENV.fetch 'TWITTER_TOKEN_SECRET', "not a key"
+end
+
+def twitter_user
+  ENV.fetch 'TWITTER_USER', "who knows"
+end
+
+def twitter_consumer
+  ENV.fetch 'TWITTER_CONSUMER', "conumery"
+end
+
+def twitter_consumer_secrect
+  ENV.fetch 'TWITTER_CONSUMER_SECRET', "nice secret"
+end
+
 def test_github_password
   ENV.fetch 'GITHUB_PASSWORD', 'wow_such_password'
 end
