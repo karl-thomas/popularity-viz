@@ -11,6 +11,17 @@ class TweetCollection
     tweets.select { |t| t.retweet? }
   end
 
+  def all_text
+    tweets.map(&:text).join(" ")
+  end
+
+  def most_common(string = self.all_text)
+    words = string.downcase.tr(",.?!",'').gsub('rt', '').split(' ')
+    counts = words.each_with_object(Hash.new(0)) { |e, h| h[e] += 1 }
+    max_quantity = counts.values.max
+    counts.select { |k, v| v == max_quantity }.keys
+  end
+
   def any_retweets?
     tweets.any? { |t| t.retweet? }
   end
