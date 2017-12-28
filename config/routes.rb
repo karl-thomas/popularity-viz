@@ -25,5 +25,4 @@ Rails.application.routes.draw do
   # get 'twitter/recent_favorites', to: 'twitter#recent_favorites'
   # get 'twitter/formatted_profile', to: 'twitter#formatted_profile'
 
-
 end
