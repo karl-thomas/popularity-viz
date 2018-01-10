@@ -47,10 +47,11 @@ gem 'jbuilder', '~> 2.5'
 gem 'rails-controller-testing'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
-gem 'vcr'
-gem 'webmock'
+
 group :development, :test do
   gem 'rspec-rails'
+  gem 'vcr'
+  gem 'webmock'
   # Adds support for Capybara system testing and selenium driver
   gem 'capybara', "~> 2.5"
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
