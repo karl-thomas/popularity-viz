@@ -11,7 +11,7 @@ module PopularityViz
     config.load_defaults 5.1
     
     config.action_dispatch.default_headers = {
-      'Access-Control-Allow-Origin' => 'http://localhost:8080',
+      'Access-Control-Allow-Origin' => 'http://karl-thomas.com',
       'Access-Control-Request-Method' => 'GET'
     }
 # 'Access-Control-Request-Method' => %w{GET POST OPTIONS}.join(",")
