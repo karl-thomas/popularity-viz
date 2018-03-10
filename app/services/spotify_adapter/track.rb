@@ -1,5 +1,8 @@
+require_relative 'audio_features'
+
 class SpotifyAdapter
   class Track < SpotifyAdapter
+    
     attr_reader :id, :added_at, :full
     def initialize(id, date_added_to_playlist)
       @id = id
@@ -20,11 +23,7 @@ class SpotifyAdapter
     end
     
     def audio_features
-      begin 
-        full.audio_features
-      rescue
-        nil
-      end
+        AudioFeatures.new(full)
     end
   end
 end

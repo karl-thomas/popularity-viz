@@ -7,6 +7,7 @@ class SpotifyAdapter
     def initialize(ids, custom = false)
       @custom = custom
       super()
+      
       if custom
         @tracks = ids 
       else
