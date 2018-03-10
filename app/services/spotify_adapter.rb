@@ -25,7 +25,9 @@ class SpotifyAdapter
     averages = average_audio_features
     track_hashes = recently_played
     recent_singers = artists(track_hashes)
-    # artists = recent_top_artists ===== spotify currently not returning artists, code is valid on my end
+
+    # spotify currently not returning artists, its valid/tested/works on my end
+    # artists = recent_top_artists
     genres = recent_genres(recent_singers)
     fun_genres = filter_boring_genres(genres)
     
@@ -38,6 +40,7 @@ class SpotifyAdapter
       recommended_track: recommendation
     }
   end
+
 
   def recently_played
     @recently_played ||= RSpotify.resolve_auth_request(self.username, "me/player/recently-played?limit=50")["items"]
@@ -53,27 +56,28 @@ class SpotifyAdapter
     RSpotify::Artist.find(uniq_ids)
   end
 
-  def get_songs_after date
-    date = date.to_i
-    RSpotify.resolve_auth_request(self.username, "me/player/recently-played?after=#{date}&limit=50")
-  end
+  # not in use
+  # def get_songs_after date
+  #   date = date.to_i
+  #   RSpotify.resolve_auth_request(self.username, "me/player/recently-played?after=#{date}&limit=50")
+  # end
 
-  def get_songs_before date
-    date = date.to_i
-    RSpotify.resolve_auth_request(self.username, "me/player/recently-played?before=#{date}&limit=50")
-  end
+  # def get_songs_before date
+  #   date = date.to_i
+  #   RSpotify.resolve_auth_request(self.username, "me/player/recently-played?before=#{date}&limit=50")
+  # end
 
-  def saved_albums
-    self.user.saved_albums
-  end
+  # def saved_albums
+  #   self.user.saved_albums
+  # end
 
-  def top_track
-    self.user.top_tracks(time_range: 'short_term')[0]
-  end
+  # def top_track
+  #   self.user.top_tracks(time_range: 'short_term')[0]
+  # end
 
-  def recent_top_artists
-    self.user.top_artists(time_range: 'short_term')
-  end
+  # def recent_top_artists
+  #   self.user.top_artists(time_range: 'short_term')
+  # end
   
   def recent_genres(artists)
     artists.flat_map {|a| a.genres }.sort.uniq
@@ -107,7 +111,6 @@ class SpotifyAdapter
       .merge(count_of_saved_tracks) {|date, a, s| a.merge(s)}
   end
 
-  # ------- saved tracks methods ----------------------------
   def recent_tracks(entity)
     entity.map { |id,date| [date, id] if date > two_weeks_ago }.compact.to_h  
   end
@@ -122,10 +125,11 @@ class SpotifyAdapter
   end
 
   def count_of_saved_tracks
-    groups = group_tracks_by_date recently_saved_tracks
+    groups = group_tracks_by_date(recently_saved_tracks)
     groups.map {|date, tracks| [ date, {saved_tracks: tracks.count } ] }.to_h 
   end
- # ------- not sure where to place --------------------------
+
+  # merges the tracks off the playlists and "saved" sections of spotify
 
   def all_recent_tracks
     pl_tracks = owned_playlists.all_recent_tracks.map {|track| [track.added_at,track.id]}.to_h
@@ -133,16 +137,11 @@ class SpotifyAdapter
     tracks.map {|date,id| Track.new(id, date) }
   end
 
-  def find_tracks(array_of_ids)
-    ids = array_of_ids.reject {|id| id.nil? }
-    RSpotify::Track.find(ids)
-  end
-
   def average_audio_features
     if !@averages
       tracks = all_recent_tracks
       sum = sum_of_audio_features(tracks)
-      @averages ||= sum.tap do |sum|
+      @averages = sum.tap do |sum|
         sum.each do |key,val|
           sum[key] = (val/10).floor(2)
         end  
