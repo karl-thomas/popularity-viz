@@ -2,7 +2,7 @@ class SpotifyAdapter
   class PlaylistCollection < SpotifyAdapter
     attr_reader :playlists
     def initialize(playlists)
-      @playlists = sanitize_playlists(playlists)
+      @playlists = create_playlists(playlists)
     end
 
     def recent_playlists
@@ -21,7 +21,8 @@ class SpotifyAdapter
       group_tracks_by_date.map {|date, tracks| [ date, {added_tracks: tracks.count } ] }.to_h
     end
 
-    def sanitize_playlists(playlists)
+    private 
+    def create_playlists(playlists)
       playlists.map { |pl| SpotifyAdapter::Playlist.new(pl.id)}
     end
   end
