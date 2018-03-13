@@ -28,7 +28,7 @@ RSpec.describe TwitterAdapter do
         expect(adapter.two_weeks_ago).not_to raise_error
       end
 
-      it "returns a string of a date"
+      it "returns a string of a date" do
         expect(Date.parse(adapter.two_weeks_ago)).not_to raise_error
       end
     end
