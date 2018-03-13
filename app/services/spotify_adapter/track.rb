@@ -4,6 +4,7 @@ class SpotifyAdapter
   class Track < SpotifyAdapter
     
     attr_reader :id, :added_at, :full
+    
     def initialize(id, date_added_to_playlist)
       @id = id
       @added_at = date_added_to_playlist  
@@ -25,5 +26,7 @@ class SpotifyAdapter
     def audio_features
         AudioFeatures.new(full)
     end
+
+    alias_method :audio, :audio_features 
   end
 end

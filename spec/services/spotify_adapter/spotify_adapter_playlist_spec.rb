@@ -2,10 +2,11 @@ require 'rails_helper'
 
 RSpec.describe SpotifyAdapter::Playlist do
   let(:playlist) { SpotifyAdapter.new.owned_playlists.playlists[0] }
+  let(:custom_playlist) {SpotifyAdapter.all_recent_tracks}
+  
   it "is assigned to the correct class", :vcr do
     expect(playlist).to be_an_instance_of SpotifyAdapter::Playlist
   end
-
 
   describe "on initialization", :vcr do
     it "is assigned an id as a reader" do
