@@ -24,7 +24,7 @@ class SpotifyAdapter
     end
     
     def audio_features
-        AudioFeatures.new(full)
+      AudioFeatures.new(full)
     end
 
     alias_method :audio, :audio_features 
