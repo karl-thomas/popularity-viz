@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
 
+  match '/posts' => 'posts#index', via: :options
   get '/posts', to: 'posts#index' 
+  match '/posts/:id' =>'posts#show', via: :options
   get '/posts/:id', to: 'posts#show'
   # i may need these routes to get some anciliary data  
 
