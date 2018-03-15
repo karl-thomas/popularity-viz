@@ -43,8 +43,8 @@ class TwitterAdapter
 
   def recent_mentions
     query = "@#{self.user_name} since:#{@two_weeks_ago}"
-     api_response = self.client.search(query).take(100).collect.to_a
-     TweetCollection.new(api_response, :mentions)
+    api_response = self.client.search(query).take(100).collect.to_a
+    TweetCollection.new(api_response, :mentions)
   end
 
 
