@@ -43,22 +43,10 @@ class TwitterAdapter
 
   def recent_mentions
     query = "@#{self.user_name} since:#{@two_weeks_ago}"
-     api_response = self.client.search(query).take(100).collect.to_a
-     TweetCollection.new(api_response, :mentions)
+    api_response = self.client.search(query).take(100).collect.to_a
+    TweetCollection.new(api_response, :mentions)
   end
 
-  
-  # def retrieve_followers(new_followers = 100)
-  #   self.client.followers(self.user_name, skip_status: 't').take(new_followers)
-  # end
-
-  # def retrieve_friends(new_friends = 100 )
-  #   self.client.friends(self.user_name, skip_status: 't').take(new_friends)
-  # end
-
-  # def retrieve_favorites(new_favorites = 100)
-  #   self.client.favorites(self.user_name, count: new_favorites)
-  # end
 
   def formatted_profile
     profile = self.retrieve_profile

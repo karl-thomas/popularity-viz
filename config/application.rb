@@ -12,7 +12,7 @@ module PopularityViz
   
 
     config.action_dispatch.default_headers = {
-      'Access-Control-Allow-Origin' => 'http://localhost:8080',
+      'Access-Control-Allow-Origin' => 'http://karl-thomas.com',
       'Access-Control-Allow-Methods' => 'GET, OPTIONS',
       'Access-Control-Allow-Headers' => 'Authorization'    
     }

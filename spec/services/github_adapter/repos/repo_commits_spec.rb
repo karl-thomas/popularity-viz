@@ -1,9 +1,9 @@
 require 'rails_helper'
 
-RSpec.describe Repo::Commits do
+RSpec.describe Repo::Commits, :vcr do
   let(:collection) { GithubAdapter.new.owned_repos.first.recent_commits}
   describe "on initialization", :vcr do
-    describe "#commits" do
+    describe "#commits", :vcr do
       it "is a readable array" do
         expect(collection.commits).to be_an_instance_of Array
       end
@@ -48,7 +48,7 @@ RSpec.describe Repo::Commits do
     end
   end
 
-  describe "#recent_commit_dates" do 
+  describe "#recent_commit_dates", :vcr do 
     it "returns a hash of commits grouped by dates" do
       commits = collection.recent_commit_dates
       date = commits.keys.first
@@ -60,7 +60,7 @@ RSpec.describe Repo::Commits do
     end
   end
 
-  describe "#recent_commit_time_ranges" do
+  describe "#recent_commit_time_ranges", :vcr do
     #  the commented out tests need to be stubbed. 
     it "returns a nested array" do
       expect(collection.recent_commit_time_ranges).to be_an_instance_of Array

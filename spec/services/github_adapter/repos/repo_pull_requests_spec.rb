@@ -1,8 +1,9 @@
 require 'rails_helper'
 
-RSpec.describe Repo::PullRequests do 
+RSpec.describe Repo::PullRequests, :vcr do 
   let(:repo) {GithubAdapter.new.owned_repos.recent_repos.first}
   let(:pulls) { repo.pull_requests}
+  
   describe "on initialization", :vcr do
     it "is assigned a collection if pull_requests" do
       expect(pulls.pulls).to be_an_instance_of Array
