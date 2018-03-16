@@ -43,5 +43,16 @@ RSpec.describe SpotifyAdapter::Track do
     end
   end
 
+  describe "#to_h", :vcr do
+    it "returns a pretty hash version of the basic track data" do
+      expect(recent_track.to_h[recent_track.added_at]).to eq recent_track.id
+    end
+  end
+
+  describe "audioe features", :vcr do 
+    it "returns a wrapped version of audio feature from the spotify api" do
+      expect(recent_track.audio_features).to be_an_instance_of AudioFeatures
+    end
+  end
   
 end

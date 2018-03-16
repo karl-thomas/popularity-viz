@@ -29,3 +29,5 @@ thing.txt
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+spec/cassettes

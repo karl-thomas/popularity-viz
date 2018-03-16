@@ -1,10 +1,10 @@
 Rails.application.routes.draw do
 
-  match '/posts' => 'posts#index', via: :options
   get '/posts', to: 'posts#index' 
-  match '/posts/:id' =>'posts#show', via: :options
   get '/posts/:id', to: 'posts#show'
   # i may need these routes to get some anciliary data  
+  match '/posts/:id' =>'posts#show', via: :options
+  match '/posts' => 'posts#index', via: :options
 
   # root 'spotify#index'
   # get '/auth/spotify/callback', to: 'spotify#spotify'
