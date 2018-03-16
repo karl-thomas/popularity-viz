@@ -2,15 +2,9 @@ require 'rails_helper'
 
 RSpec.describe SpotifyAdapter::Playlist do
   let(:playlist) { SpotifyAdapter.new.owned_playlists.playlists[0] }
+
   it "is assigned to the correct class", :vcr do
     expect(playlist).to be_an_instance_of SpotifyAdapter::Playlist
-  end
-
-
-  describe "on initialization", :vcr do
-    it "is assigned an id as a reader" do
-      expect(playlist.id).not_to be nil
-    end
   end
 
   describe "#tracks", :vcr do
@@ -43,17 +37,17 @@ RSpec.describe SpotifyAdapter::Playlist do
 
   describe "#recent_tracks", :vcr do
     it "returns a hash" do
-      expect(playlist.recent_tracks).to be_an_instance_of Hash
+      expect(playlist.recent_tracks).to be_an_instance_of Array
     end
 
     it "has keys of date objects, less than two weeks old" do
-      date = playlist.recent_tracks.keys.first
+      date = playlist.recent_tracks.first.added_at
       expect(date).to be > 2.weeks.ago
     end
 
     it "has strings of valid track ids for values" do
-      id =  playlist.recent_tracks.values.first
-      expect(id).to be_an_instance_of(String)
+      id =  playlist.recent_tracks.first.added_at
+      expect(id).to be_an_instance_of(Time)
     end
   end
 
